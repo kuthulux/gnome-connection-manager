@@ -450,13 +450,13 @@ def vte_run(terminal, command, arg=None):
     args.append(command)
     if arg:
         args += arg
-    #print ("cmd: %s env: %s, home: %s" % (args, envv, os.getenv("HOME")))
+    flag_spawn = GLib.SpawnFlags.DEFAULT if command == SHELL else GLib.SpawnFlags.FILE_AND_ARGV_ZERO
     if TERMINAL_V048:
         terminal.spawn_async(Vte.PtyFlags.DEFAULT,
                            os.getenv("HOME"),
                            args,
                            envv,
-                           GLib.SpawnFlags.FILE_AND_ARGV_ZERO | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
+                           flag_spawn | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
                            None,
                            None,
                            -1,
@@ -467,10 +467,11 @@ def vte_run(terminal, command, arg=None):
                            os.getenv("HOME"),
                            args,
                            envv,
-                           GLib.SpawnFlags.FILE_AND_ARGV_ZERO | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
+                           flag_spawn | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
                            None,
                            None,
                            None)
+
 class Wmain(SimpleGladeApp):
 
     def __init__(self, path="gnome-connection-manager.glade",
@@ -1200,7 +1201,6 @@ class Wmain(SimpleGladeApp):
                 Gtk.main_iteration()
             
             if host.host == '' or host.host == None:
-                #v.fork_command(SHELL)
                 vte_run(v, SHELL)
             else:
                 cmd = SSH_COMMAND
