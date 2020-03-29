@@ -208,7 +208,7 @@ TEL_BIN = 'telnet'
 SHELL   = os.environ["SHELL"]
 
 SSH_COMMAND = BASE_PATH + "/ssh.expect"
-CONFIG_FILE = os.getenv("HOME") + "/.gcm/gcm2.conf"
+CONFIG_FILE = os.getenv("HOME") + "/.gcm/gcm.conf"
 KEY_FILE = os.getenv("HOME") + "/.gcm/.gcm.key"
 
 if not os.path.exists(os.getenv("HOME") + "/.gcm"):
