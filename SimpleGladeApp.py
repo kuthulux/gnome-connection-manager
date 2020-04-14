@@ -28,6 +28,7 @@ from gi.repository import Gtk
 
 import os
 import re
+import sys
 import tokenize
 import weakref
 import builtins
