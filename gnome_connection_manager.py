@@ -439,11 +439,16 @@ def decrypt(passw, string):
     return s
 
 def vte_feed(terminal, data):
-    if TERMINAL_V048:
-        terminal.feed_child(data.encode('utf-8'))
+    if TERMINAL_V048 or (Vte.MAJOR_VERSION, Vte.MINOR_VERSION) >= (0, 42):
+        try:
+            terminal.feed_child(data.encode('utf-8'))
+        except TypeError as e:
+            # https://bugs.launchpad.net/ubuntu/+source/ubuntu-release-upgrader/+bug/1780501
+            # The doc does not say clearly at which version the feed_child* function has lost # the "len" parameter :(
+            terminal.feed_child(data, len(data))
     else:
         terminal.feed_child(data, len(data))
-                
+
 def vte_run(terminal, command, arg=None):
     envv = [ 'PATH=%s' % (os.getenv("PATH")) ]
     args = []
