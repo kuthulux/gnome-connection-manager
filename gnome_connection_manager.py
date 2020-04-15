@@ -450,7 +450,7 @@ def vte_feed(terminal, data):
         terminal.feed_child(data, len(data))
 
 def vte_run(terminal, command, arg=None):
-    envv = [ 'PATH=%s' % (os.getenv("PATH")) ]
+    envv = [ 'PATH=%s' % (os.getenv("PATH")), 'TERM=%s' % (os.getenv("TERM")) ]
     args = []
     args.append(command)
     if arg:
