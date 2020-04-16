@@ -3170,8 +3170,12 @@ class NotebookTabLabel(Gtk.HBox):
             self.popup.mnuLog.set_active( hasattr(self.widget_.get_child(), "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
-        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:    
-            self.close_tab(self.widget_)
+        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
+            # Middle mouse button can close the tab, but should ask
+            # regardless of conf.CONFIRM_ON_CLOSE_TAB setting to avoid
+            # mishaps during mouse pasting
+            if msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) == Gtk.ResponseType.OK:
+                self.close_tab(self.widget_)
 
 class EntryDialog( Gtk.Dialog):
     def __init__(self, title, message, default_text='', modal=True, mask=False):
