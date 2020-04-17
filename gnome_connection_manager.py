@@ -263,6 +263,7 @@ class conf():
     FONT_COLOR = ""
     BACK_COLOR = ""
     TRANSPARENCY = 0
+    TERM = ""
     PASTE_ON_RIGHT_CLICK = 1
     CONFIRM_ON_CLOSE_TAB = 1
     CONFIRM_ON_CLOSE_TAB_MIDDLE = 1
@@ -451,7 +452,8 @@ def vte_feed(terminal, data):
         terminal.feed_child(data, len(data))
 
 def vte_run(terminal, command, arg=None):
-    envv = [ 'PATH=%s' % (os.getenv("PATH")) ]
+    term_type = terminal.host.term if hasattr(terminal, 'host') and terminal.host.term else conf.TERM if conf.TERM else os.getenv("TERM")
+    envv = [ 'PATH=%s' % os.getenv("PATH"), 'TERM=%s' % term_type ]
     args = []
     args.append(command)
     if arg:
@@ -1144,9 +1146,6 @@ class Wmain(SimpleGladeApp):
             v = Vte.Terminal()
             v.set_word_char_exceptions(conf.WORD_SEPARATORS)
             v.set_scrollback_lines(conf.BUFFER_LINES)
-            #if v.get_emulation() != os.getenv("TERM"):
-            #    os.environ['TERM'] = v.get_emulation()
-            os.environ['TERM'] = 'xterm-256color'
             
             if isinstance(host, str):
                 host = Host('', host) 
@@ -1206,6 +1205,8 @@ class Wmain(SimpleGladeApp):
             while Gtk.events_pending():
                 Gtk.main_iteration()
             
+            v.host = host
+
             if host.host == '' or host.host == None:
                 vte_run(v, SHELL)
             else:
@@ -1347,7 +1348,6 @@ class Wmain(SimpleGladeApp):
             conf.TRANSPARENCY = cp.getint("options", "transparency")
             conf.PASTE_ON_RIGHT_CLICK = cp.getboolean("options", "paste-right-click")
             conf.CONFIRM_ON_CLOSE_TAB = cp.getboolean("options", "confirm-close-tab")
-            conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.CHECK_UPDATES = cp.getboolean("options", "check-updates")
             conf.COLLAPSED_FOLDERS = cp.get("window", "collapsed-folders")
             conf.LEFT_PANEL_WIDTH = cp.getint("window", "left-panel-width")
@@ -1362,6 +1362,8 @@ class Wmain(SimpleGladeApp):
             conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
             conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
+            conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
+            conf.TERM = cp.get("options", "term")
         except:
             print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
         
@@ -1588,6 +1590,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "confirm-exit", conf.CONFIRM_ON_EXIT)
         cp.set("options", "font-color", conf.FONT_COLOR)
         cp.set("options", "back-color", conf.BACK_COLOR)
+        cp.set("options", "term", conf.TERM)
         cp.set("options", "transparency", conf.TRANSPARENCY)        
         cp.set("options", "paste-right-click", conf.PASTE_ON_RIGHT_CLICK)
         cp.set("options", "confirm-close-tab", conf.CONFIRM_ON_CLOSE_TAB)
@@ -2214,6 +2217,7 @@ class Host():
             self.log = self.get_arg(args, False)
             self.backspace_key = self.get_arg(args, int(Vte.EraseBinding.AUTO))
             self.delete_key = self.get_arg(args, int(Vte.EraseBinding.AUTO))
+            self.term = self.get_arg(args, '')
         except:
             pass
        
@@ -2230,7 +2234,7 @@ class Host():
         return ",".join(self.tunnel)
 
     def clone(self):
-        return Host(self.group, self.name, self.description, self.host, self.user, self.password, self.private_key, self.port, self.tunnel_as_string(), self.type, self.commands, self.keep_alive, self.font_color, self.back_color, self.x11, self.agent, self.compression, self.compressionLevel, self.extra_params, self.log, self.backspace_key, self.delete_key)
+        return Host(self.group, self.name, self.description, self.host, self.user, self.password, self.private_key, self.port, self.tunnel_as_string(), self.type, self.commands, self.keep_alive, self.font_color, self.back_color, self.x11, self.agent, self.compression, self.compressionLevel, self.extra_params, self.log, self.backspace_key, self.delete_key, self.term)
 
 class HostUtils:
     @staticmethod
@@ -2266,7 +2270,8 @@ class HostUtils:
         log = HostUtils.get_val(cp, section, "log", False)
         backspace_key = int(HostUtils.get_val(cp, section, "backspace-key", int(Vte.EraseBinding.AUTO)))
         delete_key = int(HostUtils.get_val(cp, section, "delete-key", int(Vte.EraseBinding.AUTO)))
-        h = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key)
+        term = HostUtils.get_val(cp, section, "term", "")
+        h = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key, term)
         return h
 
     @staticmethod
@@ -2295,6 +2300,7 @@ class HostUtils:
         cp.set(section, "log", host.log)
         cp.set(section, "backspace-key", host.backspace_key)
         cp.set(section, "delete-key", host.delete_key)
+        cp.set(section, "term", host.term)
 
 class Whost(SimpleGladeApp):
 
@@ -2357,6 +2363,7 @@ class Whost(SimpleGladeApp):
         self.chkLogging = self.get_widget("chkLogging")
         self.cmbBackspace = self.get_widget("cmbBackspace")
         self.cmbDelete = self.get_widget("cmbDelete")
+        self.txtTerm = self.get_widget("txtTerm")
         self.cmbType.set_active(0)
         self.cmbBackspace.set_active(0)
         self.cmbDelete.set_active(0)
@@ -2428,6 +2435,7 @@ class Whost(SimpleGladeApp):
         self.cmbBackspace.set_active(host.backspace_key)
         self.cmbDelete.set_active(host.delete_key)
         self.update_texttags()
+        self.txtTerm.set_text(host.term)
         
     def update_texttags(self, *args):
         buf = self.txtCommands.get_buffer()
@@ -2501,7 +2509,9 @@ class Whost(SimpleGladeApp):
             msgbox(_("Puerto invalido"))
             return
         
-        host = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key)
+        term = self.txtTerm.get_text()        
+
+        host = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key, term)
                     
         try:
             #Guardar                
@@ -2727,6 +2737,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Separador de Palabras"), "conf.WORD_SEPARATORS", str)
         self.addParam(_(u"Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 1000000)
         self.addParam(_("Transparencia"), "conf.TRANSPARENCY", int, 0, 100)
+        self.addParam(_("TERM"), "conf.TERM", str)
         self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
         self.addParam(_("Abrir consola local al inicio"), "conf.STARTUP_LOCAL", bool)
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
