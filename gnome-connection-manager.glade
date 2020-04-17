@@ -3096,6 +3096,7 @@ if not, write to the Free Software Foundation, Inc.,
               <object class="GtkHPaned" id="hpMain">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="wide_handle">True</property>
                 <signal name="button-press-event" handler="on_hpMain_button_press_event" swapped="no"/>
                 <child>
                   <object class="GtkScrolledWindow" id="scrolledwindow1">

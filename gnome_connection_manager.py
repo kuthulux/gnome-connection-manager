@@ -264,7 +264,8 @@ class conf():
     BACK_COLOR = ""
     TRANSPARENCY = 0
     PASTE_ON_RIGHT_CLICK = 1
-    CONFIRM_ON_CLOSE_TAB = 0
+    CONFIRM_ON_CLOSE_TAB = 1
+    CONFIRM_ON_CLOSE_TAB_MIDDLE = 1
     AUTO_CLOSE_TAB = 0
     COLLAPSED_FOLDERS = ""
     LEFT_PANEL_WIDTH = 100
@@ -1190,11 +1191,11 @@ class Wmain(SimpleGladeApp):
             scrollPane.show()
             scrollPane.add(v)                        
             v.show()            
-                        
+
             notebook.append_page(scrollPane, tab_label=tab)
             notebook.set_current_page(self.nbConsole.page_num(scrollPane))  
             notebook.set_tab_reorderable(scrollPane, True)
-            notebook.set_tab_detachable(scrollPane, True)            
+            notebook.set_tab_detachable(scrollPane, True)
             self.wMain.set_focus(v)
             self.on_tab_focus(v)
             self.set_terminal_logger(v, host.log)
@@ -1346,6 +1347,7 @@ class Wmain(SimpleGladeApp):
             conf.TRANSPARENCY = cp.getint("options", "transparency")
             conf.PASTE_ON_RIGHT_CLICK = cp.getboolean("options", "paste-right-click")
             conf.CONFIRM_ON_CLOSE_TAB = cp.getboolean("options", "confirm-close-tab")
+            conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.CHECK_UPDATES = cp.getboolean("options", "check-updates")
             conf.COLLAPSED_FOLDERS = cp.get("window", "collapsed-folders")
             conf.LEFT_PANEL_WIDTH = cp.getint("window", "left-panel-width")
@@ -1589,6 +1591,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "transparency", conf.TRANSPARENCY)        
         cp.set("options", "paste-right-click", conf.PASTE_ON_RIGHT_CLICK)
         cp.set("options", "confirm-close-tab", conf.CONFIRM_ON_CLOSE_TAB)
+        cp.set("options", "confirm-close-tab-middle", conf.CONFIRM_ON_CLOSE_TAB_MIDDLE)
         cp.set("options", "check-updates", conf.CHECK_UPDATES)
         cp.set("options", "font", conf.FONT)
         cp.set("options", "donate", conf.HIDE_DONATE)
@@ -1651,12 +1654,11 @@ class Wmain(SimpleGladeApp):
             cp  = cnb.get_parent()
 
             if direction==HSPLIT:
-                w,h = cnb.get_allocated_width()/2, cnb.get_allocated_height()
+                p = cnb.get_allocated_width()/2
             else:                
-                w,h = cnb.get_allocated_width(), cnb.get_allocated_height()/2
-
-            cnb.set_size_request(w,h)
-            hp.set_size_request(nb.get_allocated_width(), cnb.get_allocated_height())
+                p = cnb.get_allocated_height()/2
+            hp.set_position(p)
+            hp.set_wide_handle(True)
             
             cp.remove(cnb)
             cp.add(hp)
@@ -1672,7 +1674,7 @@ class Wmain(SimpleGladeApp):
             nb.set_tab_label(csp, tab_label=tab)
             nb.set_tab_reorderable(csp, True)
             nb.set_tab_detachable(csp, True)
-                        
+
             hp.add2(nb)
             nb.show()
             hp.show()
@@ -2730,6 +2732,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
         self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
+        self.addParam(_(U"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
         self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _(u"Sólo si no hay errores")])
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)  
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
@@ -3170,7 +3173,9 @@ class NotebookTabLabel(Gtk.HBox):
             self.popup.mnuLog.set_active( hasattr(self.widget_.get_child(), "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
-        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:    
+        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
+            if conf.CONFIRM_ON_CLOSE_TAB_MIDDLE and msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) != Gtk.ResponseType.OK:
+                return True          
             self.close_tab(self.widget_)
 
 class EntryDialog( Gtk.Dialog):

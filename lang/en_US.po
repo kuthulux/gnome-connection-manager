@@ -499,6 +499,9 @@ msgstr "Paste on right click"
 msgid "Confirmar al cerrar una consola"
 msgstr "Confirm on close console"
 
+msgid "Confirmar al cerrar una consola con botón central del mouse"
+msgstr "Confirm on close console with middle click"
+
 #: ../gnome_connection_manager.py:945 ../gnome_connection_manager.py:1406
 #: ../gnome_connection_manager.py:1417 ../gnome_connection_manager.py:1616
 #: ../gnome_connection_manager.py:1771 ../gnome_connection_manager.py:1903
