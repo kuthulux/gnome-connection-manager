@@ -216,6 +216,10 @@ if not os.path.exists(os.getenv("HOME") + "/.gcm"):
 
 domain_name="gcm-lang"
 
+#these colors are defined in vte sourcecode, but there is no way to read them (vte.cc 0.60.1, line 2371)
+DEFAULT_BGCOLOR = "#000000"
+DEFAULT_FGCOLOR = "#C0C0C0"
+
 HSPLIT = 0
 VSPLIT = 1
 
@@ -504,14 +508,8 @@ class Wmain(SimpleGladeApp):
         settings = Gtk.Settings.get_default()
         settings.props.gtk_menu_bar_accel = None
 
-        self.real_transparency = False
-        if conf.TRANSPARENCY>0:
-            #Revisar si hay soporte para transparencia
-            screen = self.get_widget("wMain").get_screen()
-            visual = screen.get_rgba_visual()
-            if visual != None and screen.is_composited():
-                self.get_widget("wMain").set_visual(visual)
-                self.real_transparency = True
+        self.update_visual()
+        self.get_widget("wMain").get_screen().connect('composited-changed', self.update_visual)
         
         if conf.WINDOW_WIDTH != -1 and conf.WINDOW_HEIGHT != -1:
             self.get_widget("wMain").resize(conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT)
@@ -559,6 +557,25 @@ class Wmain(SimpleGladeApp):
         
         if conf.STARTUP_LOCAL:
             self.addTab(self.nbConsole,'local')
+
+    def update_visual(self):
+        window = self.get_widget("wMain")
+        screen = window.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual and screen.is_composited():
+            # NOTE: We should re-realize window when update window visual
+            # Otherwise it may failed, when the gcm is started without compositor
+            window.unrealize()
+            window.set_visual(visual)
+            window.transparency = True
+            window.realize()            
+            if window.get_property('visible'):
+                window.hide()
+                window.show()
+        else:
+            sys.stderr.write('System doesn\'t support transparency')
+            window.transparency = False
+            window.set_visual(screen.get_system_visual())
 
     #-- Wmain.new {
     def new(self):        
@@ -1175,14 +1192,14 @@ class Wmain(SimpleGladeApp):
             v.connect('key_press_event', self.on_terminal_keypress)            
             v.connect('selection-changed', self.on_terminal_selection)
             
-            if conf.TRANSPARENCY > 0:                 
-                if not self.real_transparency:
-                    v.set_background_transparent(True)
-                    v.set_background_saturation(conf.TRANSPARENCY / 100.0)
-                    if len(bcolor)>0:
-                        v.set_background_tint_color(parse_color(bcolor))
-                else:
-                    v.set_opacity(int( (100 - conf.TRANSPARENCY) / 100.0 * 65535) )
+            if conf.TRANSPARENCY > 0 and self.wMain.transparency:
+                #v.set_opacity(1 - (conf.TRANSPARENCY / 100)) #posibly a bug in gtk3, set_opacity only works if parent is transparent too (worked just fine in gtk2), 
+                #the workaround is to set the background color with alpha channel
+
+                #if bcolor is not set, then use default background color
+                c = parse_color_rgba(bcolor if bcolor else DEFAULT_BGCOLOR)
+                c.alpha = 1 - (conf.TRANSPARENCY / 100)
+                v.set_color_background(c) 
             
             v.set_backspace_binding(host.backspace_key)
             v.set_delete_binding(host.delete_key)
@@ -2418,8 +2435,8 @@ class Whost(SimpleGladeApp):
             self.get_widget("chkDefaultColors").set_active(True)
             self.btnFColor.set_sensitive(False)
             self.btnBColor.set_sensitive(False)
-            fcolor="#FFFFFF"
-            bcolor="#000000"
+            fcolor=DEFAULT_FGCOLOR
+            bcolor=DEFAULT_BGCOLOR
  
         self.btnFColor.set_rgba(parse_color_rgba(fcolor))
         self.btnBColor.set_rgba(parse_color_rgba(bcolor))
@@ -2753,8 +2770,8 @@ class Wconfig(SimpleGladeApp):
             self.get_widget("chkDefaultColors1").set_active(True)
             self.btnFColor.set_sensitive(False)
             self.btnBColor.set_sensitive(False)
-            fcolor="#FFFFFF"
-            bcolor="#000000"
+            fcolor=DEFAULT_FGCOLOR
+            bcolor=DEFAULT_BGCOLOR
         else:
             self.get_widget("chkDefaultColors1").set_active(False)
             self.btnFColor.set_sensitive(True)
