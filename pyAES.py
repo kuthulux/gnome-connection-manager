@@ -348,14 +348,15 @@ def encrypt(text, password):
     for i in range(16):
         IV.append(randint(0, 255))
 
+    text = text.encode('utf-8').decode('iso-8859-1')
+
     #PADDING
     numpads = 16 - (len(text)%16)
     text = text + numpads*chr(numpads)
 
     # convert password to AES 256-bit key
-    aesKey = passwordToKey(password)
-
-    fp = BytesIO(text.encode('utf-8'))
+    aesKey = passwordToKey(password)    
+    fp = BytesIO(text.encode('iso-8859-1')) #python2 default is iso-8859-1, python3 is utf-8, convert to iso-8859-1 for compatibility
     outfile = BytesIO()
 
     # write IV to outfile
@@ -448,6 +449,6 @@ def decrypt(text, password):
     # close file pointers
     fp.close()
     s = outfile.getvalue()
-    outfile.close()
-    return s
+    outfile.close()    
+    return bytes(s, 'iso-8859-1').decode('utf-8') #python2 default is iso-8859-1, so treat it as iso-8859-1 and convert it to utf8
 
