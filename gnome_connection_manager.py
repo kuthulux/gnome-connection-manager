@@ -245,6 +245,7 @@ _CONSOLE_9 = ["console_9"]
 _CONSOLE_CLOSE = ["console_close"]
 _CONSOLE_RECONNECT = ["console_reconnect"]
 _CONNECT = ["connect"]
+_CLONE = ["clone"]
 
 ICON_PATH = BASE_PATH + "/icon.png"
 
@@ -632,6 +633,17 @@ class Wmain(SimpleGladeApp):
                 elif cmd == _FIND_BACK:
                     if hasattr(self, 'search'):
                         self.find_word(backwards=True)
+                elif cmd == _CLONE:
+                    term = widget
+                    ntbk = widget.get_parent().get_parent()
+                    tab = ntbk.get_tab_label(term.get_parent())
+                    if not hasattr(term, "host"):
+                        self.addTab(ntbk, tab.get_text())
+                    else:
+                        host = term.host.clone()
+                        host.name = tab.get_text()
+                        host.log = hasattr(term, "log_handler_id") and term.log_handler_id != 0
+                        self.addTab(ntbk, host)
                 elif cmd == _CONSOLE_PREV:
                     widget.get_parent().get_parent().prev_page()
                 elif cmd == _CONSOLE_NEXT:
@@ -661,7 +673,7 @@ class Wmain(SimpleGladeApp):
                     self.on_btnConnect_clicked(None)
                 elif cmd[0][0:8] == "console_":
                     page = int(cmd[0][8:]) - 1                   
-                    widget.get_parent().get_parent().set_current_page(page)                
+                    widget.get_parent().get_parent().set_current_page(page)             
             else:
                 #comandos del usuario
                 vte_feed(widget, cmd)
@@ -1349,6 +1361,12 @@ class Wmain(SimpleGladeApp):
                 return True
         return False
         
+    def add_shortcut(self, cp, scuts, command, name, default):
+        try:
+            scuts[cp.get("shortcuts", command)] = name
+        except:
+            scuts[default] = name
+
     def loadConfig(self):
         global groups
         
@@ -1384,74 +1402,29 @@ class Wmain(SimpleGladeApp):
         except:
             print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
         
-        #Leer shorcuts        
+        #setup shorcuts
         scuts = {}
-        try:
-            scuts[cp.get("shortcuts", "copy")] = _COPY
-        except:
-            scuts["CTRL+SHIFT+C"] = _COPY
-        try:
-            scuts[cp.get("shortcuts", "paste")] = _PASTE
-        except:
-            scuts["CTRL+SHIFT+V"] = _PASTE
-        try:
-            scuts[cp.get("shortcuts", "copy_all")] = _COPY_ALL
-        except:
-            scuts["CTRL+SHIFT+A"] = _COPY_ALL
-        try:
-            scuts[cp.get("shortcuts", "save")] = _SAVE
-        except:
-            scuts["CTRL+S"] = _SAVE
-        try:
-            scuts[cp.get("shortcuts", "find")] = _FIND
-        except:
-            scuts["CTRL+F"] = _FIND
-        try:
-            scuts[cp.get("shortcuts", "find_next")] = _FIND_NEXT
-        except:
-            scuts["F3"] = _FIND_NEXT
-        try:
-            scuts[cp.get("shortcuts", "find_back")] = _FIND_BACK
-        except:
-            scuts["SHIFT+F3"] = _FIND_BACK
-        
-        try:
-            scuts[cp.get("shortcuts", "console_previous")] = _CONSOLE_PREV
-        except:
-            scuts["CTRL+SHIFT+LEFT"] = _CONSOLE_PREV
-        
-        try:
-            scuts[cp.get("shortcuts", "console_next")] = _CONSOLE_NEXT
-        except:
-            scuts["CTRL+SHIFT+RIGHT"] = _CONSOLE_NEXT
-
-        try:
-            scuts[cp.get("shortcuts", "console_close")] = _CONSOLE_CLOSE
-        except:
-            scuts["CTRL+W"] = _CONSOLE_CLOSE
-        
-        try:
-            scuts[cp.get("shortcuts", "console_reconnect")] = _CONSOLE_RECONNECT
-        except:
-            scuts["CTRL+N"] = _CONSOLE_RECONNECT
-          
-        try:
-            scuts[cp.get("shortcuts", "connect")] = _CONNECT
-        except:
-            scuts["CTRL+RETURN"] = _CONNECT
-            
-        ##kaman
-        try:
-            scuts[cp.get("shortcuts", "reset")] = _CLEAR
-        except:
-            scuts["CTRL+K"] = _CLEAR
+        self.add_shortcut(cp, scuts, "copy", _COPY, "CTRL+SHIFT+C") 
+        self.add_shortcut(cp, scuts, "paste", _PASTE, "CTRL+SHIFT+V")
+        self.add_shortcut(cp, scuts, "copy_all", _COPY_ALL, "CTRL+SHIFT+A") 
+        self.add_shortcut(cp, scuts, "save", _SAVE, "CTRL+S") 
+        self.add_shortcut(cp, scuts, "find", _FIND, "CTRL+F") 
+        self.add_shortcut(cp, scuts, "find_next", _FIND_NEXT, "CTRL+G") 
+        self.add_shortcut(cp, scuts, "find_back", _FIND_BACK, "CTRL+H") 
+        self.add_shortcut(cp, scuts, "console_previous", _CONSOLE_PREV, "CTRL+SHIFT+LEFT")
+        self.add_shortcut(cp, scuts, "console_next", _CONSOLE_NEXT, "CTRL+SHIFT+RIGHT")  
+        self.add_shortcut(cp, scuts, "console_close", _CONSOLE_CLOSE, "CTRL+W")  
+        self.add_shortcut(cp, scuts, "console_reconnect", _CONSOLE_RECONNECT, "CTRL+N")  
+        self.add_shortcut(cp, scuts, "connect", _CONNECT, "CTRL+RETURN")
+        self.add_shortcut(cp, scuts, "reset", _CLEAR, "CTRL+SHIFT+K")
+        self.add_shortcut(cp, scuts, "clone", _CLONE, "CTRL+SHIFT+D")
 
         #shortcuts para cambiar consola1-consola9
         for x in range(1,10):
             try:
                 scuts[cp.get("shortcuts", "console_%d" % (x) )] = eval("_CONSOLE_%d" % (x))                
             except:
-                scuts["F%d" % (x)] = eval("_CONSOLE_%d" % (x))                
+                scuts["ALT+%d" % (x)] = eval("_CONSOLE_%d" % (x))                
         try:
             i = 1            
             while True:
@@ -2994,11 +2967,13 @@ class Wconfig(SimpleGladeApp):
     #-- Wconfig.on_btnFont_clicked }
 
     #-- Wconfig.on_treeCommands_key_press_event {
-    def on_treeCommands_key_press_event(self, widget, event, *args):
+    def on_treeCommands_key_press_event(self, widget, event, *args):        
         if self.capture_keys and len(args)==3 and (event.keyval != Gdk.KEY_Return or
                                                    event.state != 0):
-            model, rownum, colnum = args           
-            widget.set_text(get_key_name(event))            
+            model, rownum, colnum = args
+            key = get_key_name(event)
+            if key not in ['RETURN', 'KP_ENTER']:
+                widget.set_text(get_key_name(event))
     #-- Wconfig.on_treeCommands_key_press_event }
 
 
