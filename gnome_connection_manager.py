@@ -315,7 +315,7 @@ def show_font_dialog(parent, title, button):
         
     if parent.dlgFont == None:
         parent.dlgFont = Gtk.FontSelectionDialog(title)
-    fontsel = parent.dlgFont.fontsel
+    fontsel = parent.dlgFont.get_font_selection()
     fontsel.set_font_name(button.selected_font.to_string())    
 
     response = parent.dlgFont.run()
@@ -2789,6 +2789,7 @@ class Wconfig(SimpleGladeApp):
             conf.FONT = 'monospace'
         else:
             self.chkDefaultFont.set_active(False)
+        self.btnFont.set_sensitive(not self.chkDefaultFont.get_active())
         self.btnFont.selected_font = Pango.FontDescription(conf.FONT)
         self.btnFont.set_label(self.btnFont.selected_font.to_string())
         self.btnFont.get_child().modify_font(self.btnFont.selected_font)
