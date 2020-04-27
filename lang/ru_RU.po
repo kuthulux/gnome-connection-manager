@@ -3,19 +3,19 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2020-04-27 17:30+0500\n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: Dmitriy Q <dmitry@atsip.ru>\n"
+"Language-Team: \n"
+"X-Generator: Poedit 2.3\n"
 
 #: ../gnome_connection_manager.py:224 ../gnome_connection_manager.py:331
 #: ../gnome_connection_manager.py:340 ../gnome_connection_manager.py:406
@@ -194,7 +194,7 @@ msgstr "Открыть"
 #: ../gnome_connection_manager.py:1356 ../gnome_connection_manager.py:1400
 #: ../gnome_connection_manager.py:1491 ../gnome_connection_manager.py:1660
 msgid "Hay"
-msgstr "Открыто консолей:"
+msgstr "Имеется"
 
 #: ../gnome_connection_manager.py:530 ../gnome_connection_manager.py:820
 #: ../gnome_connection_manager.py:831 ../gnome_connection_manager.py:951
@@ -202,7 +202,7 @@ msgstr "Открыто консолей:"
 #: ../gnome_connection_manager.py:1356 ../gnome_connection_manager.py:1400
 #: ../gnome_connection_manager.py:1491 ../gnome_connection_manager.py:1660
 msgid "consolas abiertas, confirma que desea salir?"
-msgstr "Выйти несмотря на это?"
+msgstr "есть открытые консоли, выйти несмотря на это?"
 
 #: ../gnome_connection_manager.py:838 ../gnome_connection_manager.py:849
 #: ../gnome_connection_manager.py:969 ../gnome_connection_manager.py:1098
@@ -222,7 +222,7 @@ msgstr "Импорт хостов"
 #: ../gnome_connection_manager.py:1509 ../gnome_connection_manager.py:1551
 #: ../gnome_connection_manager.py:1678 ../gnome_connection_manager.py:1720
 msgid "Ingrese clave: "
-msgstr "Введите пароль"
+msgstr "Введите пароль: "
 
 #: ../gnome_connection_manager.py:851 ../gnome_connection_manager.py:862
 #: ../gnome_connection_manager.py:982 ../gnome_connection_manager.py:1111
@@ -230,7 +230,7 @@ msgstr "Введите пароль"
 #: ../gnome_connection_manager.py:1430 ../gnome_connection_manager.py:1521
 #: ../gnome_connection_manager.py:1690
 msgid "Clave invalida"
-msgstr "Неправильный пароль"
+msgstr "Неверный пароль"
 
 #: ../gnome_connection_manager.py:854 ../gnome_connection_manager.py:865
 #: ../gnome_connection_manager.py:985 ../gnome_connection_manager.py:1114
@@ -385,7 +385,7 @@ msgstr "уже есть в группе"
 #: ../gnome_connection_manager.py:2023 ../gnome_connection_manager.py:2116
 #: ../gnome_connection_manager.py:2222 ../gnome_connection_manager.py:2391
 msgid "Error al guardar el host. Descripcion"
-msgstr "Не могу сохранить хост. Описание"
+msgstr "Ошибка сохранения хоста. Описание"
 
 #: ../gnome_connection_manager.py:879 ../gnome_connection_manager.py:1332
 #: ../gnome_connection_manager.py:1343 ../gnome_connection_manager.py:1526
@@ -449,7 +449,7 @@ msgstr "Запрос подтверждения при закрытии конс
 #: ../gnome_connection_manager.py:2186 ../gnome_connection_manager.py:2287
 #: ../gnome_connection_manager.py:2406 ../gnome_connection_manager.py:2576
 msgid "Confirmar al salir"
-msgstr "Запрос подтверждения при выходи"
+msgstr "Запрос подтверждения при выходе"
 
 #: ../gnome_connection_manager.py:1431 ../gnome_connection_manager.py:1443
 #: ../gnome_connection_manager.py:1642 ../gnome_connection_manager.py:1807
@@ -683,7 +683,7 @@ msgstr "Редактировать хост"
 #: ../gnome-connection-manager.glade:447 ../gnome-connection-manager.glade:459
 #: ../gnome-connection-manager.glade:494 ../gnome-connection-manager.glade:633
 msgid "Editar propiedades de host seleccionado"
-msgstr "Изменение свойств хоста"
+msgstr "Изменить свойства выбранного хоста"
 
 #: ../gnome-connection-manager.glade.h:18
 #: ../gnome-connection-manager.glade:536 ../gnome-connection-manager.glade:548
@@ -909,7 +909,9 @@ msgstr "_Импорт хостов"
 #: ../gnome-connection-manager.glade:3046
 #: ../gnome-connection-manager.glade:3185
 msgid "translator-credits"
-msgstr "Фокин Денис"
+msgstr ""
+"Фокин Денис\n"
+"Кузнецов Дмитрий"
 
 #: ../gnome_connection_manager.py:1418 ../gnome_connection_manager.py:1617
 #: ../gnome_connection_manager.py:1772 ../gnome_connection_manager.py:1904
@@ -971,7 +973,7 @@ msgstr "Отправлять Keep-Alive"
 #: ../gnome-connection-manager.glade:1808
 #: ../gnome-connection-manager.glade:1947
 msgid "Intervalo en segundos para enviar paquetes keep-alive"
-msgstr "Секунд между keep-alive пакетами"
+msgstr "Интервал в секундах между пакетами keep-alive"
 
 #: ../gnome_connection_manager.py:500 ../gnome_connection_manager.py:575
 #: ../gnome_connection_manager.py:549 ../gnome_connection_manager.py:643
@@ -980,7 +982,7 @@ msgstr "Секунд между keep-alive пакетами"
 #: ../gnome_connection_manager.py:759 ../gnome_connection_manager.py:864
 #: ../gnome_connection_manager.py:796 ../gnome_connection_manager.py:901
 msgid "Reiniciar consola"
-msgstr "Переинициализировать консоль"
+msgstr "Перезагрузить консоль"
 
 #: ../gnome_connection_manager.py:506 ../gnome_connection_manager.py:581
 #: ../gnome_connection_manager.py:555 ../gnome_connection_manager.py:649
@@ -989,7 +991,7 @@ msgstr "Переинициализировать консоль"
 #: ../gnome_connection_manager.py:765 ../gnome_connection_manager.py:870
 #: ../gnome_connection_manager.py:802 ../gnome_connection_manager.py:907
 msgid "Reiniciar y Limpiar consola"
-msgstr "Переинициализировать и очистить консоль"
+msgstr "Перезагрузить и очистить консоль"
 
 #: ../gnome_connection_manager.py:1773 ../gnome_connection_manager.py:1905
 #: ../gnome_connection_manager.py:2188 ../gnome_connection_manager.py:2289
@@ -1001,7 +1003,7 @@ msgstr "Скрыть напоминание о пожертвовании"
 #: ../gnome_connection_manager.py:2401 ../gnome_connection_manager.py:2502
 #: ../gnome_connection_manager.py:2633 ../gnome_connection_manager.py:2803
 msgid "Seleccione la fuente"
-msgstr "Выберите фонт"
+msgstr "Выберите шрифт"
 
 #: ../gnome-connection-manager.glade:1321
 #: ../gnome-connection-manager.glade:1423
@@ -1063,7 +1065,7 @@ msgstr "Переподключиться к хосту"
 #: ../gnome_connection_manager.py:882 ../gnome_connection_manager.py:808
 #: ../gnome_connection_manager.py:919
 msgid "Clonar consola"
-msgstr "клон консоль"
+msgstr "Клонировать консоль"
 
 #: ../gnome_connection_manager.py:1476 ../gnome_connection_manager.py:1657
 #: ../gnome_connection_manager.py:1706 ../gnome_connection_manager.py:1807
@@ -1135,7 +1137,7 @@ msgstr "Выбрать"
 
 #: ../gnome-connection-manager.glade:122
 msgid "Salir"
-msgstr "выходи"
+msgstr "Выйти"
 
 #: ../gnome_connection_manager.py:598 ../gnome_connection_manager.py:666
 #: ../gnome_connection_manager.py:684 ../gnome_connection_manager.py:737
@@ -1145,21 +1147,21 @@ msgstr "Копировать и Вставить"
 
 #: ../gnome-connection-manager.glade:122
 msgid "_Salir"
-msgstr "_выходи"
+msgstr "_Выйти"
 
 #: ../gnome-connection-manager.glade:1348
 #: ../gnome-connection-manager.glade:1292
 #: ../gnome-connection-manager.glade:1327
 #: ../gnome-connection-manager.glade:1466
 msgid "Usar formato grupo1/grupo2/grupo3 para crear subgrupos"
-msgstr "Чтобы создать подгруппы использовать формат группе1/группе2/группе3"
+msgstr "Чтобы создать подгруппы используйте формат группа1/группа2/группа3"
 
 #: ../gnome_connection_manager.py:706 ../gnome_connection_manager.py:817
 #: ../gnome_connection_manager.py:724 ../gnome_connection_manager.py:835
 #: ../gnome_connection_manager.py:777 ../gnome_connection_manager.py:888
 #: ../gnome_connection_manager.py:814 ../gnome_connection_manager.py:925
 msgid "Habilitar log"
-msgstr "включить журнал"
+msgstr "Включить журнал"
 
 #: ../gnome_connection_manager.py:861 ../gnome_connection_manager.py:879
 #: ../gnome_connection_manager.py:932 ../gnome_connection_manager.py:1026
@@ -1169,7 +1171,7 @@ msgstr "Не могу открыть лог-файл для записи"
 #: ../gnome_connection_manager.py:2182 ../gnome_connection_manager.py:2283
 #: ../gnome_connection_manager.py:2401 ../gnome_connection_manager.py:2570
 msgid "Ruta de logs"
-msgstr "путь к файлу журнала"
+msgstr "Путь к журналам"
 
 #: ../gnome-connection-manager.glade:1458
 #: ../gnome-connection-manager.glade:1507
@@ -1183,32 +1185,32 @@ msgstr "Закрытый ключ"
 #: ../gnome-connection-manager.glade:1880
 #: ../gnome-connection-manager.glade:2019
 msgid "Redirigir Agente"
-msgstr "Проброс агент"
+msgstr "Проброс агента"
 
 #: ../gnome-connection-manager.glade:1846
 #: ../gnome-connection-manager.glade:1895
 #: ../gnome-connection-manager.glade:2029
 #: ../gnome-connection-manager.glade:2168
 msgid "Habilitar Log"
-msgstr "включить журнал"
+msgstr "Включить журнал"
 
 #: ../gnome-connection-manager.glade:1359
 #: ../gnome-connection-manager.glade:1394
 #: ../gnome-connection-manager.glade:1533
 msgid "Descripción"
-msgstr "описание"
+msgstr "Описание"
 
 #: ../gnome-connection-manager.glade:2034
 #: ../gnome-connection-manager.glade:2168
 #: ../gnome-connection-manager.glade:2307
 msgid "Dinámico"
-msgstr "динамик"
+msgstr "Динамический"
 
 #: ../gnome-connection-manager.glade:2035
 #: ../gnome-connection-manager.glade:2169
 #: ../gnome-connection-manager.glade:2308
 msgid "Crear redirección dinámica de puertos"
-msgstr "Создание динамических экспедирование"
+msgstr "Создание динамического перенаправления портов"
 
 #: ../gnome-connection-manager.glade:2449
 #: ../gnome-connection-manager.glade:2583
@@ -1217,8 +1219,8 @@ msgid ""
 "<span size='smaller'>Usar ##D=milisegundos para introducir un delay.\n"
 "Ej: ##D=1000</span>"
 msgstr ""
-"<span size='smaller'>Использование ##D=миллисекунды ввести задержку.\n"
-"например: ##D=1000</span>"
+"<span size='smaller'>Использование ##D=миллисекунд для задержки.\n"
+"Например: ##D=1000</span>"
 
 #: ../gnome-connection-manager.glade:3732
 #: ../gnome-connection-manager.glade:4043
@@ -1228,32 +1230,32 @@ msgstr "<span size=\"smaller\">CTRL+UP/CTRL+DOWN для истории</span>"
 
 #: ../gnome_connection_manager.py:2405 ../gnome_connection_manager.py:2575
 msgid "Nunca"
-msgstr "никогда"
+msgstr "Никогда"
 
 #: ../gnome_connection_manager.py:2405 ../gnome_connection_manager.py:2575
 msgid "Siempre"
-msgstr "всегда"
+msgstr "Всегда"
 
 #: ../gnome_connection_manager.py:2405 ../gnome_connection_manager.py:2575
 msgid "Sólo si no hay errores"
-msgstr "только при отсутствии ошибок"
+msgstr "Только при отсутствии ошибок"
 
 #: ../gnome-connection-manager.glade:147 ../gnome-connection-manager.glade:274
 msgid "_Ver"
-msgstr "смотреть"
+msgstr "_Cмотреть"
 
 #: ../gnome-connection-manager.glade:155 ../gnome-connection-manager.glade:282
 msgid "Mostrar Toolbar"
-msgstr "показать панель инструментов"
+msgstr "Показать панель инструментов"
 
 #: ../gnome-connection-manager.glade:165 ../gnome-connection-manager.glade:292
 msgid "Mostrar Panel"
-msgstr "показать панель"
+msgstr "Показать панель"
 
 #: ../gnome-connection-manager.glade:1931
 #: ../gnome-connection-manager.glade:2070
 msgid "Compresión"
-msgstr "сжатие"
+msgstr "Сжатие"
 
 #: ../gnome-connection-manager.glade:1962
 #: ../gnome-connection-manager.glade:2101
@@ -1263,25 +1265,25 @@ msgid ""
 "1: min\n"
 "9: max"
 msgstr ""
-"степень сжатия: \n"
-"пустой: по умолчанию\n"
+"Степень сжатия: \n"
+"пусто: по умолчанию\n"
 "1: мин\n"
 "9: макс"
 
 #: ../gnome-connection-manager.glade:1979
 #: ../gnome-connection-manager.glade:2118
 msgid "Opciones extra"
-msgstr "дополнительные аргументы"
+msgstr "Дополнительные параметры"
 
 #: ../gnome-connection-manager.glade:2015
 #: ../gnome-connection-manager.glade:2154
 msgid "Parámetros extra a pasar a la línea de comandos"
-msgstr "дополнительные аргументы для передачи командной строки"
+msgstr "Дополнительные параметры для передачи в командную строку"
 
 #: ../gnome-connection-manager.glade:2851
 #: ../gnome-connection-manager.glade:2990
 msgid "Sequencias de Teclas:"
-msgstr "ключи последовательности"
+msgstr "Ключи последовательности:"
 
 #: ../gnome-connection-manager.glade:2880
 #: ../gnome-connection-manager.glade:3019
@@ -1296,7 +1298,7 @@ msgstr "Delete:"
 #: ../gnome-connection-manager.glade:2989
 #: ../gnome-connection-manager.glade:3128
 msgid "Colores y Teclas"
-msgstr "цветов и ключи"
+msgstr "Цвета и ключи"
 
 #: ../gnome_connection_manager.py:780 ../gnome-connection-manager.glade:231
 msgid "Copiar todo"
