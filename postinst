@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -e
+
+sudo xdg-desktop-menu install /usr/share/applications/gnome-connection-manager.desktop
+
