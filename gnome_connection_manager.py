@@ -1598,8 +1598,8 @@ class Wmain(SimpleGladeApp):
         cp.add_section("window")
         cp.set("window", "collapsed-folders", collapsed_folders)
         cp.set("window", "left-panel-width", self.hpMain.get_position())
-        cp.set("window", "window-width", conf.WINDOW_WIDTH)
-        cp.set("window", "window-height", conf.WINDOW_HEIGHT)
+        cp.set("window", "window-width", -1 if self.wMain.is_maximized() else conf.WINDOW_WIDTH)
+        cp.set("window", "window-height", -1 if self.wMain.is_maximized() else conf.WINDOW_HEIGHT)
         cp.set("window", "show-panel", conf.SHOW_PANEL)
         cp.set("window", "show-toolbar", conf.SHOW_TOOLBAR)
         
