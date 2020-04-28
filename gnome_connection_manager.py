@@ -206,6 +206,7 @@ BASE_PATH = os.path.dirname(os.path.abspath(sys.argv[0]))
 SSH_BIN = 'ssh'
 TEL_BIN = 'telnet'
 SHELL   = os.environ["SHELL"]
+DEFAULT_TERM_TYPE = 'xterm-256color'
 
 SSH_COMMAND = BASE_PATH + "/ssh.expect"
 CONFIG_FILE = os.getenv("HOME") + "/.gcm/gcm.conf"
@@ -457,7 +458,7 @@ def vte_feed(terminal, data):
         terminal.feed_child(data, len(data))
 
 def vte_run(terminal, command, arg=None):
-    term_type = terminal.host.term if hasattr(terminal, 'host') and terminal.host.term else conf.TERM if conf.TERM else os.getenv("TERM")
+    term_type = terminal.host.term if hasattr(terminal, 'host') and terminal.host.term else conf.TERM or os.getenv("TERM") or DEFAULT_TERM_TYPE
     envv = [ 'PATH=%s' % os.getenv("PATH"), 'TERM=%s' % term_type ]
     args = []
     args.append(command)
