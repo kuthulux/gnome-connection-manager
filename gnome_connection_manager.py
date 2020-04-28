@@ -1131,6 +1131,9 @@ class Wmain(SimpleGladeApp):
         if terminal:
             self.terminal_copy_all(terminal)
     
+    def on_menuSettings_activate(self, widget):
+        wConfig = Wconfig()
+
     def on_contents_changed(self, terminal):
         col,row = terminal.get_cursor_position()        
         if terminal.last_logged_row != row:

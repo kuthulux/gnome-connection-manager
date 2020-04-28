@@ -2344,6 +2344,21 @@ if not, write to the Free Software Foundation, Inc.,
                         </child>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem" id="separator3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="menuSettings">
+                        <property name="label" translatable="yes">Configuración</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="use_stock">False</property>
+                        <signal name="activate" handler="on_menuSettings_activate" swapped="no"/>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
