@@ -801,8 +801,8 @@ class Wmain(SimpleGladeApp):
         elif item == 'H': #COPY HOST ADDRESS TO CLIPBOARD
             if self.treeServers.get_selection().get_selected()[1]!=None and not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
                 host = self.treeModel.get_value(self.treeServers.get_selection().get_selected()[1],1)                
-                cb = Gtk.Clipboard()
-                cb.set_text(host.host)
+                cb = Gtk.Clipboard.get_default(Gdk.Display.get_default())
+                cb.set_text(host.host, len(host.host))
                 cb.store()
             return True
         elif item == 'D': #DUPLICATE HOST
