@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: 2020-04-27 17:30+0500\n"
+"PO-Revision-Date: 2020-04-29 12:47+0500\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1242,7 +1242,7 @@ msgstr "Только при отсутствии ошибок"
 
 #: ../gnome-connection-manager.glade:147 ../gnome-connection-manager.glade:274
 msgid "_Ver"
-msgstr "_Cмотреть"
+msgstr "_Вид"
 
 #: ../gnome-connection-manager.glade:155 ../gnome-connection-manager.glade:282
 msgid "Mostrar Toolbar"
@@ -1250,7 +1250,7 @@ msgstr "Показать панель инструментов"
 
 #: ../gnome-connection-manager.glade:165 ../gnome-connection-manager.glade:292
 msgid "Mostrar Panel"
-msgstr "Показать панель"
+msgstr "Показать боковую панель"
 
 #: ../gnome-connection-manager.glade:1931
 #: ../gnome-connection-manager.glade:2070
