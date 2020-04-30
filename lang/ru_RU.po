@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: 2020-04-30 10:31+0500\n"
+"PO-Revision-Date: 2020-04-30 11:42+0500\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1054,7 +1054,7 @@ msgstr "Пользовательские команды"
 #: ../gnome_connection_manager.py:781 ../gnome_connection_manager.py:834
 #: ../gnome_connection_manager.py:871
 msgid "Duplicar Host"
-msgstr "Хост уже существует"
+msgstr "Дублировать хост"
 
 #: ../gnome_connection_manager.py:655 ../gnome_connection_manager.py:805
 #: ../gnome_connection_manager.py:823 ../gnome_connection_manager.py:876
