@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: 2020-04-29 12:47+0500\n"
+"PO-Revision-Date: 2020-04-30 09:35+0500\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -433,7 +433,7 @@ msgstr "Прозрачность"
 #: ../gnome_connection_manager.py:2183 ../gnome_connection_manager.py:2284
 #: ../gnome_connection_manager.py:2402 ../gnome_connection_manager.py:2572
 msgid "Pegar con botón derecho"
-msgstr "Вставить правой кнопкой мыши"
+msgstr "Вставлять правой кнопкой мыши"
 
 #: ../gnome_connection_manager.py:944 ../gnome_connection_manager.py:1405
 #: ../gnome_connection_manager.py:1416 ../gnome_connection_manager.py:1615
@@ -918,7 +918,7 @@ msgstr ""
 #: ../gnome_connection_manager.py:2187 ../gnome_connection_manager.py:2288
 #: ../gnome_connection_manager.py:2407 ../gnome_connection_manager.py:2577
 msgid "Comprobar actualizaciones"
-msgstr "Проверить обновления"
+msgstr "Проверять обновления"
 
 #: ../gnome_connection_manager.py:1781 ../gnome_connection_manager.py:1993
 #: ../gnome_connection_manager.py:2180 ../gnome_connection_manager.py:2430
