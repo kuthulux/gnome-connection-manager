@@ -1,8 +1,9 @@
 # Gnome Connection Manager or GCM
  
 Gnome Connection Manager or GCM is a tabbed ssh connection manager for gtk+ environments.
-Starting with version 1.2.0 it supports python3 and GTK 3 so it should run fine on any modern desktop environment.
+Starting with version 1.2.0 it **only** supports python3 and GTK 3 so it should run fine on any modern desktop environment.
 
+If you can't update to python/gtk 3 and only have python2/gtk2, then keep using GCM version v1.1.0 from [kuthulu.com](http://kuthulu.com/gcm/download.html)
 
 ## Installation
 
