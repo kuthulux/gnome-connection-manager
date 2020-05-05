@@ -287,6 +287,7 @@ class conf():
     SHOW_TOOLBAR = True
     SHOW_PANEL = True
     VERSION = 0
+    UPDATE_TITLE = 0
 
 def msgbox(text, parent=None):
     msgBox = Gtk.MessageDialog(parent=parent, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text=text)
@@ -1430,6 +1431,7 @@ class Wmain(SimpleGladeApp):
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
             conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.TERM = cp.get("options", "term")
+            conf.UPDATE_TITLE = cp.getboolean("options", "update-title")
         except:
             print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
         
@@ -1623,6 +1625,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "log-path", conf.LOG_PATH)
         cp.set("options", "version", app_fileversion)
         cp.set("options", "auto-close-tab", conf.AUTO_CLOSE_TAB)
+        cp.set("options", "update-title", conf.UPDATE_TITLE)
 
         collapsed_folders = ','.join(self.get_collapsed_nodes())         
         cp.add_section("window")
@@ -1659,6 +1662,9 @@ class Wmain(SimpleGladeApp):
     def on_tab_focus(self, widget, *args): 
         if isinstance(widget, Vte.Terminal):
             self.current = widget
+            if conf.UPDATE_TITLE:
+                tab_text = widget.get_parent().get_parent().get_tab_label(widget.get_parent()).get_text()
+                self.wMain.set_title("%s - %s" % (app_name, tab_text.strip()))
         
     def split_notebook(self, direction):        
         csp = self.current.get_parent() if self.current!=None else None
@@ -2769,6 +2775,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)  
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
         self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
+        self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
         
         if len(conf.FONT_COLOR)==0:
             self.get_widget("chkDefaultColors1").set_active(True)
