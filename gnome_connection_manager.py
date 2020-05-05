@@ -195,6 +195,7 @@ from SimpleGladeApp import bindtextdomain
 
 import configparser
 import pyAES
+import urlregex
 
 app_name = "Gnome Connection Manager"
 app_version = "1.2.0"
@@ -608,6 +609,16 @@ class Wmain(SimpleGladeApp):
                 self.popupMenu.terminal = widget
                 self.popupMenu.popup( None, None, None, None, event.button, event.time)
             return True
+    
+        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1 and event.get_state() &  Gdk.ModifierType.CONTROL_MASK:
+            url, tag = widget.match_check_event(event)
+            if tag == widget.tag_url:
+                url = "http://%s" % url
+            elif tag == widget.tag_email and not url.startswith("mailto:"):
+                url = "mailto://%s" % url
+            url = url or widget.hyperlink_check_event(event)
+            if url:
+                Gtk.show_uri(Gdk.Screen.get_default(), url, Gtk.get_current_event_time())
     
     def on_terminal_keypress(self, widget, event, *args):
         #if shortcuts.has_key(get_key_name(event)):
@@ -1174,11 +1185,27 @@ class Wmain(SimpleGladeApp):
                 terminal.log_handler_id = 0
         return True
 
+    def registerUrlRegexes(self, terminal):
+        terminal.tag_direct = self.registerUrlRegex(terminal, urlregex.DIRECT)
+        terminal.tag_url = self.registerUrlRegex(terminal, urlregex.URL)
+        terminal.tag_email = self.registerUrlRegex(terminal, urlregex.EMAIL)
+
+    def registerUrlRegex(self, terminal, regex):
+        try:
+            new_reg_m = Vte.Regex.new_for_match(regex, len(regex), urlregex.PCRE2_FLAGS)
+            tag = terminal.match_add_regex(new_reg_m, 0)
+            terminal.match_set_cursor_name(tag, "pointer")
+            return tag
+        except Exception as e:
+            pass
+
     def addTab(self, notebook, host):
         try:
             v = Vte.Terminal()
             v.set_word_char_exceptions(conf.WORD_SEPARATORS)
             v.set_scrollback_lines(conf.BUFFER_LINES)
+            v.set_allow_hyperlink(True)
+            self.registerUrlRegexes(v)
             
             if isinstance(host, str):
                 host = Host('', host) 
