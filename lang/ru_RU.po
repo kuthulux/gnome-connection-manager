@@ -8,13 +8,13 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: 2020-04-30 11:42+0500\n"
+"PO-Revision-Date: 2020-05-04 22:53+0500\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Last-Translator: Dmitriy Q <dmitry@atsip.ru>\n"
-"Language-Team: \n"
+"Language-Team: TranslAster\n"
 "X-Generator: Poedit 2.3\n"
 
 #: ../gnome_connection_manager.py:224 ../gnome_connection_manager.py:331
@@ -202,7 +202,7 @@ msgstr "Имеется"
 #: ../gnome_connection_manager.py:1356 ../gnome_connection_manager.py:1400
 #: ../gnome_connection_manager.py:1491 ../gnome_connection_manager.py:1660
 msgid "consolas abiertas, confirma que desea salir?"
-msgstr "есть открытые консоли, выйти несмотря на это?"
+msgstr "открытые консоли, выйти несмотря на это?"
 
 #: ../gnome_connection_manager.py:838 ../gnome_connection_manager.py:849
 #: ../gnome_connection_manager.py:969 ../gnome_connection_manager.py:1098
