@@ -3175,6 +3175,7 @@ if not, write to the Free Software Foundation, Inc.,
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <signal name="button-press-event" handler="on_double_click" swapped="no"/>
+                    <signal name="switch-page" handler="on_tab_focus" swapped="no"/>
                     <child>
                       <object class="GtkLabel" id="placeholder">
                         <property name="can_focus">False</property>

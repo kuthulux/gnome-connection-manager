@@ -288,6 +288,7 @@ class conf():
     SHOW_PANEL = True
     VERSION = 0
     UPDATE_TITLE = 0
+    APP_TITLE = app_name
 
 def msgbox(text, parent=None):
     msgBox = Gtk.MessageDialog(parent=parent, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text=text)
@@ -620,7 +621,11 @@ class Wmain(SimpleGladeApp):
             url = url or widget.hyperlink_check_event(event)
             if url:
                 Gtk.show_uri(Gdk.Screen.get_default(), url, Gtk.get_current_event_time())
-    
+
+        #terminal doesnt emmit the "focus" signal when there is more than one visible on the screen, so force the focus
+        nb = widget.get_parent().get_parent()
+        self.on_tab_focus(nb, nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
+
     def on_terminal_keypress(self, widget, event, *args):
         #if shortcuts.has_key(get_key_name(event)):
         if get_key_name(event) in shortcuts:
@@ -835,7 +840,9 @@ class Wmain(SimpleGladeApp):
         elif item == 'R': #RENAME TAB
             text = inputbox(_('Renombrar consola'), _('Ingrese nuevo nombre'), self.popupMenuTab.label.get_text().strip())
             if text != None and text != '':
-                self.popupMenuTab.label.set_text("  %s  " % (text))            
+                self.popupMenuTab.label.set_text("  %s  " % (text))
+                nb = self.popupMenuTab.label.get_parent().get_parent().get_parent()
+                nb.emit('switch-page', nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
             return True
         elif item == 'RS' or item == 'RS2': #RESET CONSOLE              
             if (item == 'RS'):
@@ -1432,6 +1439,7 @@ class Wmain(SimpleGladeApp):
             conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.TERM = cp.get("options", "term")
             conf.UPDATE_TITLE = cp.getboolean("options", "update-title")
+            conf.APP_TITLE = cp.get("options", "app-title") or app_name
         except:
             print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
         
@@ -1626,6 +1634,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "version", app_fileversion)
         cp.set("options", "auto-close-tab", conf.AUTO_CLOSE_TAB)
         cp.set("options", "update-title", conf.UPDATE_TITLE)
+        cp.set("options", "app-title", conf.APP_TITLE or app_name)
 
         collapsed_folders = ','.join(self.get_collapsed_nodes())         
         cp.add_section("window")
@@ -1659,13 +1668,21 @@ class Wmain(SimpleGladeApp):
         f.close()
         os.rename(CONFIG_FILE + ".tmp", CONFIG_FILE)
         
-    def on_tab_focus(self, widget, *args): 
+    def on_tab_focus(self, widget, tab=None, *args):
         if isinstance(widget, Vte.Terminal):
             self.current = widget
-            if conf.UPDATE_TITLE:
+        if conf.UPDATE_TITLE and widget != None:
+            if isinstance(widget, Vte.Terminal):
                 tab_text = widget.get_parent().get_parent().get_tab_label(widget.get_parent()).get_text()
-                self.wMain.set_title("%s - %s" % (app_name, tab_text.strip()))
-        
+            elif tab != None: #notebok page switched
+                tab_text = widget.get_tab_label(tab).get_text() if widget.get_tab_label(tab) else ''
+            else:
+                tab_text = ''
+            if tab_text:
+                self.wMain.set_title("%s - %s" % (conf.APP_TITLE or app_name, tab_text.strip()))
+            else:
+                self.wMain.set_title(conf.APP_TITLE or app_name)
+
     def split_notebook(self, direction):        
         csp = self.current.get_parent() if self.current!=None else None
         cnb = csp.get_parent() if csp!=None else None
@@ -1680,6 +1697,7 @@ class Wmain(SimpleGladeApp):
             nb.connect('button_press_event', self.on_double_click, None)
             nb.connect('page_removed', self.on_page_removed)
             nb.connect("page-added", self.on_page_added)
+            nb.connect('switch-page', self.on_tab_focus)
             nb.set_property("scrollable", True)
             cp  = cnb.get_parent()
 
@@ -1710,6 +1728,7 @@ class Wmain(SimpleGladeApp):
             hp.show()
             hp.queue_draw()
             self.current = cnb.get_nth_page(cnb.get_current_page()).get_children()[0]
+            self.on_tab_focus(cnb, cnb.get_nth_page(cnb.get_current_page()))
 
     def find_notebook(self, widget, exclude=None):
         if widget!=exclude and isinstance(widget, Gtk.Notebook):
@@ -1731,7 +1750,7 @@ class Wmain(SimpleGladeApp):
                 return None
                              
             for w in widget.get_children():
-                wid = self.find_active_terminal(w)                    
+                wid = self.find_active_terminal(w)
                 if isinstance(wid, Vte.Terminal) and wid.is_focus():
                     return wid
             return None
@@ -1752,9 +1771,14 @@ class Wmain(SimpleGladeApp):
                     self.nbConsole = save
                 else:
                     self.nbConsole = self.find_notebook(save)
+            p = self.nbConsole.get_current_page()
+            self.on_tab_focus(self.nbConsole, self.nbConsole.get_nth_page(p), p)
 
     def on_page_removed(self, widget, *args):
         self.count-=1
+        if widget.get_current_page() == -1:
+            self.on_tab_focus(widget, None)
+
         if hasattr(widget, "is_closed") and widget.is_closed:
             #tab has been closed
             self.check_notebook_pages(widget)
@@ -1762,7 +1786,7 @@ class Wmain(SimpleGladeApp):
             #tab has been moved to another notebook
             #save a reference to this notebook, on_page_added check if the notebook must be removed
             self.check_notebook = widget
-            
+
     def on_page_added(self, widget, *args):
         self.count+=1
         if hasattr(self, "check_notebook"):
@@ -2057,6 +2081,7 @@ class Wmain(SimpleGladeApp):
                 self.nbConsole.set_tab_reorderable(csp, True)
                 self.nbConsole.set_tab_detachable(csp, True)
             wid = self.find_notebook(self.hpMain, self.nbConsole)
+        self.on_tab_focus(self.nbConsole, self.nbConsole.get_nth_page(self.nbConsole.get_current_page()))
     #-- Wmain.on_btnUnsplit_clicked }
 
     #-- Wmain.on_btnConfig_clicked {
@@ -2724,7 +2749,7 @@ class Wabout(SimpleGladeApp):
         self.wAbout.set_icon_from_file(ICON_PATH)
     #-- Wabout.new {
     def new(self):       
-        self.wAbout.set_name(app_name)
+        self.wAbout.set_program_name(app_name)
         self.wAbout.set_version(app_version)
         self.wAbout.set_website(app_web)    
     #-- Wabout.new }
@@ -2776,7 +2801,8 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
         self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
         self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
-        
+        self.addParam(_(u"Título"), "conf.APP_TITLE", str)
+
         if len(conf.FONT_COLOR)==0:
             self.get_widget("chkDefaultColors1").set_active(True)
             self.btnFColor.set_sensitive(False)
