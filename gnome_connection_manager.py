@@ -247,6 +247,7 @@ _CONSOLE_9 = ["console_9"]
 _CONSOLE_CLOSE = ["console_close"]
 _CONSOLE_RECONNECT = ["console_reconnect"]
 _CONNECT = ["connect"]
+_NEW_LOCAL = ["new_local"]
 _CLONE = ["clone"]
 
 ICON_PATH = BASE_PATH + "/icon.png"
@@ -363,13 +364,13 @@ def color_to_hex(rgba, diff=0):
         
 def get_key_name(event):
     name = ""
-    if event.state & 4:
+    if event.state & Gdk.ModifierType.CONTROL_MASK:
         name = name + "CTRL+"
-    if event.state & 1:
-        name = name + "SHIFT+"
-    if event.state & 8:
+    if event.state & Gdk.ModifierType.SHIFT_MASK:
+        name = name + "to circleSHIFT+"
+    if event.state & Gdk.ModifierType.MOD1_MASK:
         name = name + "ALT+"
-    if event.state & 67108864:
+    if event.state & Gdk.ModifierType.SUPER_MASK:
         name = name + "SUPER+"
     return name + Gdk.keyval_name(event.keyval).upper()
      
@@ -663,9 +664,17 @@ class Wmain(SimpleGladeApp):
                         host.log = hasattr(term, "log_handler_id") and term.log_handler_id != 0
                         self.addTab(ntbk, host)
                 elif cmd == _CONSOLE_PREV:
-                    widget.get_parent().get_parent().prev_page()
+                    ntbk = widget.get_parent().get_parent()
+                    if ntbk.get_current_page() == 0:
+                        ntbk.set_current_page(len(ntbk) - 1)
+                    else:
+                        ntbk.prev_page()
                 elif cmd == _CONSOLE_NEXT:
-                    widget.get_parent().get_parent().next_page()
+                    ntbk = widget.get_parent().get_parent()
+                    if ntbk.get_current_page() == len(ntbk) - 1:
+                        ntbk.set_current_page(0)
+                    else:
+                        ntbk.next_page()
                 elif cmd == _CONSOLE_CLOSE:
                     wid = widget.get_parent()                    
                     page = widget.get_parent().get_parent().page_num(wid)                    
@@ -692,6 +701,8 @@ class Wmain(SimpleGladeApp):
                 elif cmd[0][0:8] == "console_":
                     page = int(cmd[0][8:]) - 1                   
                     widget.get_parent().get_parent().set_current_page(page)             
+                elif cmd == _NEW_LOCAL:
+                    self.on_btnLocal_clicked(None)
             else:
                 #comandos del usuario
                 vte_feed(widget, cmd)
@@ -1452,13 +1463,14 @@ class Wmain(SimpleGladeApp):
         self.add_shortcut(cp, scuts, "find", _FIND, "CTRL+F") 
         self.add_shortcut(cp, scuts, "find_next", _FIND_NEXT, "CTRL+G") 
         self.add_shortcut(cp, scuts, "find_back", _FIND_BACK, "CTRL+H") 
-        self.add_shortcut(cp, scuts, "console_previous", _CONSOLE_PREV, "CTRL+SHIFT+LEFT")
-        self.add_shortcut(cp, scuts, "console_next", _CONSOLE_NEXT, "CTRL+SHIFT+RIGHT")  
+        self.add_shortcut(cp, scuts, "console_previous", _CONSOLE_PREV, "CTRL+SHIFT+TAB")
+        self.add_shortcut(cp, scuts, "console_next", _CONSOLE_NEXT, "CTRL+TAB")  
         self.add_shortcut(cp, scuts, "console_close", _CONSOLE_CLOSE, "CTRL+W")  
         self.add_shortcut(cp, scuts, "console_reconnect", _CONSOLE_RECONNECT, "CTRL+N")  
         self.add_shortcut(cp, scuts, "connect", _CONNECT, "CTRL+RETURN")
         self.add_shortcut(cp, scuts, "reset", _CLEAR, "CTRL+SHIFT+K")
         self.add_shortcut(cp, scuts, "clone", _CLONE, "CTRL+SHIFT+D")
+        self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+N")
 
         #shortcuts para cambiar consola1-consola9
         for x in range(1,10):
