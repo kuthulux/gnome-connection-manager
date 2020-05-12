@@ -367,7 +367,7 @@ def get_key_name(event):
     if event.state & Gdk.ModifierType.CONTROL_MASK:
         name = name + "CTRL+"
     if event.state & Gdk.ModifierType.SHIFT_MASK:
-        name = name + "to circleSHIFT+"
+        name = name + "SHIFT+"
     if event.state & Gdk.ModifierType.MOD1_MASK:
         name = name + "ALT+"
     if event.state & Gdk.ModifierType.SUPER_MASK:
@@ -1470,7 +1470,7 @@ class Wmain(SimpleGladeApp):
         self.add_shortcut(cp, scuts, "connect", _CONNECT, "CTRL+RETURN")
         self.add_shortcut(cp, scuts, "reset", _CLEAR, "CTRL+SHIFT+K")
         self.add_shortcut(cp, scuts, "clone", _CLONE, "CTRL+SHIFT+D")
-        self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+N")
+        self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+SHIFT+N")
 
         #shortcuts para cambiar consola1-consola9
         for x in range(1,10):
