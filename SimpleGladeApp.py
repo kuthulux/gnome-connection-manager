@@ -64,7 +64,7 @@ def bindtextdomain(app_name, locale_dir=None):
         #force english as default locale
         try:
             os.environ["LANG"] = "en_US.UTF-8"
-            os.environ["LANGUAGE"] = "en_US.UTF-8"
+            os.environ["LANGUAGE"] = "en"
             locale.setlocale(locale.LC_ALL, "")
             locale.bindtextdomain(app_name, locale_dir)
             gettext.bindtextdomain(app_name, locale_dir)
