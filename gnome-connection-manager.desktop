@@ -9,4 +9,5 @@ Terminal=false
 Type=Application
 Icon=/usr/share/gnome-connection-manager/icon.png
 Categories=GTK;GNOME;Network;
+StartupWMClass=gnome_connection_manager.py
 Name[en]=Gnome Connection Manager
