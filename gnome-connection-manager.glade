@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.22.1 -->
 <!--*- mode: xml -*-->
 <interface>
-  <requires lib="gtk+" version="3.0"/>  
+  <requires lib="gtk+" version="3.0"/>
   <object class="GtkDialog" id="wHost">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1338,17 +1338,17 @@ Ej: ##D=1000&lt;/span&gt;</property>
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
     <property name="copyright">Renzo Bertuzzi L. (kuthulu@gmail.com) - Chile</property>
-    <property name="comments">A simple ssh connection manager for gnome</property>
-    <property name="license">This is gnome-connection-manager, written and maintained by
+    <property name="comments">Простенький менеджер ssh-подключений для Gnome</property>
+    <property name="license">gnome-connection-manager создан и поддерживается
 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt;
-Project's Homepage: http://kuthulu.com/gcm
- 
+Домашняя страница проекта: http://kuthulu.com/gcm
+
 Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile
- 
+
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 3, as
 published by the Free Software Foundation.
- 
+
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
