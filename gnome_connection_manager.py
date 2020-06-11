@@ -165,6 +165,7 @@ import tempfile
 import traceback
 import re
 import shlex
+import cairo
 
 try:
     import gi
@@ -504,7 +505,7 @@ class Wmain(SimpleGladeApp):
         load_encryption_key()
         
         self.initLeftPane()     
-        
+
         self.createMenu()
         self.window = self.get_widget("wMain")
 
@@ -573,8 +574,9 @@ class Wmain(SimpleGladeApp):
             # Otherwise it may failed, when the gcm is started without compositor
             window.unrealize()
             window.set_visual(visual)
+            window.set_app_paintable(True) #needed to create a fully transparent window in gnome-shell/mutter, see on_draw below
             window.transparency = True
-            window.realize()            
+            window.realize()
             if window.get_property('visible'):
                 window.hide()
                 window.show()
@@ -582,6 +584,20 @@ class Wmain(SimpleGladeApp):
             sys.stderr.write('System doesn\'t support transparency')
             window.transparency = False
             window.set_visual(screen.get_system_visual())
+
+
+    def on_draw(self, widget, cr):
+        #hack to paint the background of the window element to allow transparency
+        #to enable transparency in gnome-shell with mutter we have to set window.set_app_paintable(True), but this produces a transparent window
+        #so we have to paint the background of the window (Gtk.render_background), but when running in wayland the window.get_allocated_width/height
+        #is greater than the window size which results in a border around the window,
+        #to prevent it we have to paint the background of individual elements in the window using their signal 'draw'
+        c = self.window.get_style_context().get_background_color(widget.get_state())
+        cr.set_source_rgb(c.red, c.green, c.blue) #paint the background using the window background-color without alpha
+        cr.set_operator(cairo.OPERATOR_SOURCE)
+        cr.paint()
+        cr.set_operator(cairo.OPERATOR_OVER)
+        return False
 
     #-- Wmain.new {
     def new(self):        
@@ -1261,7 +1277,7 @@ class Wmain(SimpleGladeApp):
                 #if bcolor is not set, then use default background color
                 c = parse_color_rgba(bcolor if bcolor else DEFAULT_BGCOLOR)
                 c.alpha = 1 - (conf.TRANSPARENCY / 100)
-                v.set_color_background(c) 
+                v.set_color_background(c)
             
             v.set_backspace_binding(host.backspace_key)
             v.set_delete_binding(host.delete_key)
@@ -1710,6 +1726,7 @@ class Wmain(SimpleGladeApp):
             nb.connect('page_removed', self.on_page_removed)
             nb.connect("page-added", self.on_page_added)
             nb.connect('switch-page', self.on_tab_focus)
+            nb.connect('draw', self.on_draw) #to prevent transparent tabs
             nb.set_property("scrollable", True)
             cp  = cnb.get_parent()
 
