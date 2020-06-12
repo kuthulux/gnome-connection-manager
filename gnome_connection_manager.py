@@ -515,9 +515,12 @@ class Wmain(SimpleGladeApp):
         settings = Gtk.Settings.get_default()
         settings.props.gtk_menu_bar_accel = None
 
+        self.enable_window_transparency(self.window)
+        self.window.connect("style-updated", self.enable_window_transparency)
+
         self.update_visual()
         self.get_widget("wMain").get_screen().connect('composited-changed', self.update_visual)
-        
+
         if conf.WINDOW_WIDTH != -1 and conf.WINDOW_HEIGHT != -1:
             self.get_widget("wMain").resize(conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT)
         else:
@@ -574,7 +577,6 @@ class Wmain(SimpleGladeApp):
             # Otherwise it may failed, when the gcm is started without compositor
             window.unrealize()
             window.set_visual(visual)
-            window.set_app_paintable(True) #needed to create a fully transparent window in gnome-shell/mutter, see on_draw below
             window.transparency = True
             window.realize()
             if window.get_property('visible'):
@@ -586,18 +588,36 @@ class Wmain(SimpleGladeApp):
             window.set_visual(screen.get_system_visual())
 
 
-    def on_draw(self, widget, cr):
-        #hack to paint the background of the window element to allow transparency
-        #to enable transparency in gnome-shell with mutter we have to set window.set_app_paintable(True), but this produces a transparent window
-        #so we have to paint the background of the window (Gtk.render_background), but when running in wayland the window.get_allocated_width/height
-        #is greater than the window size which results in a border around the window,
-        #to prevent it we have to paint the background of individual elements in the window using their signal 'draw'
-        c = self.window.get_style_context().get_background_color(widget.get_state())
-        cr.set_source_rgb(c.red, c.green, c.blue) #paint the background using the window background-color without alpha
-        cr.set_operator(cairo.OPERATOR_SOURCE)
-        cr.paint()
-        cr.set_operator(cairo.OPERATOR_OVER)
-        return False
+    def enable_window_transparency(self, window):
+        #hack to allow transparent widgets inside a opaque window
+        #the key is to set the alpha channel of the window's background color to 0.9999, in that way the window is opaque but still allows transparent children
+
+        #remove previously addded css to get the background color from the current gtk theme
+        if hasattr(window, "style_provider") and window.style_provider:
+            Gtk.StyleContext.remove_provider_for_screen(
+                Gdk.Screen.get_default(),
+                window.style_provider
+            )
+
+        #get window background color
+        context = window.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.NORMAL)
+
+        #set the background color to the same as the gtk theme, but with alpha 0.99999 (it looks opaque but allows to have transparent widgets)
+        CSS = b"""
+        window.background {
+            background-color: rgba(%d, %d, %d, %f);
+        }
+        """ % (color.red*255, color.green*255, color.blue*255, 0.999999)
+
+        window.style_provider = Gtk.CssProvider()
+        window.style_provider.load_from_data(CSS)
+
+        context.add_provider_for_screen(
+            window.get_screen(),
+            window.style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     #-- Wmain.new {
     def new(self):        
@@ -1726,7 +1746,6 @@ class Wmain(SimpleGladeApp):
             nb.connect('page_removed', self.on_page_removed)
             nb.connect("page-added", self.on_page_added)
             nb.connect('switch-page', self.on_tab_focus)
-            nb.connect('draw', self.on_draw) #to prevent transparent tabs
             nb.set_property("scrollable", True)
             cp  = cnb.get_parent()
 
