@@ -423,12 +423,19 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkAdjustment" id="adjustment4">
+                    <property name="lower">0</property>
+                    <property name="upper">3600</property>
+                    <property name="step_increment">1</property>
+                    <property name="page_increment">10</property>
+                  </object>
                   <object class="GtkSpinButton" id="txtKeepAlive">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="climb_rate">1</property>
                     <property name="numeric">True</property>
+                    <property name="adjustment">adjustment4</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -524,12 +531,19 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkAdjustment" id="adjustment5">
+                    <property name="lower">1</property>
+                    <property name="upper">9</property>
+                    <property name="step_increment">1</property>
+                    <property name="page_increment">1</property>
+                  </object>
                   <object class="GtkSpinButton" id="txtCompressionLevel">
                     <property name="visible">True</property>
                     <property name="sensitive">False</property>
                     <property name="can_focus">True</property>
                     <property name="climb_rate">1</property>
                     <property name="numeric">True</property>
+                    <property name="adjustment">adjustment5</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>

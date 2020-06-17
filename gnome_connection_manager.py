@@ -2682,7 +2682,6 @@ class Whost(SimpleGladeApp):
 
     #-- Whost.on_chkCompression_toggled {
     def on_chkCompression_toggled(self, widget, *args):
-        self.txtCompressionLevel.set_text('')
         self.txtCompressionLevel.set_sensitive(widget.get_active())
     #-- Whost.on_chkCompression_toggled }
     
