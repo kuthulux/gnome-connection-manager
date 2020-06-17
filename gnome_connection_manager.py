@@ -165,6 +165,7 @@ import tempfile
 import traceback
 import re
 import shlex
+import cairo
 
 try:
     import gi
@@ -504,7 +505,7 @@ class Wmain(SimpleGladeApp):
         load_encryption_key()
         
         self.initLeftPane()     
-        
+
         self.createMenu()
         self.window = self.get_widget("wMain")
 
@@ -514,9 +515,12 @@ class Wmain(SimpleGladeApp):
         settings = Gtk.Settings.get_default()
         settings.props.gtk_menu_bar_accel = None
 
+        self.enable_window_transparency(self.window)
+        self.window.connect("style-updated", self.enable_window_transparency)
+
         self.update_visual()
         self.get_widget("wMain").get_screen().connect('composited-changed', self.update_visual)
-        
+
         if conf.WINDOW_WIDTH != -1 and conf.WINDOW_HEIGHT != -1:
             self.get_widget("wMain").resize(conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT)
         else:
@@ -574,7 +578,7 @@ class Wmain(SimpleGladeApp):
             window.unrealize()
             window.set_visual(visual)
             window.transparency = True
-            window.realize()            
+            window.realize()
             if window.get_property('visible'):
                 window.hide()
                 window.show()
@@ -582,6 +586,38 @@ class Wmain(SimpleGladeApp):
             sys.stderr.write('System doesn\'t support transparency')
             window.transparency = False
             window.set_visual(screen.get_system_visual())
+
+
+    def enable_window_transparency(self, window):
+        #hack to allow transparent widgets inside a opaque window
+        #the key is to set the alpha channel of the window's background color to 0.9999, in that way the window is opaque but still allows transparent children
+
+        #remove previously addded css to get the background color from the current gtk theme
+        if hasattr(window, "style_provider") and window.style_provider:
+            Gtk.StyleContext.remove_provider_for_screen(
+                Gdk.Screen.get_default(),
+                window.style_provider
+            )
+
+        #get window background color
+        context = window.get_style_context()
+        color = context.get_background_color(Gtk.StateFlags.NORMAL)
+
+        #set the background color to the same as the gtk theme, but with alpha 0.99999 (it looks opaque but allows to have transparent widgets)
+        CSS = b"""
+        window.background {
+            background-color: rgba(%d, %d, %d, %f);
+        }
+        """ % (color.red*255, color.green*255, color.blue*255, 0.999999)
+
+        window.style_provider = Gtk.CssProvider()
+        window.style_provider.load_from_data(CSS)
+
+        context.add_provider_for_screen(
+            window.get_screen(),
+            window.style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
     #-- Wmain.new {
     def new(self):        
@@ -1261,7 +1297,7 @@ class Wmain(SimpleGladeApp):
                 #if bcolor is not set, then use default background color
                 c = parse_color_rgba(bcolor if bcolor else DEFAULT_BGCOLOR)
                 c.alpha = 1 - (conf.TRANSPARENCY / 100)
-                v.set_color_background(c) 
+                v.set_color_background(c)
             
             v.set_backspace_binding(host.backspace_key)
             v.set_delete_binding(host.delete_key)
