@@ -1,6 +1,6 @@
 PKG_NAME=gnome-connection-manager
 PKG_DESCRIPTION="Simple tabbed ssh and telnet connection manager for GTK+ environments\nMore info in http://kuthulu.com/gcm"
-PKG_VERSION=1.2.0
+PKG_VERSION=1.2.1
 PKG_MAINTAINER="Renzo Bertuzzi <kuthulu@gmail.com>"
 PKG_VENDOR=kuthulu.com
 PKG_URL=http://kuthulu.com/gcm 
