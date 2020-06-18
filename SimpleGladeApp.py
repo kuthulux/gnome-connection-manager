@@ -126,7 +126,11 @@ class SimpleGladeApp(object):
         # self.builder.connect_signals(self.custom_handler)
 
         if root:
+            parent = kwargs['parent'] if 'parent' in kwargs else None
+            if parent:
+                self.builder.expose_object('wMain', parent)
             self.builder.add_objects_from_file(self.glade_path, [root])
+
             # TODO PORT remove the next line is not needed Guake shuold not pass an root parameter
             # this would mess stuff up
             # self.main_widget = self.builder.get_object("window-root")

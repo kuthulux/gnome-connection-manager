@@ -10,6 +10,7 @@
     <property name="modal">True</property>
     <property name="icon">icon.png</property>
     <property name="type_hint">dialog</property>
+    <property name="transient_for">wMain</property>
     <child>
       <placeholder/>
     </child>
@@ -1374,6 +1375,7 @@ if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.</property>
     <property name="translator_credits" translatable="yes" comments="TRANSLATORS: Replace this string with your names, one name per line.">translator-credits</property>
     <property name="logo">icon.png</property>
+    <property name="transient_for">wMain</property>
     <signal name="response" handler="on_wAbout_close" swapped="no"/>
     <child>
       <placeholder/>
@@ -1401,6 +1403,7 @@ if not, write to the Free Software Foundation, Inc.,
     <property name="destroy_with_parent">True</property>
     <property name="icon">icon.png</property>
     <property name="type_hint">dialog</property>
+    <property name="transient_for">wMain</property>
     <signal name="destroy" handler="on_wCluster_destroy" swapped="no"/>
     <child>
       <placeholder/>
@@ -1775,6 +1778,7 @@ if not, write to the Free Software Foundation, Inc.,
     <property name="window_position">center-on-parent</property>
     <property name="icon">icon.png</property>
     <property name="type_hint">dialog</property>
+    <property name="transient_for">wMain</property>
     <child>
       <placeholder/>
     </child>

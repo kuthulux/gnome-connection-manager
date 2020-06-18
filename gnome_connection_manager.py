@@ -2408,7 +2408,7 @@ class Whost(SimpleGladeApp):
                  root="wHost",
                  domain=domain_name, **kwargs):
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, **kwargs)
+        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
         
         self.treeModel = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING, GObject.TYPE_STRING, GObject.TYPE_STRING)
         self.treeTunel.set_model(self.treeModel)
@@ -2792,7 +2792,7 @@ class Wabout(SimpleGladeApp):
                  root="wAbout",
                  domain=domain_name, **kwargs):
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, **kwargs)
+        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
         self.wAbout.set_icon_from_file(ICON_PATH)
     #-- Wabout.new {
     def new(self):       
@@ -2817,7 +2817,7 @@ class Wconfig(SimpleGladeApp):
                  root="wConfig",
                  domain=domain_name):
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain)        
+        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
 
     #-- Wconfig.new {
     def new(self):        
@@ -3096,7 +3096,7 @@ class Wcluster(SimpleGladeApp):
                  domain=domain_name, terms=None, **kwargs):
         self.terms = terms
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, **kwargs)
+        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
 
     #-- Wcluster.new {
     def new(self):        
