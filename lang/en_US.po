@@ -1468,6 +1468,10 @@ msgstr "Copy all"
 msgid "Abrir consola local al inicio"
 msgstr "Open local console on startup"
 
+#: ../gnome_connection_manager.py:2572
+msgid "Log consola local"
+msgstr "Log local console sessions"
+
 #: ../gnome-connection-manager.glade:147
 msgid "_Editar"
 msgstr "_Edit"

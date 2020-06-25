@@ -285,6 +285,7 @@ class conf():
     WORD_SEPARATORS="-A-Za-z0-9,./?%&#:_=+@~"
     BUFFER_LINES=2000
     STARTUP_LOCAL=True
+    LOG_LOCAL=False
     CONFIRM_ON_EXIT=True
     FONT_COLOR = ""
     BACK_COLOR = ""
@@ -1283,7 +1284,13 @@ class Wmain(SimpleGladeApp):
             self.registerUrlRegexes(v)
             
             if isinstance(host, str):
-                host = Host('', host) 
+                host = Host('', host)
+                # Note: log enablement defaults to host.log except for 'local'
+                # sessions that do not have a saved session to seed the host
+                # configuration, but rather use a global GCM config toggle
+                if host.name == 'local':
+                    #print ("D: Local session logging set to: %s\n" % (conf.LOG_LOCAL))
+                    host.log = conf.LOG_LOCAL
             
             fcolor = host.font_color
             bcolor = host.back_color
@@ -1503,6 +1510,7 @@ class Wmain(SimpleGladeApp):
             conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
             conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
+            conf.LOG_LOCAL = cp.getboolean("options","log-local")
             conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.TERM = cp.get("options", "term")
             conf.UPDATE_TITLE = cp.getboolean("options", "update-title")
@@ -1686,6 +1694,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "word-separators", conf.WORD_SEPARATORS)        
         cp.set("options", "buffer-lines", conf.BUFFER_LINES)
         cp.set("options", "startup-local", conf.STARTUP_LOCAL)
+        cp.set("options", "log-local", conf.LOG_LOCAL)
         cp.set("options", "confirm-exit", conf.CONFIRM_ON_EXIT)
         cp.set("options", "font-color", conf.FONT_COLOR)
         cp.set("options", "back-color", conf.BACK_COLOR)
@@ -2859,6 +2868,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("TERM"), "conf.TERM", str)
         self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
         self.addParam(_("Abrir consola local al inicio"), "conf.STARTUP_LOCAL", bool)
+        self.addParam(_("Log consola local"), "conf.LOG_LOCAL", bool)
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
         self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
