@@ -302,7 +302,7 @@ class conf():
     FONT = ""
     HIDE_DONATE = False
     AUTO_COPY_SELECTION = 0
-    LOG_PATH = USERHOME_DIR
+    LOG_PATH = CONFIG_DIR + "/logs"
     SHOW_TOOLBAR = True
     SHOW_PANEL = True
     VERSION = 0
@@ -1235,7 +1235,10 @@ class Wmain(SimpleGladeApp):
             terminal.log_handler_id = terminal.connect('contents-changed', self.on_contents_changed)
             p = terminal.get_parent()        
             title = p.get_parent().get_tab_label(p).get_text().strip()
-            prefix = "%s/%s-%s" % (os.path.expanduser(conf.LOG_PATH), title, time.strftime("%Y%m%d"))
+            LOG_PATH = os.path.expanduser(conf.LOG_PATH)
+            prefix = "%s/%s-%s" % (LOG_PATH, title, time.strftime("%Y%m%d"))
+            if not os.path.exists(LOG_PATH):
+                os.makedirs(LOG_PATH)
             filename = ''
             for i in range(1,1000):
                 if not os.path.exists("%s-%03i.log" % (prefix,i)):
