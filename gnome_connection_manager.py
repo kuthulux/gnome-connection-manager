@@ -1245,10 +1245,17 @@ class Wmain(SimpleGladeApp):
                 if not os.path.exists("%s-%03i.log" % (prefix,i)):
                     filename = "%s-%03i.log" % (prefix,i)
                     break
+            if filename == '':
+                # End up appending to the latest log file...
+                filename = "%s-%03i.log" % (prefix,i)
             filename == "%s-%03i.log" % (prefix,1)
             try:
-                terminal.log = open(filename, 'w', 1)
-                terminal.log.write("Session '%s' opened at %s\n%s\n" % (title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
+                prepend = ''
+                if os.path.exists(filename):
+                    msgbox("%s\n%s" % (_("Anexar el archivo de log existente"), filename))
+                    prepend = '\n\n===== %s =====\n\n' %(_("Fin del registro de sesión anterior"))
+                terminal.log = open(filename, 'a', 1)
+                terminal.log.write("%sSession '%s' opened at %s\n%s\n" % (prepend, title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
             except Exception as e:
                 print(e)
                 msgbox("%s\n%s" % (_("No se puede abrir el archivo de log para escritura"), filename))

@@ -1328,6 +1328,14 @@ msgstr "Enable logging"
 msgid "No se puede abrir el archivo de log para escritura"
 msgstr "Can't open log file for writting"
 
+#: ../gnome_connection_manager.py:1255
+msgid "Anexar el archivo de log existente"
+msgstr "Appending to existing log file"
+
+#: ../gnome_connection_manager.py:1256
+msgid "Fin del registro de sesión anterior"
+msgstr "End of previous session log"
+
 #: ../gnome_connection_manager.py:2182 ../gnome_connection_manager.py:2283
 #: ../gnome_connection_manager.py:2401 ../gnome_connection_manager.py:2570
 msgid "Ruta de logs"
