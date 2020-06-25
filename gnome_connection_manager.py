@@ -211,11 +211,28 @@ SHELL   = os.environ["SHELL"]
 DEFAULT_TERM_TYPE = 'xterm-256color'
 
 SSH_COMMAND = BASE_PATH + "/ssh.expect"
-CONFIG_FILE = os.getenv("HOME") + "/.gcm/gcm.conf"
-KEY_FILE = os.getenv("HOME") + "/.gcm/.gcm.key"
+try:
+    USERHOME_DIR = os.getenv("HOME")
+except:
+    USERHOME_DIR = ""
+if USERHOME_DIR is None or USERHOME_DIR == "":
+    try:
+        USERHOME_DIR = os.path.expanduser("~")
+    except:
+        USERHOME_DIR = ""
 
-if not os.path.exists(os.getenv("HOME") + "/.gcm"):
-    os.makedirs(os.getenv("HOME") + "/.gcm")
+assert( (USERHOME_DIR is not None) and (USERHOME_DIR != "") ), \
+    "FATAL: Could not determine home directory for the current user";
+
+assert os.path.isdir(USERHOME_DIR), \
+    "FATAL: Could not locate home directory '%s' for the current user" % (USERHOME_DIR);
+
+CONFIG_DIR = USERHOME_DIR + "/.gcm"
+CONFIG_FILE = CONFIG_DIR + "/gcm.conf"
+KEY_FILE = CONFIG_DIR + "/.gcm.key"
+
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
 
 domain_name="gcm-lang"
 
@@ -285,7 +302,7 @@ class conf():
     FONT = ""
     HIDE_DONATE = False
     AUTO_COPY_SELECTION = 0
-    LOG_PATH = os.path.expanduser("~")
+    LOG_PATH = USERHOME_DIR
     SHOW_TOOLBAR = True
     SHOW_PANEL = True
     VERSION = 0
@@ -340,7 +357,7 @@ def show_open_dialog(parent, title, action):
     dlg.add_button(Gtk.STOCK_SAVE if action==Gtk.FileChooserAction.SAVE else Gtk.STOCK_OPEN, Gtk.ResponseType.OK)        
     dlg.set_do_overwrite_confirmation(True)        
     if not hasattr(parent,'lastPath'):
-        parent.lastPath = os.path.expanduser("~")
+        parent.lastPath = USERHOME_DIR
     dlg.set_current_folder( parent.lastPath )
     
     if dlg.run() == Gtk.ResponseType.OK:
@@ -1848,7 +1865,7 @@ class Wmain(SimpleGladeApp):
         dlg.set_do_overwrite_confirmation(True)
         dlg.set_current_name( os.path.basename("gcm-buffer-%s.txt" % (time.strftime("%Y%m%d%H%M%S")) ))
         if not hasattr(self,'lastPath'):
-            self.lastPath = os.path.expanduser("~")
+            self.lastPath = USERHOME_DIR
         dlg.set_current_folder( self.lastPath )
         
         if dlg.run() == Gtk.ResponseType.OK:
