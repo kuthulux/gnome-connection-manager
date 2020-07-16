@@ -1338,14 +1338,10 @@ Ej: ##D=1000&lt;/span&gt;</property>
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
     <property name="copyright">Renzo Bertuzzi L. (kuthulu@gmail.com) - Chile</property>
-    <property name="comments">Простенький менеджер ssh-подключений для Gnome</property>
-    <property name="license">gnome-connection-manager создан и поддерживается
+    <property name="comments">A simple ssh connection manager for gnome</property>
+    <property name="license">This is gnome-connection-manager, written and maintained by
 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt;
-<<<<<<< HEAD
 Project's Homepage: http://kuthulu.com/gcm
-=======
-Домашняя страница проекта: http://kuthulu.com/gcm
->>>>>>> f8aaab31f030582e07c9479abe152ad025cdb8c4
 
 Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile
 
