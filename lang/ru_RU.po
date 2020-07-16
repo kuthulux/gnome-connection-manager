@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-07-05 14:39+0100\n"
-"PO-Revision-Date: 2020-05-04 22:53+0500\n"
+"PO-Revision-Date: 2020-07-16 09:16+0500\n"
 "Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Last-Translator: Dmitriy Q <dmitry@atsip.ru>\n"
 "Language-Team: TranslAster\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 
 #: ../gnome_connection_manager.py:224 ../gnome_connection_manager.py:331
 #: ../gnome_connection_manager.py:340 ../gnome_connection_manager.py:406
@@ -1318,3 +1318,11 @@ msgstr "_Правка"
 #: ../gnome-connection-manager.glade:308
 msgid "_Servidores"
 msgstr "_Хосты"
+
+#: ../gnome_connection_manager.py:2851
+msgid "Título"
+msgstr "Заголовок"
+
+#: ../gnome_connection_manager.py:2850
+msgid "Título dinámico"
+msgstr "Динамический заголовок"
