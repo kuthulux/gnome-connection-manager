@@ -550,8 +550,9 @@ class Wmain(SimpleGladeApp):
         self.nbConsole.set_scrollable(True)
         self.nbConsole.set_group_name("11")
         self.nbConsole.connect('page_removed', self.on_page_removed)        
-        self.nbConsole.connect("page-added", self.on_page_added)                                        
-        
+        self.nbConsole.connect("page-added", self.on_page_added)
+        self.nbConsole.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
+        self.nbConsole.connect("scroll-event", self.on_tab_scroll)
                 
         self.hpMain.previous_position = 150
         
@@ -1752,7 +1753,19 @@ class Wmain(SimpleGladeApp):
         cp.write(f)
         f.close()
         os.rename(CONFIG_FILE + ".tmp", CONFIG_FILE)
-        
+
+    def on_tab_scroll(self, notebook, event):
+        if event.get_scroll_deltas()[2] < 0:
+            if notebook.get_current_page() == 0:
+                notebook.set_current_page(notebook.get_n_pages()-1)
+            else:
+                notebook.prev_page()
+        else:
+            if notebook.get_current_page() == notebook.get_n_pages()-1:
+                notebook.set_current_page(0)
+            else:
+                notebook.next_page()
+
     def on_tab_focus(self, widget, tab=None, *args):
         if isinstance(widget, Vte.Terminal):
             self.current = widget
@@ -1779,10 +1792,13 @@ class Wmain(SimpleGladeApp):
             hp = Gtk.HPaned() if direction==HSPLIT else Gtk.VPaned()
             nb = Gtk.Notebook()
             nb.set_group_name("11")
+            nb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
             nb.connect('button_press_event', self.on_double_click, None)
             nb.connect('page_removed', self.on_page_removed)
             nb.connect("page-added", self.on_page_added)
             nb.connect('switch-page', self.on_tab_focus)
+            nb.connect('scroll-event', self.on_tab_scroll)
+
             nb.set_property("scrollable", True)
             cp  = cnb.get_parent()
 
@@ -3265,6 +3281,7 @@ class NotebookTabLabel(Gtk.HBox):
         self.eb2.show()
         close_btn.show_all()  
         self.is_active = True
+        self.eb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
         self.show()
         
     def change_color(self, color):
