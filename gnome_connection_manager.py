@@ -1306,9 +1306,23 @@ class Wmain(SimpleGladeApp):
             if fcolor == '' or fcolor == None or bcolor == '' or bcolor == None:
                 fcolor = conf.FONT_COLOR
                 bcolor = conf.BACK_COLOR
-                
+
+            palette_components = [
+                # background
+                '#000000', '#CC0000', '#4E9A06', '#C4A000',
+                '#3465A4', '#75507B', '#06989A', '#D3D7CF',
+                # foreground
+                '#555753', '#EF2929', '#8AE234', '#FCE94F',
+                '#729FCF', '#729FCF', '#34E2E2', '#EEEEEC'
+            ]
+
+            palette = []
+            for components in palette_components:
+                color = parse_color_rgba(components)
+                palette.append(color)
+
             if len(fcolor)>0 and len(bcolor)>0:
-                v.set_colors(parse_color_rgba(fcolor), parse_color_rgba(bcolor), [])
+                v.set_colors(parse_color_rgba(fcolor), parse_color_rgba(bcolor), palette)
 
             if len(conf.FONT)==0:
                 conf.FONT = 'monospace'
