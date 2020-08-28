@@ -211,11 +211,28 @@ SHELL   = os.environ["SHELL"]
 DEFAULT_TERM_TYPE = 'xterm-256color'
 
 SSH_COMMAND = BASE_PATH + "/ssh.expect"
-CONFIG_FILE = os.getenv("HOME") + "/.gcm/gcm.conf"
-KEY_FILE = os.getenv("HOME") + "/.gcm/.gcm.key"
+try:
+    USERHOME_DIR = os.getenv("HOME")
+except:
+    USERHOME_DIR = ""
+if USERHOME_DIR is None or USERHOME_DIR == "":
+    try:
+        USERHOME_DIR = os.path.expanduser("~")
+    except:
+        USERHOME_DIR = ""
 
-if not os.path.exists(os.getenv("HOME") + "/.gcm"):
-    os.makedirs(os.getenv("HOME") + "/.gcm")
+assert( (USERHOME_DIR is not None) and (USERHOME_DIR != "") ), \
+    "FATAL: Could not determine home directory for the current user";
+
+assert os.path.isdir(USERHOME_DIR), \
+    "FATAL: Could not locate home directory '%s' for the current user" % (USERHOME_DIR);
+
+CONFIG_DIR = USERHOME_DIR + "/.gcm"
+CONFIG_FILE = CONFIG_DIR + "/gcm.conf"
+KEY_FILE = CONFIG_DIR + "/.gcm.key"
+
+if not os.path.exists(CONFIG_DIR):
+    os.makedirs(CONFIG_DIR)
 
 domain_name="gcm-lang"
 
@@ -268,6 +285,7 @@ class conf():
     WORD_SEPARATORS="-A-Za-z0-9,./?%&#:_=+@~"
     BUFFER_LINES=2000
     STARTUP_LOCAL=True
+    LOG_LOCAL=False
     CONFIRM_ON_EXIT=True
     FONT_COLOR = ""
     BACK_COLOR = ""
@@ -285,7 +303,7 @@ class conf():
     FONT = ""
     HIDE_DONATE = False
     AUTO_COPY_SELECTION = 0
-    LOG_PATH = os.path.expanduser("~")
+    LOG_PATH = CONFIG_DIR + "/logs"
     SHOW_TOOLBAR = True
     SHOW_PANEL = True
     VERSION = 0
@@ -340,7 +358,7 @@ def show_open_dialog(parent, title, action):
     dlg.add_button(Gtk.STOCK_SAVE if action==Gtk.FileChooserAction.SAVE else Gtk.STOCK_OPEN, Gtk.ResponseType.OK)        
     dlg.set_do_overwrite_confirmation(True)        
     if not hasattr(parent,'lastPath'):
-        parent.lastPath = os.path.expanduser("~")
+        parent.lastPath = USERHOME_DIR
     dlg.set_current_folder( parent.lastPath )
     
     if dlg.run() == Gtk.ResponseType.OK:
@@ -1218,16 +1236,26 @@ class Wmain(SimpleGladeApp):
             terminal.log_handler_id = terminal.connect('contents-changed', self.on_contents_changed)
             p = terminal.get_parent()        
             title = p.get_parent().get_tab_label(p).get_text().strip()
-            prefix = "%s/%s-%s" % (os.path.expanduser(conf.LOG_PATH), title, time.strftime("%Y%m%d"))
+            LOG_PATH = os.path.expanduser(conf.LOG_PATH)
+            prefix = "%s/%s-%s" % (LOG_PATH, title, time.strftime("%Y%m%d"))
+            if not os.path.exists(LOG_PATH):
+                os.makedirs(LOG_PATH)
             filename = ''
             for i in range(1,1000):
                 if not os.path.exists("%s-%03i.log" % (prefix,i)):
                     filename = "%s-%03i.log" % (prefix,i)
                     break
+            if filename == '':
+                # End up appending to the latest log file...
+                filename = "%s-%03i.log" % (prefix,i)
             filename == "%s-%03i.log" % (prefix,1)
             try:
-                terminal.log = open(filename, 'w', 1)
-                terminal.log.write("Session '%s' opened at %s\n%s\n" % (title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
+                prepend = ''
+                if os.path.exists(filename):
+                    msgbox("%s\n%s" % (_("Anexar el archivo de log existente"), filename))
+                    prepend = '\n\n===== %s =====\n\n' %(_("Fin del registro de sesión anterior"))
+                terminal.log = open(filename, 'a', 1)
+                terminal.log.write("%sSession '%s' opened at %s\n%s\n" % (prepend, title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
             except Exception as e:
                 print(e)
                 msgbox("%s\n%s" % (_("No se puede abrir el archivo de log para escritura"), filename))
@@ -1263,7 +1291,13 @@ class Wmain(SimpleGladeApp):
             self.registerUrlRegexes(v)
             
             if isinstance(host, str):
-                host = Host('', host) 
+                host = Host('', host)
+                # Note: log enablement defaults to host.log except for 'local'
+                # sessions that do not have a saved session to seed the host
+                # configuration, but rather use a global GCM config toggle
+                if host.name == 'local':
+                    #print ("D: Local session logging set to: %s\n" % (conf.LOG_LOCAL))
+                    host.log = conf.LOG_LOCAL
             
             fcolor = host.font_color
             bcolor = host.back_color
@@ -1483,6 +1517,7 @@ class Wmain(SimpleGladeApp):
             conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
             conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
+            conf.LOG_LOCAL = cp.getboolean("options","log-local")
             conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
             conf.TERM = cp.get("options", "term")
             conf.UPDATE_TITLE = cp.getboolean("options", "update-title")
@@ -1666,6 +1701,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "word-separators", conf.WORD_SEPARATORS)        
         cp.set("options", "buffer-lines", conf.BUFFER_LINES)
         cp.set("options", "startup-local", conf.STARTUP_LOCAL)
+        cp.set("options", "log-local", conf.LOG_LOCAL)
         cp.set("options", "confirm-exit", conf.CONFIRM_ON_EXIT)
         cp.set("options", "font-color", conf.FONT_COLOR)
         cp.set("options", "back-color", conf.BACK_COLOR)
@@ -1848,7 +1884,7 @@ class Wmain(SimpleGladeApp):
         dlg.set_do_overwrite_confirmation(True)
         dlg.set_current_name( os.path.basename("gcm-buffer-%s.txt" % (time.strftime("%Y%m%d%H%M%S")) ))
         if not hasattr(self,'lastPath'):
-            self.lastPath = os.path.expanduser("~")
+            self.lastPath = USERHOME_DIR
         dlg.set_current_folder( self.lastPath )
         
         if dlg.run() == Gtk.ResponseType.OK:
@@ -2839,6 +2875,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("TERM"), "conf.TERM", str)
         self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
         self.addParam(_("Abrir consola local al inicio"), "conf.STARTUP_LOCAL", bool)
+        self.addParam(_("Log consola local"), "conf.LOG_LOCAL", bool)
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
         self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
