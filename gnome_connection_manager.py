@@ -1287,7 +1287,8 @@ class Wmain(SimpleGladeApp):
             v = Vte.Terminal()
             v.set_word_char_exceptions(conf.WORD_SEPARATORS)
             v.set_scrollback_lines(conf.BUFFER_LINES)
-            v.set_allow_hyperlink(True)
+            if (Vte.MAJOR_VERSION, Vte.MINOR_VERSION) >= (0, 50): 
+                v.set_allow_hyperlink(True)
             self.registerUrlRegexes(v)
             
             if isinstance(host, str):
