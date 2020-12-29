@@ -3428,7 +3428,7 @@ class CellTextView(Gtk.TextView, Gtk.CellEditable):
     def get_text(self):
         text_buffer = self.get_buffer()
         bounds = text_buffer.get_bounds()
-        return text_buffer.get_text(*bounds, True)
+        return text_buffer.get_text(*bounds, include_hidden_chars=True)
 
     def set_text(self, text):
         self.get_buffer().set_text(text)
