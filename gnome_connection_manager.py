@@ -767,7 +767,8 @@ class Wmain(SimpleGladeApp):
 
     def on_terminal_selection(self, widget, *args):
         if conf.AUTO_COPY_SELECTION:
-            self.terminal_copy(widget)
+            if widget.get_has_selection():
+                self.terminal_copy(widget)
         return True
         
     def find_word(self, backwards=False):
