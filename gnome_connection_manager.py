@@ -493,11 +493,12 @@ def vte_run(terminal, command, arg=None):
                            os.getenv("HOME"),
                            args,
                            envv,
-                           flag_spawn | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
+                           flag_spawn | GLib.SpawnFlags.SEARCH_PATH,
                            None,
                            None,
                            -1,
                            None,
+                           lambda term,pid,err,user_data: None,
                            None)
     else:
         terminal.spawn_sync(Vte.PtyFlags.DEFAULT,
