@@ -31,7 +31,7 @@ cd gnome-connection-manager
 #### Dependencies:
 * expect
 * python3
-* python3-gi (debian) / python3-gobject (fedora)
+* python3-gi and gir1.2-vte-2.91 (debian) / python3-gobject (fedora)
 
 ---
 

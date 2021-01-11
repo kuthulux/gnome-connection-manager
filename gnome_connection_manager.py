@@ -37,123 +37,6 @@
 # - Enter passwords in commands and hide them, #P=password (Angelo Corsaro). TextView doesnt support masking text, it needs a different implementation. Pending.
 # - Persist history of cluster commands. is it really necessary?
 # - Option to disable shortcuts
-#
-#Changelog: 
-# v1.1.0 - Bugfix: public key field was not saved (thanks to Benoît Georgelin for reporting the bug)
-#        - Bugfix: bug in AES library resulted in blank passwords randomly being replaced by some characters (thanks to Boyan Peychev for reporting the bug)
-#        - Bugfix: drag and release tab on the same notebook caused tab to be closed
-#        - Bugfix: Estado de nodos expandidos/contraidos se revertia a un estado anterior al editar por segunda vez un host
-#        - Bugfix: Cluster window had to be resized to show the text area in some setups
-#        - Bugfix: Blank lines in commands were removed when restarting application (thanks to Nicholas O'Neill for reporting the bug)
-#        - Se agrega traducción a koreano (thanks to Jong Hoon Lee)
-#        - Better indentation in server panel
-#        - Disabled the horizontal scroll bar in the console        
-#        - Added option to open local console on application startup (thanks to Boaman Surebun for the implementation)
-#        - Se agrega opción para copiar todo el buffer al porta-papeles
-#        - Se usa la consola por defecto del usuario en vez de bash
-#        - Se exponen algunos shortcuts
-#        - Added menu with servers list
-#
-# v1.0.0 - Bugfix: last group was collapsed when adding/editing a new host. All collapsed nodes are preserved now. (thanks to Kevin Brennan for reporting the bug)
-#        - Bugfix: importing servers in another computer cleared all the passwords. (thanks to Simon Pitt for reporting the bug)
-#        - Bugfix: buttons to choose colors did not reflect the selected color (thanks to Sverre Rakkenes for reporting the bug)
-#        - Se implementa AES-256 para encriptar claves
-#        - Se agrega opcion para pasar parametros adicionales a la linea de comando (ssh/telnet)
-#        - Se agrega opcion para auto cerrar tab (nunca, siempre, solo si no hay errores) cuando se finaliza la sesion
-#        - Se agrega menu con opcion para ocultar toolbar y panel de servidores
-#        - Se agrega soporte para compression ssh (gracias a Boaman Surebun por la implementacion)
-#        - Se agrega configuracion en host para sequencia de teclas Backspace y Delete
-#
-# v0.9.8 - Bugfix: find_back shortcut was not working
-#        - Bugfix: double click on tabs or arrows in the tab bar opened a new local window
-#        - Se quita F10 como atajo para el menu
-#        - Se agrega texto de licencia en acerca de
-#        - Historial de comandos en cluster
-#        - Se agrega descripcion y tooltips sobre hosts
-#        - delay entre los comandos que se envian al inicio (por cada linea, usar una linea tipo comentario con el delay??)
-#        - Se agrega redireccionamiento dynamico de puertos
-#
-# v0.9.7 - Bugfix: error message "Error connecting to server: global name 'bolor' is not defined" when opening a host with custom colors (thanks to talos)
-#
-# v0.9.6 - Bugfix: error al duplicar un host en un subgrupo
-#        - Se agrega opcion para generar log de las sesiones
-#        - Si no existe el idioma, ingles por defecto
-#        - Se agrega opcion para habilitar Agent-forwarding
-#        - Se agrega soporte para private key files
-#
-# v0.9.5 - Se elimina mensaje "The package is of bad quality" al instalar en ubuntu 11.04 (lintian check)
-#        - Bugfix: el modo cluster no muestra los titulos correctos de las consolas cuando han sido renombradas
-#        - Se agrega opción de clonar consola
-#        - Archivo de configuración ahora se guarda al realizar cambios (antes se guardaba al salir de la aplicacion)
-#        - Se agrega opción de tener subgrupos, al editar un host se debe usar el formato grupo/subgrupo/subgrupo para el nombre de grupo
-#
-# v0.9.4 - Bugfix: Dejar el foco siempre en la nueva consola
-#        - Bugfix: Shortcut para console_previous se revertia a ctrl+shift+left 
-#        - Se agrega traducción a italiano (gracias a Vincenzo Reale)
-#        - Bugfix: Telnet no funcionaba al usarlo sin usuario
-#
-# v0.9.3 - Bugfix: No funcionaba el boton "Local" luego de cerrar todas las consolas
-#        - Bugfix: se quita atajo CTRL+QUIT para salir de la aplicacion.
-#        - Se agrega traducción a ruso (gracias a Denis Fokin)
-#        - Se agrega traducción a portugues (gracias a Ericson Alexandre S.)
-#        - Se agrega menu contextual "copiar y pegar"
-#        - Se agrega shortcut para reconectar 
-#        - Revisar si expect esta instalado al iniciar
-#        - Permitir conexiones locales al guardar un host (ssh, telnet, local)
-#
-# v0.9.2 - Bugfix: En algunos casos no se guardaban los passwords
-#        - Bugfix: Al conectarse a traves de una sesion remota (nomachine, X11) y abrir gcm se limpiaban los passwords
-#        - Se agrega traducción a polaco (gracias a Pawel)
-#
-# v0.9.1 - Bugfix: Se corrigen algunos textos en frances
-#        - Bugfix: Se corrige bug al importar servidores
-#        - Bugfix: opcion de reconectar desaparece para las demás consolas luego de reconectar a una consola
-#        - Se agrega opcion de cerrar consola con boton central del mouse sin pedir confirmacion
-#
-# v0.9.0 - Se agrega opcion de copiar texto seleccionado automaticamente al porta papeles
-#        - Se agrega menu para duplicar host
-#        - Se agrega modo cluster (permite enviar mismo comando a varios hosts a la vez)
-#        - Se agrega menu para reabrir una sesion cerrada
-#        - menu contextual en consola para enviar los comandos predefinidos
-#
-# v0.8.0 - Bugfix: ancho/alto incorrecto al dividir consola horizontal/vertical
-#        - Se agrega opcion para conservar tamaño de ventana entre ejecuciones
-#        - Se agrega opcion para resetear y resetear-limpiar consola (menu contextual y shortcut)
-#        - Soporte para autenticacion sin password/public key(se debe dejar el password en blanco)
-#        - X11 forwading para ssh
-#        - cambiar font de consola
-#        - Permitir ocultar boton para donar
-#
-# v0.7.1 - Bugfix: al cerrar consola con shortcut se mantenia abierta la sesion ssh
-#        - Bugfix: importar servers arrojaba mensaje "Archivo invalido"
-#
-# v0.7.0 - Se agrega menu contextual "copiar direccion" del host
-#        - Se agrega opcion de keep-alive por host
-#        - Se agrega colores configurables por host
-#        - Se agrega opción de renombrar tabs de consola
-#        - Se agrega traducción a francés (gracias a William M.)
-#        - Se agrega shortcut para cerrar consola
-#
-# v0.6.1 - Se agrega shortcuts para cambiar entre consolas (izq, der, y 01 a 09)
-#        - Correción de bug: no se podia editar un shortcut predefinido
-#
-# v0.6.0 - Se agrega opción para guardar buffer en archivo
-#        - Se agrega buscador
-#        - Boton para abrir consola local
-#        - ejecutar comando luego del login
-#        - guardar estado (abiertos/cerrados) de folders y posicion del panel
-#        - importar/exportar lista de servidores
-#        - menu contextual en grupos y servidores (expandir/contraer todo, editar host, agregar host)
-#        - shortcuts para comandos predefinidos (copia, pegar, etc) y para ejecutar comandos
-#        - comprobar actualizaciones
-#        - Corrección de bug: autologin no funcionaba para algunos servidores telnet
-#
-# v0.5.0 - Corrección de bug que mostraba mal las consolas ssh en algunos casos (no se ocupaba todo el espacio de la consola)
-#        - Corrección de bug que cerraba dos consolas al tener la pantalla dividida y cerrar consola de la derecha
-#        - Se agrega opción de menu contextual con boton derecho
-#        - Se agrega opción de confirmar al cerrar una consola
-#        - Se muestra mensaje en pantalla cuando cambia la key de un host para ssh
-#        - Boton donar
 
 from __future__ import with_statement
 import os
@@ -172,9 +55,8 @@ try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('Vte', '2.91')
     from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GdkPixbuf, GLib
-except:
-    print >> sys.stderr, "python3-gi required"
-    sys.exit(1)
+except:    
+    sys.exit("python3-gi and gir1.2-vte-2.91 required")
 
 #check Terminal version
 TERMINAL_V048 = 'spawn_async' in Vte.Terminal.__dict__

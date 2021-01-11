@@ -48,6 +48,7 @@ deb:
 		-d python3 \
 		-d python3-gi \
 		-d expect \
+		-d gir1.2-vte-2.91 \
 		--after-install postinst \
 		--deb-priority optional \
 		usr
