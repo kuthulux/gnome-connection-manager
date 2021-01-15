@@ -1031,7 +1031,7 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
         
     def createMenuItem(self, shortcut, label):
-        menuItem = Gtk.MenuItem('')
+        menuItem = Gtk.MenuItem(label='')
         text = "[%s] %s" % (shortcut, label)
         attrs = Pango.parse_markup("<span foreground='blue'  size='x-small'>[%s]</span> %s" % (GLib.markup_escape_text(shortcut, -1), GLib.markup_escape_text(label, -1)), -1, "0")
         menuItem.get_child().set_attributes(attrs[1])
