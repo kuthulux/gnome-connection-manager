@@ -1212,10 +1212,12 @@ class Wmain(SimpleGladeApp):
                 conf.FONT = 'monospace'
             else:
                 v.set_font(Pango.FontDescription(conf.FONT))
-            
-            scrollPane = Gtk.ScrolledWindow()            
-            scrollPane.connect('button_press_event', lambda *args: True)
-            scrollPane.set_property('hscrollbar-policy', Gtk.PolicyType.NEVER)
+
+            scrollPane = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment ())
+            scrollPane.pack_start (v, True, True, 0)
+            scrollPane.pack_start (scrollbar, False, False, 0)
+
             tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab )
             
             v.connect("child-exited", lambda *args: tab.mark_tab_as_closed())
@@ -1236,8 +1238,7 @@ class Wmain(SimpleGladeApp):
             v.set_backspace_binding(host.backspace_key)
             v.set_delete_binding(host.delete_key)
             
-            scrollPane.show()
-            scrollPane.add(v)                        
+            scrollPane.show_all()
             v.show()            
 
             notebook.append_page(scrollPane, tab_label=tab)
