@@ -3181,7 +3181,7 @@ class NotebookTabLabel(Gtk.HBox):
         close_btn.show_all()  
         self.is_active = True
         self.eb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
-        close_btn.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
+        self.eb2.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
         self.show()
         
     def change_color(self, color):
