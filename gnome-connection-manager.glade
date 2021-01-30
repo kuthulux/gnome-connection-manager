@@ -2955,9 +2955,7 @@ if not, write to the Free Software Foundation, Inc.,
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="invisible_char">●</property>
-                    <property name="text" translatable="yes">buscar...</property>
-                    <signal name="focus-in-event" handler="on_txtSearch_focus" swapped="no"/>
-                    <signal name="focus-out-event" handler="on_txtSearch_focus_out_event" swapped="no"/>
+                    <property name="text" translatable="yes"></property>
                     <signal name="key-press-event" handler="on_btnSearch_key_press" swapped="no"/>
                   </object>
                 </child>

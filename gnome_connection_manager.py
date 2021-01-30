@@ -453,6 +453,13 @@ class Wmain(SimpleGladeApp):
         if conf.CHECK_UPDATES:
             GLib.timeout_add(2000, lambda: self.check_updates())
         
+        #load style.css
+        screen = Gdk.Screen.get_default()
+        provider = Gtk.CssProvider()
+        provider.load_from_path(BASE_PATH + "/style.css")
+        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+
         #Por cada parametro de la linea de comandos buscar el host y agregar un tab
         for arg in sys.argv[1:]:
             i = arg.rfind("/")
@@ -465,7 +472,7 @@ class Wmain(SimpleGladeApp):
                             self.addTab(self.nbConsole, h)
                             break                
         
-        self.get_widget('txtSearch').override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('darkgray'))
+        self.get_widget('txtSearch').set_placeholder_text(_('buscar...'))
         
         if conf.STARTUP_LOCAL:
             self.addTab(self.nbConsole,'local')
@@ -2108,19 +2115,6 @@ class Wmain(SimpleGladeApp):
             
     #-- Wmain.on_btnDonate_clicked }
     
-    #-- Wmain.on_txtSearch_focus {
-    def on_txtSearch_focus(self, widget, *args):
-        if widget.get_text() == _('buscar...'):
-            widget.override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('black'))
-            widget.set_text('')
-    #-- Wmain.on_txtSearch_focus }
-
-    #-- Wmain.on_txtSearch_focus_out_event {
-    def on_txtSearch_focus_out_event(self, widget, *args):
-        if widget.get_text() == '':
-            widget.override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('darkgray'))
-            widget.set_text(_('buscar...'))
-    #-- Wmain.on_txtSearch_focus_out_event }
 
     #-- Wmain.on_btnSearchBack_clicked {
     def on_btnSearchBack_clicked(self, widget, *args):
@@ -2174,7 +2168,7 @@ class Wmain(SimpleGladeApp):
             if isinstance(obj, Gtk.Notebook):
                 n = obj.get_n_pages()
                 for i in range(0,n):
-                    terminal = obj.get_nth_page(i).get_child()                    
+                    terminal = obj.get_nth_page(i).get_children()[0]
                     title = obj.get_tab_label(obj.get_nth_page(i)).get_text()
                     consoles.append( (title, terminal) )                
         
@@ -2900,7 +2894,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_value(value)                        
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -2912,7 +2906,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_active(value)
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -2922,7 +2916,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_text(value)            
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -3042,8 +3036,6 @@ class Wconfig(SimpleGladeApp):
 
 
 class Wcluster(SimpleGladeApp):
-    COLOR = parse_color('#FFFC00')
-    
     def __init__(self, path="gnome-connection-manager.glade",
                  root="wCluster",
                  domain=domain_name, terms=None, **kwargs):
@@ -3073,7 +3065,7 @@ class Wcluster(SimpleGladeApp):
     
     def on_active_toggled(self, widget, path):          
         self.treeStore[path][0] = not self.treeStore[path][0]
-        self.change_color(self.treeStore[path][2], self.treeStore[path][0])                
+        self.change_color(self.treeStore[path][2], self.treeStore[path][0])
 
     def change_color(self, term, activate):
         obj = term.get_parent()
@@ -3082,10 +3074,7 @@ class Wcluster(SimpleGladeApp):
         nb = obj.get_parent()
         if nb == None:
             return
-        if activate:
-            nb.get_tab_label(obj).change_color(Wcluster.COLOR)
-        else:
-            nb.get_tab_label(obj).restore_color()
+        nb.get_tab_label(obj).set_selected(activate)
             
     #-- Wcluster custom methods }
 
@@ -3184,20 +3173,11 @@ class NotebookTabLabel(Gtk.HBox):
         self.eb2.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
         self.show()
         
-    def change_color(self, color):
-        self.bg_active = self.eb.get_style_context().get_background_color(Gtk.StateFlags.ACTIVE)
-        self.bg_normal = self.eb.get_style_context().get_background_color(Gtk.StateFlags.NORMAL)
-        self.eb.modify_bg(Gtk.StateType.ACTIVE, color)
-        self.eb2.modify_bg(Gtk.StateType.ACTIVE, color)
-        self.eb.modify_bg(Gtk.StateType.NORMAL, color)
-        self.eb2.modify_bg(Gtk.StateType.NORMAL, color)
-        
-    def restore_color(self):
-        if hasattr(self, 'bg_active'):
-            self.eb.override_background_color(Gtk.StateFlags.ACTIVE, self.bg_active)
-            self.eb2.override_background_color(Gtk.StateFlags.ACTIVE, self.bg_active)
-            self.eb.override_background_color(Gtk.StateFlags.NORMAL, self.bg_normal)
-            self.eb2.override_background_color(Gtk.StateFlags.NORMAL, self.bg_normal)
+    def set_selected(self, sel):  
+        if sel:
+            self.get_style_context().add_class("selected")
+        else:
+            self.get_style_context().remove_class("selected")
         
     def on_close_tab(self, widget, notebook, *args):
         if conf.CONFIRM_ON_CLOSE_TAB and msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) != Gtk.ResponseType.OK:
@@ -3261,7 +3241,7 @@ class EntryDialog( Gtk.Dialog):
         self.vbox.pack_start(box, True, True, 0)
         box.show()
         if message:
-            label = Gtk.Label(message)
+            label = Gtk.Label(label=message)
             box.pack_start(label, True, True, 0)
             label.show()
         self.entry = Gtk.Entry()
