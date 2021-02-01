@@ -804,7 +804,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'RS' or item == 'RS2': #RESET CONSOLE              
             if (item == 'RS'):
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, False)
@@ -812,14 +812,14 @@ class Wmain(SimpleGladeApp):
         elif item == 'RC' or item == 'RC2': #RESET AND CLEAR CONSOLE
             if (item == 'RC'):
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, True)
             return True
         elif item == 'RO': #REOPEN SESION
             tab = self.popupMenuTab.label.get_parent().get_parent()
-            term = tab.widget_.get_child()
+            term = tab.widget_.get_children()[0]
             if not hasattr(term, "command"):
                 #term.fork_command(SHELL)
                 vte_run(term, SHELL)
@@ -837,7 +837,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'CC' or item == 'CC2': #CLONE CONSOLE
             if item == 'CC':
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
                 ntbk = tab.get_parent()
             else:
                 term = self.popupMenu.terminal
@@ -854,7 +854,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'L' or item == 'L2': #ENABLE/DISABLE LOG
             if item == 'L':
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             if not self.set_terminal_logger(term, widget.get_active()):
@@ -3220,7 +3220,7 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuReopen.show()
             
             #enable or disable log checkbox according to terminal 
-            self.popup.mnuLog.set_active( hasattr(self.widget_.get_child(), "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
+            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
