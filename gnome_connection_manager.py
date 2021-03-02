@@ -860,6 +860,15 @@ class Wmain(SimpleGladeApp):
             if not self.set_terminal_logger(term, widget.get_active()):
                 widget.set_active(False)
             return True
+        elif item == 'SCP': #SCP by filezilla
+            selected = self.treeServers.get_selection().get_selected()[1]            
+            group = self.get_group(selected)
+            host = self.treeModel.get_value(selected, 1)
+            if host.password == '':
+                cmd = '/usr/bin/filezilla sftp://%s@%s:%s &' %(host.user,host.host,host.port)
+            else:
+                cmd = '/usr/bin/filezilla sftp://%s:%s@%s:%s &' %(host.user,host.password,host.host,host.port)
+            os.system(cmd)
                 
     def createMenu(self):
         self.popupMenu = Gtk.Menu()
@@ -982,6 +991,12 @@ class Wmain(SimpleGladeApp):
         menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DND_MULTIPLE, Gtk.IconSize.MENU))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'D')
+        menuItem.show()
+
+        self.popupMenuFolder.mnuDup = menuItem = Gtk.ImageMenuItem(label=_("SCP"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DND_MULTIPLE, Gtk.IconSize.MENU))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SCP')
         menuItem.show()
         
         menuItem = Gtk.SeparatorMenuItem()
