@@ -172,8 +172,8 @@ try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('Vte', '2.91')
     from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GdkPixbuf, GLib
-except:
-    print >> sys.stderr, "python3-gi required"
+except Exception as e:
+    print ("python3-gi required",e,file=sys.stderr)
     sys.exit(1)
 
 #check Terminal version
