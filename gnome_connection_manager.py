@@ -177,6 +177,7 @@ class conf():
     CONFIRM_ON_CLOSE_TAB = 1
     CONFIRM_ON_CLOSE_TAB_MIDDLE = 1
     AUTO_CLOSE_TAB = 0
+    CYCLE_TABS = True
     COLLAPSED_FOLDERS = ""
     LEFT_PANEL_WIDTH = 100
     CHECK_UPDATES=True
@@ -573,7 +574,7 @@ class Wmain(SimpleGladeApp):
         self.on_tab_focus(nb, nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
 
     def on_terminal_keypress(self, widget, event, *args):
-        #if shortcuts.has_key(get_key_name(event)):
+        #if shortcuts.has_key(get_key_name(event)):        
         if get_key_name(event) in shortcuts:
             cmd = shortcuts[get_key_name(event)]
             if type(cmd) == list:
@@ -610,13 +611,13 @@ class Wmain(SimpleGladeApp):
                         self.addTab(ntbk, host)
                 elif cmd == _CONSOLE_PREV:
                     ntbk = widget.get_parent().get_parent()
-                    if ntbk.get_current_page() == 0:
+                    if ntbk.get_current_page() == 0 and conf.CYCLE_TABS:
                         ntbk.set_current_page(len(ntbk) - 1)
                     else:
                         ntbk.prev_page()
                 elif cmd == _CONSOLE_NEXT:
                     ntbk = widget.get_parent().get_parent()
-                    if ntbk.get_current_page() == len(ntbk) - 1:
+                    if ntbk.get_current_page() == len(ntbk) - 1 and conf.CYCLE_TABS:
                         ntbk.set_current_page(0)
                     else:
                         ntbk.next_page()
@@ -1422,6 +1423,7 @@ class Wmain(SimpleGladeApp):
             conf.LOG_PATH = cp.get("options", "log-path")
             conf.VERSION = cp.get("options", "version")
             conf.AUTO_CLOSE_TAB = cp.getint("options", "auto-close-tab")
+            conf.CYCLE_TABS = cp.getboolean("options", "cycle-tabs")
             conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
             conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
@@ -1625,6 +1627,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "log-path", conf.LOG_PATH)
         cp.set("options", "version", app_fileversion)
         cp.set("options", "auto-close-tab", conf.AUTO_CLOSE_TAB)
+        cp.set("options", "cycle-tabs", conf.CYCLE_TABS)
         cp.set("options", "update-title", conf.UPDATE_TITLE)
         cp.set("options", "app-title", conf.APP_TITLE or app_name)
 
@@ -1662,12 +1665,12 @@ class Wmain(SimpleGladeApp):
 
     def on_tab_scroll(self, notebook, event):
         if event.get_scroll_deltas()[2] < 0:
-            if notebook.get_current_page() == 0:
+            if notebook.get_current_page() == 0 and conf.CYCLE_TABS:
                 notebook.set_current_page(notebook.get_n_pages()-1)
             else:
                 notebook.prev_page()
         else:
-            if notebook.get_current_page() == notebook.get_n_pages()-1:
+            if notebook.get_current_page() == notebook.get_n_pages()-1 and conf.CYCLE_TABS:
                 notebook.set_current_page(0)
             else:
                 notebook.next_page()
@@ -2789,7 +2792,8 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
         self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
-        self.addParam(_(U"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
+        self.addParam(_(u"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
+        self.addParam(_(u"Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
         self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _(u"Sólo si no hay errores")])
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)  
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
