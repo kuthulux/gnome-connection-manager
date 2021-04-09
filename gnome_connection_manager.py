@@ -553,10 +553,16 @@ class Wmain(SimpleGladeApp):
             if conf.PASTE_ON_RIGHT_CLICK:
                 widget.paste_clipboard()
             else:
-                self.popupMenu.mnuCopy.set_sensitive(widget.get_has_selection()) 
+                self.popupMenu.mnuCopy.set_sensitive(widget.get_has_selection())
                 self.popupMenu.mnuLog.set_active( hasattr(widget, "log_handler_id") and widget.log_handler_id != 0 )
                 self.popupMenu.terminal = widget
                 self.popupMenu.popup( None, None, None, None, event.button, event.time)
+
+            # enable/disable split menu
+            nb = widget.get_parent().get_parent()
+            self.popupMenu.mnuSplitH.set_sensitive(nb.get_n_pages() > 1)
+            self.popupMenu.mnuSplitV.set_sensitive(nb.get_n_pages() > 1)
+
             return True
     
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1 and event.get_state() &  Gdk.ModifierType.CONTROL_MASK:
@@ -902,10 +908,6 @@ class Wmain(SimpleGladeApp):
         menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_SAVE, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'S')
-        menuItem.show()
-
-        menuItem = Gtk.MenuItem()
-        self.popupMenu.append(menuItem)
         menuItem.show()
 
         self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
@@ -3254,7 +3256,16 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuReopen.hide()
             else:
                 self.popup.mnuReopen.show()
-            
+
+            # show/hide split menu
+            nb = self.widget_.get_parent()
+            if nb.get_n_pages() > 1:
+                self.popup.mnuSplitH.show()
+                self.popup.mnuSplitV.show()
+            else:
+                self.popup.mnuSplitH.hide()
+                self.popup.mnuSplitV.hide()
+
             #enable or disable log checkbox according to terminal 
             self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
