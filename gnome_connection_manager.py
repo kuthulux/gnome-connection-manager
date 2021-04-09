@@ -746,7 +746,7 @@ class Wmain(SimpleGladeApp):
     def chunkstring(self, string, length):
         return (string[0+i:length+i] for i in range(0, len(string), length))
 
-    def on_popupmenu(self, widget, item, *args):        
+    def on_popupmenu(self, widget, item, *args):
         if item == 'V': #PASTE
             self.terminal_paste(self.popupMenu.terminal)
             return True
@@ -861,6 +861,10 @@ class Wmain(SimpleGladeApp):
             if not self.set_terminal_logger(term, widget.get_active()):
                 widget.set_active(False)
             return True
+        elif item == 'SPH':
+            self.on_btnHSplit_clicked(widget, args)
+        elif item == 'SPV':
+            self.on_btnVSplit_clicked(widget, args)
                 
     def createMenu(self):
         self.popupMenu = Gtk.Menu()
@@ -898,6 +902,22 @@ class Wmain(SimpleGladeApp):
         menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_SAVE, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'S')
+        menuItem.show()
+
+        menuItem = Gtk.MenuItem()
+        self.popupMenu.append(menuItem)
+        menuItem.show()
+
+        self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.show()
+
+        self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
         
         menuItem = Gtk.MenuItem()
@@ -1014,7 +1034,7 @@ class Wmain(SimpleGladeApp):
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'RS')
         menuItem.show()
-        
+
         self.popupMenuTab.mnuClear = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar y Limpiar consola"))
         menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_CLEAR, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
@@ -1036,6 +1056,18 @@ class Wmain(SimpleGladeApp):
         self.popupMenuTab.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Habilitar log"))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'L')
+        menuItem.show()
+
+        self.popupMenuTab.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.show()
+
+        self.popupMenuTab.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
         
     def createMenuItem(self, shortcut, label):
