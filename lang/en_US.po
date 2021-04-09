@@ -502,6 +502,9 @@ msgstr "Confirm on close console"
 msgid "Confirmar al cerrar una consola con botón central del mouse"
 msgstr "Confirm on close console with middle click"
 
+msgid "Reiniciar en el primer/último tab al llegar al final"
+msgstr "Circle around tabs when going to the previous/next tab"
+
 msgid "Título dinámico"
 msgstr "Dynamic title"
 

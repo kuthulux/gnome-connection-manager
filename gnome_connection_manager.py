@@ -37,123 +37,6 @@
 # - Enter passwords in commands and hide them, #P=password (Angelo Corsaro). TextView doesnt support masking text, it needs a different implementation. Pending.
 # - Persist history of cluster commands. is it really necessary?
 # - Option to disable shortcuts
-#
-#Changelog: 
-# v1.1.0 - Bugfix: public key field was not saved (thanks to Benoît Georgelin for reporting the bug)
-#        - Bugfix: bug in AES library resulted in blank passwords randomly being replaced by some characters (thanks to Boyan Peychev for reporting the bug)
-#        - Bugfix: drag and release tab on the same notebook caused tab to be closed
-#        - Bugfix: Estado de nodos expandidos/contraidos se revertia a un estado anterior al editar por segunda vez un host
-#        - Bugfix: Cluster window had to be resized to show the text area in some setups
-#        - Bugfix: Blank lines in commands were removed when restarting application (thanks to Nicholas O'Neill for reporting the bug)
-#        - Se agrega traducción a koreano (thanks to Jong Hoon Lee)
-#        - Better indentation in server panel
-#        - Disabled the horizontal scroll bar in the console        
-#        - Added option to open local console on application startup (thanks to Boaman Surebun for the implementation)
-#        - Se agrega opción para copiar todo el buffer al porta-papeles
-#        - Se usa la consola por defecto del usuario en vez de bash
-#        - Se exponen algunos shortcuts
-#        - Added menu with servers list
-#
-# v1.0.0 - Bugfix: last group was collapsed when adding/editing a new host. All collapsed nodes are preserved now. (thanks to Kevin Brennan for reporting the bug)
-#        - Bugfix: importing servers in another computer cleared all the passwords. (thanks to Simon Pitt for reporting the bug)
-#        - Bugfix: buttons to choose colors did not reflect the selected color (thanks to Sverre Rakkenes for reporting the bug)
-#        - Se implementa AES-256 para encriptar claves
-#        - Se agrega opcion para pasar parametros adicionales a la linea de comando (ssh/telnet)
-#        - Se agrega opcion para auto cerrar tab (nunca, siempre, solo si no hay errores) cuando se finaliza la sesion
-#        - Se agrega menu con opcion para ocultar toolbar y panel de servidores
-#        - Se agrega soporte para compression ssh (gracias a Boaman Surebun por la implementacion)
-#        - Se agrega configuracion en host para sequencia de teclas Backspace y Delete
-#
-# v0.9.8 - Bugfix: find_back shortcut was not working
-#        - Bugfix: double click on tabs or arrows in the tab bar opened a new local window
-#        - Se quita F10 como atajo para el menu
-#        - Se agrega texto de licencia en acerca de
-#        - Historial de comandos en cluster
-#        - Se agrega descripcion y tooltips sobre hosts
-#        - delay entre los comandos que se envian al inicio (por cada linea, usar una linea tipo comentario con el delay??)
-#        - Se agrega redireccionamiento dynamico de puertos
-#
-# v0.9.7 - Bugfix: error message "Error connecting to server: global name 'bolor' is not defined" when opening a host with custom colors (thanks to talos)
-#
-# v0.9.6 - Bugfix: error al duplicar un host en un subgrupo
-#        - Se agrega opcion para generar log de las sesiones
-#        - Si no existe el idioma, ingles por defecto
-#        - Se agrega opcion para habilitar Agent-forwarding
-#        - Se agrega soporte para private key files
-#
-# v0.9.5 - Se elimina mensaje "The package is of bad quality" al instalar en ubuntu 11.04 (lintian check)
-#        - Bugfix: el modo cluster no muestra los titulos correctos de las consolas cuando han sido renombradas
-#        - Se agrega opción de clonar consola
-#        - Archivo de configuración ahora se guarda al realizar cambios (antes se guardaba al salir de la aplicacion)
-#        - Se agrega opción de tener subgrupos, al editar un host se debe usar el formato grupo/subgrupo/subgrupo para el nombre de grupo
-#
-# v0.9.4 - Bugfix: Dejar el foco siempre en la nueva consola
-#        - Bugfix: Shortcut para console_previous se revertia a ctrl+shift+left 
-#        - Se agrega traducción a italiano (gracias a Vincenzo Reale)
-#        - Bugfix: Telnet no funcionaba al usarlo sin usuario
-#
-# v0.9.3 - Bugfix: No funcionaba el boton "Local" luego de cerrar todas las consolas
-#        - Bugfix: se quita atajo CTRL+QUIT para salir de la aplicacion.
-#        - Se agrega traducción a ruso (gracias a Denis Fokin)
-#        - Se agrega traducción a portugues (gracias a Ericson Alexandre S.)
-#        - Se agrega menu contextual "copiar y pegar"
-#        - Se agrega shortcut para reconectar 
-#        - Revisar si expect esta instalado al iniciar
-#        - Permitir conexiones locales al guardar un host (ssh, telnet, local)
-#
-# v0.9.2 - Bugfix: En algunos casos no se guardaban los passwords
-#        - Bugfix: Al conectarse a traves de una sesion remota (nomachine, X11) y abrir gcm se limpiaban los passwords
-#        - Se agrega traducción a polaco (gracias a Pawel)
-#
-# v0.9.1 - Bugfix: Se corrigen algunos textos en frances
-#        - Bugfix: Se corrige bug al importar servidores
-#        - Bugfix: opcion de reconectar desaparece para las demás consolas luego de reconectar a una consola
-#        - Se agrega opcion de cerrar consola con boton central del mouse sin pedir confirmacion
-#
-# v0.9.0 - Se agrega opcion de copiar texto seleccionado automaticamente al porta papeles
-#        - Se agrega menu para duplicar host
-#        - Se agrega modo cluster (permite enviar mismo comando a varios hosts a la vez)
-#        - Se agrega menu para reabrir una sesion cerrada
-#        - menu contextual en consola para enviar los comandos predefinidos
-#
-# v0.8.0 - Bugfix: ancho/alto incorrecto al dividir consola horizontal/vertical
-#        - Se agrega opcion para conservar tamaño de ventana entre ejecuciones
-#        - Se agrega opcion para resetear y resetear-limpiar consola (menu contextual y shortcut)
-#        - Soporte para autenticacion sin password/public key(se debe dejar el password en blanco)
-#        - X11 forwading para ssh
-#        - cambiar font de consola
-#        - Permitir ocultar boton para donar
-#
-# v0.7.1 - Bugfix: al cerrar consola con shortcut se mantenia abierta la sesion ssh
-#        - Bugfix: importar servers arrojaba mensaje "Archivo invalido"
-#
-# v0.7.0 - Se agrega menu contextual "copiar direccion" del host
-#        - Se agrega opcion de keep-alive por host
-#        - Se agrega colores configurables por host
-#        - Se agrega opción de renombrar tabs de consola
-#        - Se agrega traducción a francés (gracias a William M.)
-#        - Se agrega shortcut para cerrar consola
-#
-# v0.6.1 - Se agrega shortcuts para cambiar entre consolas (izq, der, y 01 a 09)
-#        - Correción de bug: no se podia editar un shortcut predefinido
-#
-# v0.6.0 - Se agrega opción para guardar buffer en archivo
-#        - Se agrega buscador
-#        - Boton para abrir consola local
-#        - ejecutar comando luego del login
-#        - guardar estado (abiertos/cerrados) de folders y posicion del panel
-#        - importar/exportar lista de servidores
-#        - menu contextual en grupos y servidores (expandir/contraer todo, editar host, agregar host)
-#        - shortcuts para comandos predefinidos (copia, pegar, etc) y para ejecutar comandos
-#        - comprobar actualizaciones
-#        - Corrección de bug: autologin no funcionaba para algunos servidores telnet
-#
-# v0.5.0 - Corrección de bug que mostraba mal las consolas ssh en algunos casos (no se ocupaba todo el espacio de la consola)
-#        - Corrección de bug que cerraba dos consolas al tener la pantalla dividida y cerrar consola de la derecha
-#        - Se agrega opción de menu contextual con boton derecho
-#        - Se agrega opción de confirmar al cerrar una consola
-#        - Se muestra mensaje en pantalla cuando cambia la key de un host para ssh
-#        - Boton donar
 
 from __future__ import with_statement
 import os
@@ -172,9 +55,8 @@ try:
     gi.require_version('Gtk', '3.0')
     gi.require_version('Vte', '2.91')
     from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GdkPixbuf, GLib
-except Exception as e:
-    print ("python3-gi required",e,file=sys.stderr)
-    sys.exit(1)
+except:    
+    sys.exit("python3-gi and gir1.2-vte-2.91 required")
 
 #check Terminal version
 TERMINAL_V048 = 'spawn_async' in Vte.Terminal.__dict__
@@ -295,6 +177,7 @@ class conf():
     CONFIRM_ON_CLOSE_TAB = 1
     CONFIRM_ON_CLOSE_TAB_MIDDLE = 1
     AUTO_CLOSE_TAB = 0
+    CYCLE_TABS = True
     COLLAPSED_FOLDERS = ""
     LEFT_PANEL_WIDTH = 100
     CHECK_UPDATES=True
@@ -493,11 +376,12 @@ def vte_run(terminal, command, arg=None):
                            os.getenv("HOME"),
                            args,
                            envv,
-                           flag_spawn | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
+                           flag_spawn | GLib.SpawnFlags.SEARCH_PATH,
                            None,
                            None,
                            -1,
                            None,
+                           lambda term,pid,err,user_data: None,
                            None)
     else:
         terminal.spawn_sync(Vte.PtyFlags.DEFAULT,
@@ -570,6 +454,13 @@ class Wmain(SimpleGladeApp):
         if conf.CHECK_UPDATES:
             GLib.timeout_add(2000, lambda: self.check_updates())
         
+        #load style.css
+        screen = Gdk.Screen.get_default()
+        provider = Gtk.CssProvider()
+        provider.load_from_path(BASE_PATH + "/style.css")
+        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+
         #Por cada parametro de la linea de comandos buscar el host y agregar un tab
         for arg in sys.argv[1:]:
             i = arg.rfind("/")
@@ -582,7 +473,7 @@ class Wmain(SimpleGladeApp):
                             self.addTab(self.nbConsole, h)
                             break                
         
-        self.get_widget('txtSearch').override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('darkgray'))
+        self.get_widget('txtSearch').set_placeholder_text(_('buscar...'))
         
         if conf.STARTUP_LOCAL:
             self.addTab(self.nbConsole,'local')
@@ -683,7 +574,7 @@ class Wmain(SimpleGladeApp):
         self.on_tab_focus(nb, nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
 
     def on_terminal_keypress(self, widget, event, *args):
-        #if shortcuts.has_key(get_key_name(event)):
+        #if shortcuts.has_key(get_key_name(event)):        
         if get_key_name(event) in shortcuts:
             cmd = shortcuts[get_key_name(event)]
             if type(cmd) == list:
@@ -720,13 +611,13 @@ class Wmain(SimpleGladeApp):
                         self.addTab(ntbk, host)
                 elif cmd == _CONSOLE_PREV:
                     ntbk = widget.get_parent().get_parent()
-                    if ntbk.get_current_page() == 0:
+                    if ntbk.get_current_page() == 0 and conf.CYCLE_TABS:
                         ntbk.set_current_page(len(ntbk) - 1)
                     else:
                         ntbk.prev_page()
                 elif cmd == _CONSOLE_NEXT:
                     ntbk = widget.get_parent().get_parent()
-                    if ntbk.get_current_page() == len(ntbk) - 1:
+                    if ntbk.get_current_page() == len(ntbk) - 1 and conf.CYCLE_TABS:
                         ntbk.set_current_page(0)
                     else:
                         ntbk.next_page()
@@ -767,7 +658,8 @@ class Wmain(SimpleGladeApp):
 
     def on_terminal_selection(self, widget, *args):
         if conf.AUTO_COPY_SELECTION:
-            self.terminal_copy(widget)
+            if widget.get_has_selection():
+                self.terminal_copy(widget)
         return True
         
     def find_word(self, backwards=False):
@@ -913,7 +805,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'RS' or item == 'RS2': #RESET CONSOLE              
             if (item == 'RS'):
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, False)
@@ -921,14 +813,14 @@ class Wmain(SimpleGladeApp):
         elif item == 'RC' or item == 'RC2': #RESET AND CLEAR CONSOLE
             if (item == 'RC'):
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, True)
             return True
         elif item == 'RO': #REOPEN SESION
             tab = self.popupMenuTab.label.get_parent().get_parent()
-            term = tab.widget_.get_child()
+            term = tab.widget_.get_children()[0]
             if not hasattr(term, "command"):
                 #term.fork_command(SHELL)
                 vte_run(term, SHELL)
@@ -946,7 +838,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'CC' or item == 'CC2': #CLONE CONSOLE
             if item == 'CC':
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
                 ntbk = tab.get_parent()
             else:
                 term = self.popupMenu.terminal
@@ -963,7 +855,7 @@ class Wmain(SimpleGladeApp):
         elif item == 'L' or item == 'L2': #ENABLE/DISABLE LOG
             if item == 'L':
                 tab = self.popupMenuTab.label.get_parent().get_parent()
-                term = tab.widget_.get_child()
+                term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             if not self.set_terminal_logger(term, widget.get_active()):
@@ -1147,7 +1039,7 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
         
     def createMenuItem(self, shortcut, label):
-        menuItem = Gtk.MenuItem('')
+        menuItem = Gtk.MenuItem(label='')
         text = "[%s] %s" % (shortcut, label)
         attrs = Pango.parse_markup("<span foreground='blue'  size='x-small'>[%s]</span> %s" % (GLib.markup_escape_text(shortcut, -1), GLib.markup_escape_text(label, -1)), -1, "0")
         menuItem.get_child().set_attributes(attrs[1])
@@ -1328,10 +1220,12 @@ class Wmain(SimpleGladeApp):
                 conf.FONT = 'monospace'
             else:
                 v.set_font(Pango.FontDescription(conf.FONT))
-            
-            scrollPane = Gtk.ScrolledWindow()            
-            scrollPane.connect('button_press_event', lambda *args: True)
-            scrollPane.set_property('hscrollbar-policy', Gtk.PolicyType.NEVER)
+
+            scrollPane = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment ())
+            scrollPane.pack_start (v, True, True, 0)
+            scrollPane.pack_start (scrollbar, False, False, 0)
+
             tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab )
             
             v.connect("child-exited", lambda *args: tab.mark_tab_as_closed())
@@ -1352,8 +1246,7 @@ class Wmain(SimpleGladeApp):
             v.set_backspace_binding(host.backspace_key)
             v.set_delete_binding(host.delete_key)
             
-            scrollPane.show()
-            scrollPane.add(v)                        
+            scrollPane.show_all()
             v.show()            
 
             notebook.append_page(scrollPane, tab_label=tab)
@@ -1530,6 +1423,7 @@ class Wmain(SimpleGladeApp):
             conf.LOG_PATH = cp.get("options", "log-path")
             conf.VERSION = cp.get("options", "version")
             conf.AUTO_CLOSE_TAB = cp.getint("options", "auto-close-tab")
+            conf.CYCLE_TABS = cp.getboolean("options", "cycle-tabs")
             conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
             conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
             conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
@@ -1733,6 +1627,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "log-path", conf.LOG_PATH)
         cp.set("options", "version", app_fileversion)
         cp.set("options", "auto-close-tab", conf.AUTO_CLOSE_TAB)
+        cp.set("options", "cycle-tabs", conf.CYCLE_TABS)
         cp.set("options", "update-title", conf.UPDATE_TITLE)
         cp.set("options", "app-title", conf.APP_TITLE or app_name)
 
@@ -1770,12 +1665,12 @@ class Wmain(SimpleGladeApp):
 
     def on_tab_scroll(self, notebook, event):
         if event.get_scroll_deltas()[2] < 0:
-            if notebook.get_current_page() == 0:
+            if notebook.get_current_page() == 0 and conf.CYCLE_TABS:
                 notebook.set_current_page(notebook.get_n_pages()-1)
             else:
                 notebook.prev_page()
         else:
-            if notebook.get_current_page() == notebook.get_n_pages()-1:
+            if notebook.get_current_page() == notebook.get_n_pages()-1 and conf.CYCLE_TABS:
                 notebook.set_current_page(0)
             else:
                 notebook.next_page()
@@ -2223,19 +2118,6 @@ class Wmain(SimpleGladeApp):
             
     #-- Wmain.on_btnDonate_clicked }
     
-    #-- Wmain.on_txtSearch_focus {
-    def on_txtSearch_focus(self, widget, *args):
-        if widget.get_text() == _('buscar...'):
-            widget.override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('black'))
-            widget.set_text('')
-    #-- Wmain.on_txtSearch_focus }
-
-    #-- Wmain.on_txtSearch_focus_out_event {
-    def on_txtSearch_focus_out_event(self, widget, *args):
-        if widget.get_text() == '':
-            widget.override_color(Gtk.StateFlags.NORMAL, parse_color_rgba('darkgray'))
-            widget.set_text(_('buscar...'))
-    #-- Wmain.on_txtSearch_focus_out_event }
 
     #-- Wmain.on_btnSearchBack_clicked {
     def on_btnSearchBack_clicked(self, widget, *args):
@@ -2289,7 +2171,7 @@ class Wmain(SimpleGladeApp):
             if isinstance(obj, Gtk.Notebook):
                 n = obj.get_n_pages()
                 for i in range(0,n):
-                    terminal = obj.get_nth_page(i).get_child()                    
+                    terminal = obj.get_nth_page(i).get_children()[0]
                     title = obj.get_tab_label(obj.get_nth_page(i)).get_text()
                     consoles.append( (title, terminal) )                
         
@@ -2910,7 +2792,8 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
         self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
         self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
-        self.addParam(_(U"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
+        self.addParam(_(u"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
+        self.addParam(_(u"Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
         self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _(u"Sólo si no hay errores")])
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)  
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
@@ -3015,7 +2898,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_value(value)                        
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -3027,7 +2910,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_active(value)
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -3037,7 +2920,7 @@ class Wconfig(SimpleGladeApp):
             obj.set_text(value)            
             obj.show()
             obj.field=field
-            lbl = Gtk.Label(name)
+            lbl = Gtk.Label(label=name)
             lbl.set_alignment(0, 0.5)
             lbl.show()
             self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
@@ -3157,8 +3040,6 @@ class Wconfig(SimpleGladeApp):
 
 
 class Wcluster(SimpleGladeApp):
-    COLOR = parse_color('#FFFC00')
-    
     def __init__(self, path="gnome-connection-manager.glade",
                  root="wCluster",
                  domain=domain_name, terms=None, **kwargs):
@@ -3188,7 +3069,7 @@ class Wcluster(SimpleGladeApp):
     
     def on_active_toggled(self, widget, path):          
         self.treeStore[path][0] = not self.treeStore[path][0]
-        self.change_color(self.treeStore[path][2], self.treeStore[path][0])                
+        self.change_color(self.treeStore[path][2], self.treeStore[path][0])
 
     def change_color(self, term, activate):
         obj = term.get_parent()
@@ -3197,10 +3078,7 @@ class Wcluster(SimpleGladeApp):
         nb = obj.get_parent()
         if nb == None:
             return
-        if activate:
-            nb.get_tab_label(obj).change_color(Wcluster.COLOR)
-        else:
-            nb.get_tab_label(obj).restore_color()
+        nb.get_tab_label(obj).set_selected(activate)
             
     #-- Wcluster custom methods }
 
@@ -3296,22 +3174,14 @@ class NotebookTabLabel(Gtk.HBox):
         close_btn.show_all()  
         self.is_active = True
         self.eb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
+        self.eb2.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
         self.show()
         
-    def change_color(self, color):
-        self.bg_active = self.eb.get_style_context().get_background_color(Gtk.StateFlags.ACTIVE)
-        self.bg_normal = self.eb.get_style_context().get_background_color(Gtk.StateFlags.NORMAL)
-        self.eb.modify_bg(Gtk.StateType.ACTIVE, color)
-        self.eb2.modify_bg(Gtk.StateType.ACTIVE, color)
-        self.eb.modify_bg(Gtk.StateType.NORMAL, color)
-        self.eb2.modify_bg(Gtk.StateType.NORMAL, color)
-        
-    def restore_color(self):
-        if hasattr(self, 'bg_active'):
-            self.eb.override_background_color(Gtk.StateFlags.ACTIVE, self.bg_active)
-            self.eb2.override_background_color(Gtk.StateFlags.ACTIVE, self.bg_active)
-            self.eb.override_background_color(Gtk.StateFlags.NORMAL, self.bg_normal)
-            self.eb2.override_background_color(Gtk.StateFlags.NORMAL, self.bg_normal)
+    def set_selected(self, sel):  
+        if sel:
+            self.get_style_context().add_class("selected")
+        else:
+            self.get_style_context().remove_class("selected")
         
     def on_close_tab(self, widget, notebook, *args):
         if conf.CONFIRM_ON_CLOSE_TAB and msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) != Gtk.ResponseType.OK:
@@ -3354,7 +3224,7 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuReopen.show()
             
             #enable or disable log checkbox according to terminal 
-            self.popup.mnuLog.set_active( hasattr(self.widget_.get_child(), "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
+            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
@@ -3375,7 +3245,7 @@ class EntryDialog( Gtk.Dialog):
         self.vbox.pack_start(box, True, True, 0)
         box.show()
         if message:
-            label = Gtk.Label(message)
+            label = Gtk.Label(label=message)
             box.pack_start(label, True, True, 0)
             label.show()
         self.entry = Gtk.Entry()
@@ -3428,7 +3298,7 @@ class CellTextView(Gtk.TextView, Gtk.CellEditable):
     def get_text(self):
         text_buffer = self.get_buffer()
         bounds = text_buffer.get_bounds()
-        return text_buffer.get_text(*bounds, True)
+        return text_buffer.get_text(*bounds, include_hidden_chars=True)
 
     def set_text(self, text):
         self.get_buffer().set_text(text)
