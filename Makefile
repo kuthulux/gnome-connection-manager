@@ -69,4 +69,22 @@ rpm:
 		usr
 	@echo "\033[92mOK: $(PKG_RPM)\033[0m"
 
+# Developer aids below
 
+# Files might be not committed by a developer, or changed by the build or a helper like style-strip-trailing-whitespace
+check-gitignore:
+	@if [ -n "`git status -uno -s`" ]; then \
+		echo "ERROR: Changes to files tracked in Git are not committed" >&2; \
+		git status -uno -s; \
+		exit 1; \
+	 fi
+
+# Style fix: strip trailing whitespace in text-file sources
+style-strip-trailing-whitespace:
+	@git ls-files | egrep -v '\.(png|gif|mo)$$' | \
+	 while read F ; do sed -e 's,[ '"`printf '\t'`"']*$$,,' -i "$$F" ; done
+
+check-strip-trailing-whitespace: style-strip-trailing-whitespace
+	@$(MAKE) check-gitignore
+
+check: check-strip-trailing-whitespace
