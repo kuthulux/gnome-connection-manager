@@ -3,12 +3,12 @@ PKG_DESCRIPTION="Simple tabbed ssh and telnet connection manager for GTK+ enviro
 PKG_VERSION=1.2.1
 PKG_MAINTAINER="Renzo Bertuzzi <kuthulu@gmail.com>"
 PKG_VENDOR=kuthulu.com
-PKG_URL=http://kuthulu.com/gcm 
+PKG_URL=http://kuthulu.com/gcm
 PKG_ARCH=all
 PKG_ARCH_RPM=noarch
 PKG_DEB=${PKG_NAME}_${PKG_VERSION}_${PKG_ARCH}.deb
 PKG_RPM=${PKG_NAME}-${PKG_VERSION}.${PKG_ARCH_RPM}.rpm
-FPM_OPTS=-s dir -n $(PKG_NAME) -v $(PKG_VERSION)  -C $(TMPINSTALLDIR) --maintainer ${PKG_MAINTAINER} --description "$$(printf ${PKG_DESCRIPTION})" -a $(PKG_ARCH) --license GPLv3 --vendor ${PKG_VENDOR} --category net --url ${PKG_URL} 
+FPM_OPTS=-s dir -n $(PKG_NAME) -v $(PKG_VERSION)  -C $(TMPINSTALLDIR) --maintainer ${PKG_MAINTAINER} --description "$$(printf ${PKG_DESCRIPTION})" -a $(PKG_ARCH) --license GPLv3 --vendor ${PKG_VENDOR} --category net --url ${PKG_URL}
 TMPINSTALLDIR=/tmp/$(PKG_NAME)-fpm-install
 
 all : deb rpm
@@ -41,7 +41,7 @@ translate:
 deb:
 	rm -rf $(TMPINSTALLDIR)
 	rm -f $(PKG_DEB)
-	chmod -R g-w *	
+	chmod -R g-w *
 	make install DESTDIR=$(TMPINSTALLDIR)
 
 	fpm -t deb -p $(PKG_DEB) $(FPM_OPTS) \
@@ -58,7 +58,7 @@ deb:
 rpm:
 	rm -rf $(TMPINSTALLDIR)
 	rm -f $(PKG_RPM)
-	chmod -R g-w *	
+	chmod -R g-w *
 	make install DESTDIR=$(TMPINSTALLDIR)
 
 	fpm -t rpm -p $(PKG_RPM) $(FPM_OPTS) \
