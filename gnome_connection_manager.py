@@ -493,7 +493,7 @@ class Wmain(SimpleGladeApp):
                 window.hide()
                 window.show()
         else:
-            sys.stderr.write('System doesn\'t support transparency')
+            sys.stderr.write('System doesn\'t support transparency\n')
             window.transparency = False
             window.set_visual(screen.get_system_visual())
 
@@ -1664,7 +1664,38 @@ class Wmain(SimpleGladeApp):
         os.rename(CONFIG_FILE + ".tmp", CONFIG_FILE)
 
     def on_tab_scroll(self, notebook, event):
-        if event.get_scroll_deltas()[2] < 0:
+        # According to https://sourcecodequery.com/example-method/Gdk.Event.get_scroll_deltas
+        # the deltas below should only be usable for direction == Gdk.ScrollDirection.SMOOTH
+        # Note: https://api.gtkd.org/gdk.Event.Event.getScrollDirection.html
+        # documents his as a function returning a bool (whether the event
+        # delivered a scroll direction) and an argument where to store that
+        # data as an value from enum GdkScrollDirection. Code in the example
+        # above uses a different syntax, and code below yet another with tuple.
+        gsdir = event.get_scroll_direction()
+
+        # Note: https://api.gtkd.org/gdk.Event.Event.getScrollDeltas.html
+        # documents this as a function returning a bool (whether the event
+        # contains smooth-scroll info) and having two args where to store
+        # the X/Y deltas of that scroll; the code below uses another syntax
+        # that returns a tuple of that bool and X/Y deltas:
+        gsdelta = event.get_scroll_deltas()
+        #sys.stderr.write("[D] on_tab_scroll: event.get_scroll_direction(): [%s] [%s]\n" % (gsdir[0], gsdir[1]) )
+        #sys.stderr.write("[D] on_tab_scroll: event.get_scroll_deltas(): [%s] [%s] [%s]\n" % (gsdelta[0], gsdelta[1], gsdelta[2]) )
+
+        scrollPrev = False
+        if gsdelta[0]:
+            if gsdelta[2] < 0:
+                scrollPrev = True
+        else:
+            if gsdir[1] == Gdk.ScrollDirection.UP:
+                scrollPrev = True
+            elif gsdir[1] == Gdk.ScrollDirection.DOWN:
+                scrollPrev = False
+            else:
+                #raise ValueError("Unrecognized scroll direction")
+                sys.stderr.write("[D] on_tab_scroll: event.get_scroll_direction(): Unrecognized scroll direction\n")
+
+        if scrollPrev:
             if notebook.get_current_page() == 0 and conf.CYCLE_TABS:
                 notebook.set_current_page(notebook.get_n_pages()-1)
             else:
