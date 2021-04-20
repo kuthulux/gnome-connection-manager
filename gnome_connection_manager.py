@@ -557,6 +557,12 @@ class Wmain(SimpleGladeApp):
                 self.popupMenu.mnuLog.set_active( hasattr(widget, "log_handler_id") and widget.log_handler_id != 0 )
                 self.popupMenu.terminal = widget
                 self.popupMenu.popup( None, None, None, None, event.button, event.time)
+
+            # enable/disable split menu
+            nb = widget.get_parent().get_parent()
+            self.popupMenu.mnuSplitH.set_sensitive(nb.get_n_pages() > 1)
+            self.popupMenu.mnuSplitV.set_sensitive(nb.get_n_pages() > 1)
+
             return True
 
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1 and event.get_state() &  Gdk.ModifierType.CONTROL_MASK:
@@ -861,6 +867,10 @@ class Wmain(SimpleGladeApp):
             if not self.set_terminal_logger(term, widget.get_active()):
                 widget.set_active(False)
             return True
+        elif item == 'SPH':
+            self.on_btnHSplit_clicked(widget, args)
+        elif item == 'SPV':
+            self.on_btnVSplit_clicked(widget, args)
 
     def createMenu(self):
         self.popupMenu = Gtk.Menu()
@@ -898,6 +908,18 @@ class Wmain(SimpleGladeApp):
         menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_SAVE, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'S')
+        menuItem.show()
+
+        self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.show()
+
+        self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenu.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
 
         menuItem = Gtk.MenuItem()
@@ -1036,6 +1058,18 @@ class Wmain(SimpleGladeApp):
         self.popupMenuTab.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Habilitar log"))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'L')
+        menuItem.show()
+
+        self.popupMenuTab.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.show()
+
+        self.popupMenuTab.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NEW, Gtk.IconSize.MENU))
+        self.popupMenuTab.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, 'SPV')
         menuItem.show()
 
     def createMenuItem(self, shortcut, label):
@@ -3254,7 +3288,16 @@ class NotebookTabLabel(Gtk.HBox):
             else:
                 self.popup.mnuReopen.show()
 
-            #enable or disable log checkbox according to terminal
+            # show/hide split menu
+            nb = self.widget_.get_parent()
+            if nb.get_n_pages() > 1:
+                self.popup.mnuSplitH.show()
+                self.popup.mnuSplitV.show()
+            else:
+                self.popup.mnuSplitH.hide()
+                self.popup.mnuSplitV.hide()
+
+            #enable or disable log checkbox according to terminal 
             self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
