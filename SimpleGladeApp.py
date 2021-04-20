@@ -53,7 +53,7 @@ def bindtextdomain(app_name, locale_dir=None):
 
     try:
         import locale
-        import gettext        
+        import gettext
         locale.setlocale(locale.LC_ALL, "")
         locale.bindtextdomain(app_name, locale_dir)
         gettext.bindtextdomain(app_name, locale_dir)
