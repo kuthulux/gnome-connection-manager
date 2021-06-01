@@ -1,5 +1,5 @@
 # Gnome Connection Manager or GCM
- 
+
 Gnome Connection Manager or GCM is a tabbed ssh connection manager for gtk+ environments.
 Starting with version 1.2.0 it **only** supports python3 and GTK 3 so it should run fine on any modern desktop environment.
 
@@ -27,7 +27,7 @@ python -m pip install pycairo pygobject PyGtk
 Download or clone the repository and execute the file `gnome_connection_manager.py`
 
 
-``` 
+```
 git clone git://github.com/kuthulux/gnome-connection-manager
 cd gnome-connection-manager
 ./gnome_connection_manager.py
@@ -42,7 +42,7 @@ cd gnome-connection-manager
 
 ## Language
 GCM should use the default OS language, but if for any reason you want to use another language, then start GCM this way:
- 
+
 ```bash
 LANG=en_US.UTF.8 ./gnome_connection_manager.py
 ```
@@ -63,19 +63,19 @@ sudo gem install fpm
 ```
 Fedora/Redhat
 ```bash
-sudo yum install git ruby ruby-devel make gcc gcc-c++ redhat-rpm-config getext rpm-build 
+sudo yum install git ruby ruby-devel make gcc gcc-c++ redhat-rpm-config getext rpm-build
 sudo gem install fpm
 ```
 
 2. download or clone the respository
 
-```bash 
+```bash
 git clone git://github.com/kuthulux/gnome-connection-manager
 cd gnome-connection-manager
 ```
 
 3. make the desired package:
-```bash 
+```bash
 #make deb and rpm
 make
 
