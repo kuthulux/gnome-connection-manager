@@ -867,7 +867,7 @@ class Wmain(SimpleGladeApp):
             if not self.set_terminal_logger(term, widget.get_active()):
                 widget.set_active(False)
             return True
-        elif item == 'SCP': #SCP by filezilla
+        elif item == 'SCP':
             selected = self.treeServers.get_selection().get_selected()[1]            
             group = self.get_group(selected)
             host = self.treeModel.get_value(selected, 1)
