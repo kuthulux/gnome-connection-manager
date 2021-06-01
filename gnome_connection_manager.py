@@ -872,9 +872,9 @@ class Wmain(SimpleGladeApp):
             group = self.get_group(selected)
             host = self.treeModel.get_value(selected, 1)
             if host.password == '':
-                cmd = 'xdg-open sftp://%s@%s:%s &' %(host.user,host.host,host.port)
+                cmd = '/usr/bin/xdg-open sftp://%s@%s:%s &' %(host.user,host.host,host.port)
             else:
-                cmd = 'xdg-open sftp://%s:%s@%s:%s &' %(host.user,host.password,host.host,host.port)
+                cmd = '/usr/bin/xdg-open sftp://%s:%s@%s:%s &' %(host.user,host.password,host.host,host.port)
             os.system(cmd)
                 
         elif item == 'SPH':
