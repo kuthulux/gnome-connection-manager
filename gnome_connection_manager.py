@@ -1968,11 +1968,20 @@ class Wmain(SimpleGladeApp):
     #-- Wmain.on_double_click {
     def on_double_click(self, widget, event, *args):
         if event.type in [Gdk.EventType._2BUTTON_PRESS, Gdk.EventType._3BUTTON_PRESS] and event.button == 1:
-            if isinstance(widget, Gtk.Notebook):                
-                pos = event.x + widget.get_allocation().x
+            #sys.stderr.write ("on_double_click: event.type=%s, isNB=%s, isTB=%s, isLB=%s\n" % (event.type, str(isinstance(widget, Gtk.Notebook)), str(isinstance(widget, Gtk.Toolbar)), str(isinstance(widget, Gtk.Label)) ) )
+            #sys.stderr.write ("on_double_click: widget=%s\n" % (str(widget)) )
+            if isinstance(widget, Gtk.Notebook):
+                posX = event.x + widget.get_allocation().x
+                posY = event.y + widget.get_allocation().y
                 size = widget.get_tab_label(widget.get_nth_page(widget.get_n_pages()-1)).get_allocation()
-                if pos <= size.x + size.width + 8 or event.x >= widget.get_allocation().width - widget.style_get_property("scroll-arrow-hlength"):
+                #sys.stderr.write ("on_double_click: event:  x=%s, y=%s, window=%s\n" % (str(event.x), str(event.y), str(event.get_window())) )
+                #sys.stderr.write ("on_double_click: widget: x=%s, y=%s, width=%s, height=%s\n" % (str(widget.get_allocation().x), str(widget.get_allocation().y), str(widget.get_allocation().width), str(widget.get_allocation().height)) )
+                #sys.stderr.write ("on_double_click: posX=%s, posY=%s, size: x=%s, y=%s, width=%s, height=%s\n" % (str(posX), str(posY), str(size.x), str(size.y), str(size.width), str(size.height)) )
+
+                # HACK with (posY > size.height) below as a way to detect we click the label area and not the terminal pane with MC running, see https://github.com/kuthulux/gnome-connection-manager/issues/64 :
+                if posX <= size.x + size.width + 8 or event.x >= widget.get_allocation().width - widget.style_get_property("scroll-arrow-hlength") or posY > size.height:
                     return True
+                # else fall through to addTab()
             if isinstance(widget, Gtk.Toolbar) and widget.get_drop_index(event.x,event.y) < widget.get_n_items():
                 return True
             self.addTab(widget if isinstance(widget, Gtk.Notebook) else self.nbConsole, 'local')
