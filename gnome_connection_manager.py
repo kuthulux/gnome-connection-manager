@@ -493,7 +493,7 @@ class Wmain(SimpleGladeApp):
                 window.hide()
                 window.show()
         else:
-            sys.stderr.write('System doesn\'t support transparency')
+            sys.stderr.write('System doesn\'t support transparency\n')
             window.transparency = False
             window.set_visual(screen.get_system_visual())
 
