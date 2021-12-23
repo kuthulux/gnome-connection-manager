@@ -142,7 +142,7 @@ def expandKey(cipherKey):
         for i in range(4):
             expandedKey.append(((expandedKey[currentSize - cipherKeySize]) ^ (t[i])))
             currentSize += 1
-            
+
     return expandedKey
 
 # do sbox transform on each of the values in the state table
@@ -265,9 +265,9 @@ def createRoundKey(expandedKey, n):
     return expandedKey[(n*16):(n*16+16)]
 
 # create a key from a user-supplied password using SHA-256
-def passwordToKey(password):    
+def passwordToKey(password):
     sha256 = hashlib.sha256()
-    sha256.update(password)    
+    sha256.update(password)
     key = []
     for c in list(sha256.digest()):
         key.append(c)
@@ -300,7 +300,7 @@ def aesMainInv(state, expandedKey, numRounds=14):
     # last round - leave out the mixColumns transformation
     roundKey = createRoundKey(expandedKey, 0)
     addRoundKey(state, roundKey)
-    
+
 # aesEncrypt - encrypt a single block of plaintext
 def aesEncrypt(plaintext, key):
     block = copy(plaintext)
@@ -355,7 +355,7 @@ def encrypt(text, password):
     text = text + numpads*chr(numpads)
 
     # convert password to AES 256-bit key
-    aesKey = passwordToKey(password)    
+    aesKey = passwordToKey(password)
     fp = BytesIO(text.encode('iso-8859-1')) #python2 default is iso-8859-1, python3 is utf-8, convert to iso-8859-1 for compatibility
     outfile = BytesIO()
 
@@ -363,8 +363,8 @@ def encrypt(text, password):
     for byte in IV:
         outfile.write(bytes([byte]))
 
-    # get the file size (bytes) 
-    # if the file size is a multiple of the block size, we'll need 
+    # get the file size (bytes)
+    # if the file size is a multiple of the block size, we'll need
     # to add a block of padding at the end of the message
     fp.seek(0,2)
     filesize = fp.tell()
@@ -449,6 +449,6 @@ def decrypt(text, password):
     # close file pointers
     fp.close()
     s = outfile.getvalue()
-    outfile.close()    
+    outfile.close()
     return bytes(s, 'iso-8859-1').decode('utf-8') #python2 default is iso-8859-1, so treat it as iso-8859-1 and convert it to utf8
 
