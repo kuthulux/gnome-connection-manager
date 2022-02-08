@@ -415,6 +415,7 @@ class Wmain(SimpleGladeApp):
             initialise_encyption_key()
 
         settings = Gtk.Settings.get_default()
+        settings.set_property("gtk-menu-images", True)
         settings.props.gtk_menu_bar_accel = None
 
         self.enable_window_transparency(self.window)
