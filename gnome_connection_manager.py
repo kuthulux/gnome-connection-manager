@@ -938,8 +938,9 @@ class Wmain(SimpleGladeApp):
         menuItem.connect("activate", self.on_popupmenu, 'RS2')
         menuItem.show()
 
+        STOCK_CLEAR_X = "edit-clear"
         self.popupMenu.mnuClear = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar y Limpiar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_CLEAR, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_CLEAR_X, Gtk.IconSize.MENU))
         self.popupMenu.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'RC2')
         menuItem.show()
@@ -1045,7 +1046,7 @@ class Wmain(SimpleGladeApp):
         menuItem.show()
 
         self.popupMenuTab.mnuClear = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar y Limpiar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_CLEAR, Gtk.IconSize.MENU))
+        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_CLEAR_X, Gtk.IconSize.MENU))
         self.popupMenuTab.append(menuItem)
         menuItem.connect("activate", self.on_popupmenu, 'RC')
         menuItem.show()
