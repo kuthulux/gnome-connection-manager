@@ -2,3 +2,4 @@ __pycache__
 *.deb
 *.rpm
 /lang/*/LC_MESSAGES/*
+/.idea
