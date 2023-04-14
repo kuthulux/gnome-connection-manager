@@ -54,7 +54,7 @@ try:
     import gi
     gi.require_version('Gtk', '3.0')
     gi.require_version('Vte', '2.91')
-    from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GdkPixbuf, GLib
+    from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GLib
 except:
     sys.exit("python3-gi and gir1.2-vte-2.91 required")
 
@@ -1256,11 +1256,11 @@ class Wmain(SimpleGladeApp):
                 v.set_font(Pango.FontDescription(conf.FONT))
 
             scrollPane = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment ())
+            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment())
             scrollPane.pack_start (v, True, True, 0)
             scrollPane.pack_start (scrollbar, False, False, 0)
 
-            tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab )
+            tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab)
 
             v.connect("child-exited", lambda *args: tab.mark_tab_as_closed())
             v.connect('focus', self.on_tab_focus)
@@ -2449,6 +2449,9 @@ class Whost(SimpleGladeApp):
         self.txtPrivateKey = self.get_widget("txtPrivateKey")
         self.btnBrowse = self.get_widget("btnBrowse")
         self.txtPort = self.get_widget("txtPort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtPortAdjustment = Gtk.Adjustment(value=22, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtPort.set_adjustment(txtPortAdjustment)
         self.cmbGroup.remove_all()
         for group in groups:
             self.cmbGroup.append_text(group)
@@ -2456,8 +2459,16 @@ class Whost(SimpleGladeApp):
 
         self.chkDynamic = self.get_widget("chkDynamic")
         self.txtLocalPort = self.get_widget("txtLocalPort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtLocalPortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtLocalPort.set_adjustment(txtLocalPortAdjustment)
         self.txtRemoteHost = self.get_widget("txtRemoteHost")
         self.txtRemotePort = self.get_widget("txtRemotePort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        # Local and remote port adjustments cannot be merged into one adjustment,
+        # because their vaues becomes dependent
+        txtRemotePortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtRemotePort.set_adjustment(txtRemotePortAdjustment)
         self.treeTunel = self.get_widget("treeTunel")
         self.txtComamnds = self.get_widget("txtCommands")
         self.chkComamnds = self.get_widget("chkCommands")
@@ -2467,12 +2478,18 @@ class Whost(SimpleGladeApp):
         buf.connect("changed", self.update_texttags)
         self.chkKeepAlive = self.get_widget("chkKeepAlive")
         self.txtKeepAlive = self.get_widget("txtKeepAlive")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtKeepaliveAdjustment = Gtk.Adjustment(value=0, lower=0, upper=3600, step_increment=1, page_increment=10)
+        self.txtKeepAlive.set_adjustment(txtKeepaliveAdjustment)
         self.btnFColor = self.get_widget("btnFColor")
         self.btnBColor = self.get_widget("btnBColor")
         self.chkX11 = self.get_widget("chkX11")
         self.chkAgent = self.get_widget("chkAgent")
         self.chkCompression = self.get_widget("chkCompression")
         self.txtCompressionLevel = self.get_widget("txtCompressionLevel")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtCompressionLevelAdjustment = Gtk.Adjustment(value=6, lower=1, upper=9, step_increment=1, page_increment=3)
+        self.txtCompressionLevel.set_adjustment(txtCompressionLevelAdjustment)
         self.txtExtraParams = self.get_widget("txtExtraParams")
         self.chkLogging = self.get_widget("chkLogging")
         self.cmbBackspace = self.get_widget("cmbBackspace")
@@ -3222,8 +3239,8 @@ class NotebookTabLabel(Gtk.HBox):
         self.pack_start(self.eb, True, True, 0)
         label.show()
         self.eb.show()
-        close_image = Gtk.Image.new_from_icon_name(Gtk.STOCK_CLOSE, Gtk.IconSize.MENU)
-        b, image_w, image_h = Gtk.icon_size_lookup(Gtk.IconSize.MENU)
+        close_image = Gtk.Image.new_from_icon_name("window-close", Gtk.IconSize.MENU)
+        _, image_w, image_h = Gtk.icon_size_lookup(Gtk.IconSize.MENU)
         self.widget_=widget_
         self.popup = popup_
         close_btn = Gtk.Button()

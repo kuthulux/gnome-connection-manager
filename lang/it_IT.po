@@ -902,7 +902,7 @@ msgstr "Tipo"
 #: ../gnome-connection-manager.glade:2534
 #: ../gnome-connection-manager.glade:2673
 msgid "Túnel"
-msgstr "Tunnel"
+msgstr "Port forwarding"
 
 #: ../gnome-connection-manager.glade.h:36
 #: ../gnome-connection-manager.glade:711 ../gnome-connection-manager.glade:723
