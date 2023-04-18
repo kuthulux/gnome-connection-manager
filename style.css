@@ -1,3 +1,9 @@
 notebook > header > tabs > tab box.selected {
     background-color: #EEEB00;
 }
+
+toolbutton button {
+        border-color : #bcbebf;
+        border-width : 1px;
+        border-radius: 5px;
+}

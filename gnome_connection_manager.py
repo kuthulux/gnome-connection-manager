@@ -2708,7 +2708,7 @@ class Whost(SimpleGladeApp):
         self.txtExtraParams.set_sensitive(not is_local)
 
         if widget.get_active_text()=="ssh":
-            self.get_widget("table2").show()
+            self.get_widget("tunnelGrid").show()
             self.txtKeepAlive.set_sensitive(True)
             self.chkKeepAlive.set_sensitive(True)
             self.chkX11.set_sensitive(True)
@@ -2719,7 +2719,7 @@ class Whost(SimpleGladeApp):
             self.btnBrowse.set_sensitive(True)
             port = "22"
         else:
-            self.get_widget("table2").hide()
+            self.get_widget("tunnelGrid").hide()
             self.txtKeepAlive.set_text('0')
             self.txtKeepAlive.set_sensitive(False)
             self.chkKeepAlive.set_sensitive(False)
