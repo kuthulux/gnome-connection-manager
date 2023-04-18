@@ -148,6 +148,7 @@ _CONSOLE_CLOSE = ["console_close"]
 _CONSOLE_RECONNECT = ["console_reconnect"]
 _CONNECT = ["connect"]
 _NEW_LOCAL = ["new_local"]
+_FULLSCREEN = ["fullscreen"]
 _CLONE = ["clone"]
 
 ICON_PATH = BASE_PATH + "/icon.png"
@@ -412,6 +413,8 @@ class Wmain(SimpleGladeApp):
         self.createMenu()
         self.window = self.get_widget("wMain")
 
+        self._current_fullscreen_state = False
+
         if conf.VERSION == 0:
             initialise_encyption_key()
 
@@ -533,6 +536,9 @@ class Wmain(SimpleGladeApp):
     #-- Wmain.new {
     def new(self):
         self.hpMain = self.get_widget("hpMain")
+        self.hpMainWindow = Gtk.Window()
+        self.hpMainWindow.add(self.hpMain)
+        self.wMainWindow = self.builder.get_object("wMain")
         self.nbConsole = self.get_widget("nbConsole")
         self.treeServers = self.get_widget("treeServers")
         self.menuServers = self.get_widget("menuServers")
@@ -628,6 +634,24 @@ class Wmain(SimpleGladeApp):
                         ntbk.set_current_page(0)
                     else:
                         ntbk.next_page()
+                elif cmd == _FULLSCREEN:
+                    if self._current_fullscreen_state:
+                        Gtk.Window.unfullscreen(self.hpMainWindow)
+                        Gtk.Window.unfullscreen(self.wMainWindow)
+                        self.wMainWindow.set_decorated(True)
+                        self.wMainWindow.set_has_resize_grip(True)
+                        self.get_widget("toolbar1").show()
+                        self.get_widget("contextMenu").show()
+                        self._current_fullscreen_state = False
+                    else:
+                        Gtk.Window.fullscreen(self.hpMainWindow)
+                        self.wMainWindow.set_decorated(False)
+                        self.wMainWindow.set_has_resize_grip(False)
+                        Gtk.Window.fullscreen(self.wMainWindow)
+                        self.get_widget("toolbar1").hide()
+                        self.get_widget("contextMenu").hide()
+                        self._current_fullscreen_state = True
+
                 elif cmd == _CONSOLE_CLOSE:
                     wid = widget.get_parent()
                     page = widget.get_parent().get_parent().page_num(wid)
@@ -1488,6 +1512,8 @@ class Wmain(SimpleGladeApp):
         self.add_shortcut(cp, scuts, "reset", _CLEAR, "CTRL+SHIFT+K")
         self.add_shortcut(cp, scuts, "clone", _CLONE, "CTRL+SHIFT+D")
         self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+SHIFT+N")
+        self.add_shortcut(cp, scuts, "fullscreen", _FULLSCREEN, "F11")
+
 
         #shortcuts para cambiar consola1-consola9
         for x in range(1,10):
