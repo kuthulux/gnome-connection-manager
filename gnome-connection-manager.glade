@@ -609,6 +609,12 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <child>
                   <placeholder/>
                 </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
             </child>
             <child type="tab">
@@ -1095,6 +1101,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkComboBoxText" id="cmbGroup">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="tooltip-text" translatable="yes">Usar formato grupo1/grupo2/grupo3 para crear subgrupos</property>
                     <property name="margin-start">10</property>
                     <property name="hexpand">True</property>
                     <property name="has-entry">True</property>
@@ -1185,6 +1192,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkEntry" id="txtPassword">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Dejar en blanco para autenticación sin password/public key</property>
                     <property name="margin-start">10</property>
                     <property name="visibility">False</property>
                     <property name="invisible-char">●</property>
@@ -1330,6 +1338,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkSpinButton" id="txtKeepAlive">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Intervalo en segundos para enviar paquetes keep-alive</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
@@ -1369,6 +1378,10 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkSpinButton" id="txtCompressionLevel">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Nivel de compresión: 
+blanco: por defecto
+1: min
+9: max</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
@@ -1380,6 +1393,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkEntry" id="txtExtraParams">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Parámetros extra a pasar a la línea de comandos</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
@@ -1445,6 +1459,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">False</property>
+                            <property name="tooltip-text" translatable="yes">Crear redirección dinámica de puertos</property>
                             <property name="draw-indicator">True</property>
                             <signal name="toggled" handler="on_chkDynamic_toggled" swapped="no"/>
                           </object>
@@ -1993,6 +2008,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Guardar buffer de la consola activa en un archivo</property>
                         <property name="label" translatable="yes">Guardar buffer _como</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_guardar_como1_activate" swapped="no"/>
@@ -2002,6 +2018,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Importar lista de servidores desde un archivo</property>
                         <property name="label" translatable="yes">_Importar servidores</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_importar_servidores1_activate" swapped="no"/>
@@ -2011,6 +2028,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Exportar lista de servidores a un archivo</property>
                         <property name="label" translatable="yes">_Exportar servidores</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_exportar_servidores1_activate" swapped="no"/>
@@ -2213,6 +2231,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Abrir consola local</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Local</property>
                 <property name="use-underline">True</property>
@@ -2228,6 +2247,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Conectar a host seleccionado o a todos los host del grupo</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Conectar</property>
                 <property name="use-underline">True</property>
@@ -2243,6 +2263,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Agregar nuevo host</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Agregar</property>
                 <property name="use-underline">True</property>
@@ -2258,6 +2279,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Editar propiedades de host seleccionado</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Editar</property>
                 <property name="use-underline">True</property>
@@ -2273,6 +2295,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Eliminar host seleccionado</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Eliminar</property>
                 <property name="use-underline">True</property>
@@ -2298,9 +2321,11 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Separar consola horizontalmente</property>
                 <property name="label" translatable="yes">__glade_unnamed_28</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-goto-last</property>
+                <signal name="clicked" handler="on_btnHSplit_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2311,6 +2336,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Separar consola verticalmente</property>
                 <property name="label" translatable="yes">__glade_unnamed_29</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-goto-bottom</property>
@@ -2325,6 +2351,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Unir todas las consolas</property>
                 <property name="label" translatable="yes">__glade_unnamed_30</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-fullscreen</property>
@@ -2349,6 +2376,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Configuración</property>
                 <property name="label" translatable="yes">__glade_unnamed_32</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-preferences</property>
@@ -2429,6 +2457,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="tooltip-text" translatable="yes">Enviar comandos a varios hosts al mismo tiempo</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Cluster</property>
                 <property name="use-underline">True</property>
