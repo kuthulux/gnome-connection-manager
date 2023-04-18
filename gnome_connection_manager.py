@@ -185,6 +185,7 @@ class conf():
     WINDOW_HEIGHT = -1
     FONT = ""
     HIDE_DONATE = False
+    DISABLE_HOSTS_STRIPES = False
     AUTO_COPY_SELECTION = 0
     LOG_PATH = CONFIG_DIR + "/logs"
     SHOW_TOOLBAR = True
@@ -1453,6 +1454,7 @@ class Wmain(SimpleGladeApp):
             conf.WINDOW_HEIGHT = cp.getint("window", "window-height")
             conf.FONT = cp.get("options", "font")
             conf.HIDE_DONATE = cp.getboolean("options", "donate")
+            conf.DISABLE_HOSTS_STRIPES = cp.getboolean("options", "disable-hosts-stripes")
             conf.AUTO_COPY_SELECTION = cp.getboolean("options", "auto-copy-selection")
             conf.LOG_PATH = cp.get("options", "log-path")
             conf.VERSION = cp.get("options", "version")
@@ -1537,7 +1539,8 @@ class Wmain(SimpleGladeApp):
 
     def servers_background_color(self):
         self.color_index += 1
-        return self.color_back1 if self.color_index % 2 else self.color_back2
+        unevenColor = self.color_back1 if conf.DISABLE_HOSTS_STRIPES else self.color_back2
+        return self.color_back1 if self.color_index % 2 else unevenColor
 
     def updateTree(self):
         for grupo in dict(groups):
@@ -1657,6 +1660,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "check-updates", conf.CHECK_UPDATES)
         cp.set("options", "font", conf.FONT)
         cp.set("options", "donate", conf.HIDE_DONATE)
+        cp.set("options", "disable-hosts-stripes", conf.DISABLE_HOSTS_STRIPES)
         cp.set("options", "auto-copy-selection", conf.AUTO_COPY_SELECTION)
         cp.set("options", "log-path", conf.LOG_PATH)
         cp.set("options", "version", app_fileversion)
@@ -2880,6 +2884,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
         self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
+        self.addParam(_(u"Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
         self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
         self.addParam(_(u"Título"), "conf.APP_TITLE", str)
 
@@ -3075,6 +3080,9 @@ class Wconfig(SimpleGladeApp):
             wMain.get_widget("btnDonate").hide()
         else:
             wMain.get_widget("btnDonate").show()
+
+        # Update servers window colors
+        wMain.updateTree()
 
         #Recrear menu de comandos personalizados
         wMain.populateCommandsMenu()

@@ -505,6 +505,9 @@ msgstr "Confirm on close console with middle click"
 msgid "Reiniciar en el primer/último tab al llegar al final"
 msgstr "Circle around tabs when going to the previous/next tab"
 
+msgid "Deshabilitar franjas alternas en la ventana de hosts"
+msgstr "Disable alternating stripes in hosts window"
+
 msgid "Título dinámico"
 msgstr "Dynamic title"
 
