@@ -24,7 +24,7 @@ install: translate
 	gzip -9 $(DESTDIR)/usr/share/doc/$(PKG_NAME)/changelog
 	cp gnome-connection-manager.desktop $(DESTDIR)/usr/share/applications
 	cp LICENSE $(DESTDIR)/usr/share/doc/$(PKG_NAME)/copyright
-	cp -r lang donate.gif gnome_connection_manager.py gnome-connection-manager.glade icon.png pyAES.py SimpleGladeApp.py ssh.expect urlregex.py $(DESTDIR)/usr/share/gnome-connection-manager/
+	cp -r lang donate.gif gnome_connection_manager.py gnome-connection-manager.glade icon.png pyAES.py SimpleGladeApp.py ssh.expect urlregex.py style.css $(DESTDIR)/usr/share/gnome-connection-manager/
 
 #compile translation files
 translate:
