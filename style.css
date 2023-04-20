@@ -7,3 +7,7 @@ toolbutton button {
         border-width : 1px;
         border-radius: 5px;
 }
+
+notebook tab {
+    border-left: 1px solid #bcbebf;
+}
