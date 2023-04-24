@@ -3349,7 +3349,7 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuSplitV.hide()
 
             #enable or disable log checkbox according to terminal 
-            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
+            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_children()[0].log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
