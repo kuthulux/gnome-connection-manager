@@ -2640,8 +2640,8 @@ class Whost(SimpleGladeApp):
             fcolor=""
             bcolor=""
         else:
-            fcolor = self.btnFColor.selected_color
-            bcolor = self.btnBColor.selected_color
+            fcolor = color_to_hex(self.btnFColor.get_rgba())
+            bcolor = color_to_hex(self.btnBColor.get_rgba())
 
         x11 = self.chkX11.get_active()
         agent = self.chkAgent.get_active()
