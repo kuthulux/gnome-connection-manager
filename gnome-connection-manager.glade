@@ -615,6 +615,18 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <child>
                   <placeholder/>
                 </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
             </child>
             <child type="tab">
@@ -1759,6 +1771,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
+                        <property name="active">True</property>
                         <property name="draw-indicator">True</property>
                         <signal name="toggled" handler="on_chkDefaultColors_toggled" swapped="no"/>
                       </object>
