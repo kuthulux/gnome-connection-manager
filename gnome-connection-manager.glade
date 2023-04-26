@@ -627,6 +627,12 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <child>
                   <placeholder/>
                 </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
             </child>
             <child type="tab">
@@ -1119,7 +1125,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="has-entry">True</property>
                     <child internal-child="entry">
                       <object class="GtkEntry">
-                        <property name="can-focus">False</property>
+                        <property name="can-focus">True</property>
                       </object>
                     </child>
                   </object>
