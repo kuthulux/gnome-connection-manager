@@ -505,6 +505,9 @@ msgstr "Confirm on close console with middle click"
 msgid "Reiniciar en el primer/último tab al llegar al final"
 msgstr "Circle around tabs when going to the previous/next tab"
 
+msgid "Deshabilitar franjas alternas en la ventana de hosts"
+msgstr "Disable alternating stripes in hosts window"
+
 msgid "Título dinámico"
 msgstr "Dynamic title"
 
@@ -966,7 +969,7 @@ msgstr "Type"
 #: ../gnome-connection-manager.glade:2534
 #: ../gnome-connection-manager.glade:2673
 msgid "Túnel"
-msgstr "Tunnel"
+msgstr "Port forwarding"
 
 #: ../gnome-connection-manager.glade.h:36
 #: ../gnome-connection-manager.glade:711 ../gnome-connection-manager.glade:723
