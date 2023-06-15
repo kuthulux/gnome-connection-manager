@@ -54,7 +54,7 @@ try:
     import gi
     gi.require_version('Gtk', '3.0')
     gi.require_version('Vte', '2.91')
-    from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GdkPixbuf, GLib
+    from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GLib
 except:
     sys.exit("python3-gi and gir1.2-vte-2.91 required")
 
@@ -148,6 +148,7 @@ _CONSOLE_CLOSE = ["console_close"]
 _CONSOLE_RECONNECT = ["console_reconnect"]
 _CONNECT = ["connect"]
 _NEW_LOCAL = ["new_local"]
+_FULLSCREEN = ["fullscreen"]
 _CLONE = ["clone"]
 
 ICON_PATH = BASE_PATH + "/icon.png"
@@ -185,6 +186,7 @@ class conf():
     WINDOW_HEIGHT = -1
     FONT = ""
     HIDE_DONATE = False
+    DISABLE_HOSTS_STRIPES = False
     AUTO_COPY_SELECTION = 0
     LOG_PATH = CONFIG_DIR + "/logs"
     SHOW_TOOLBAR = True
@@ -411,6 +413,8 @@ class Wmain(SimpleGladeApp):
         self.createMenu()
         self.window = self.get_widget("wMain")
 
+        self._current_fullscreen_state = False
+
         if conf.VERSION == 0:
             initialise_encyption_key()
 
@@ -534,6 +538,9 @@ class Wmain(SimpleGladeApp):
     #-- Wmain.new {
     def new(self):
         self.hpMain = self.get_widget("hpMain")
+        self.hpMainWindow = Gtk.Window()
+        self.hpMainWindow.add(self.hpMain)
+        self.wMainWindow = self.builder.get_object("wMain")
         self.nbConsole = self.get_widget("nbConsole")
         self.treeServers = self.get_widget("treeServers")
         self.menuServers = self.get_widget("menuServers")
@@ -629,6 +636,24 @@ class Wmain(SimpleGladeApp):
                         ntbk.set_current_page(0)
                     else:
                         ntbk.next_page()
+                elif cmd == _FULLSCREEN:
+                    if self._current_fullscreen_state:
+                        Gtk.Window.unfullscreen(self.hpMainWindow)
+                        Gtk.Window.unfullscreen(self.wMainWindow)
+                        self.wMainWindow.set_decorated(True)
+                        self.wMainWindow.set_has_resize_grip(True)
+                        self.get_widget("toolbar1").show()
+                        self.get_widget("contextMenu").show()
+                        self._current_fullscreen_state = False
+                    else:
+                        Gtk.Window.fullscreen(self.hpMainWindow)
+                        self.wMainWindow.set_decorated(False)
+                        self.wMainWindow.set_has_resize_grip(False)
+                        Gtk.Window.fullscreen(self.wMainWindow)
+                        self.get_widget("toolbar1").hide()
+                        self.get_widget("contextMenu").hide()
+                        self._current_fullscreen_state = True
+
                 elif cmd == _CONSOLE_CLOSE:
                     wid = widget.get_parent()
                     page = widget.get_parent().get_parent().page_num(wid)
@@ -1264,11 +1289,11 @@ class Wmain(SimpleGladeApp):
                 v.set_font(Pango.FontDescription(conf.FONT))
 
             scrollPane = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
-            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment ())
+            scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment())
             scrollPane.pack_start (v, True, True, 0)
             scrollPane.pack_start (scrollbar, False, False, 0)
 
-            tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab )
+            tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab)
 
             v.connect("child-exited", lambda *args: tab.mark_tab_as_closed())
             v.connect('focus', self.on_tab_focus)
@@ -1461,6 +1486,7 @@ class Wmain(SimpleGladeApp):
             conf.WINDOW_HEIGHT = cp.getint("window", "window-height")
             conf.FONT = cp.get("options", "font")
             conf.HIDE_DONATE = cp.getboolean("options", "donate")
+            conf.DISABLE_HOSTS_STRIPES = cp.getboolean("options", "disable-hosts-stripes")
             conf.AUTO_COPY_SELECTION = cp.getboolean("options", "auto-copy-selection")
             conf.LOG_PATH = cp.get("options", "log-path")
             conf.VERSION = cp.get("options", "version")
@@ -1494,6 +1520,8 @@ class Wmain(SimpleGladeApp):
         self.add_shortcut(cp, scuts, "reset", _CLEAR, "CTRL+SHIFT+K")
         self.add_shortcut(cp, scuts, "clone", _CLONE, "CTRL+SHIFT+D")
         self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+SHIFT+N")
+        self.add_shortcut(cp, scuts, "fullscreen", _FULLSCREEN, "F11")
+
 
         #shortcuts para cambiar consola1-consola9
         for x in range(1,10):
@@ -1545,7 +1573,8 @@ class Wmain(SimpleGladeApp):
 
     def servers_background_color(self):
         self.color_index += 1
-        return self.color_back1 if self.color_index % 2 else self.color_back2
+        unevenColor = self.color_back1 if conf.DISABLE_HOSTS_STRIPES else self.color_back2
+        return self.color_back1 if self.color_index % 2 else unevenColor
 
     def updateTree(self):
         for grupo in dict(groups):
@@ -1665,6 +1694,7 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "check-updates", conf.CHECK_UPDATES)
         cp.set("options", "font", conf.FONT)
         cp.set("options", "donate", conf.HIDE_DONATE)
+        cp.set("options", "disable-hosts-stripes", conf.DISABLE_HOSTS_STRIPES)
         cp.set("options", "auto-copy-selection", conf.AUTO_COPY_SELECTION)
         cp.set("options", "log-path", conf.LOG_PATH)
         cp.set("options", "version", app_fileversion)
@@ -2457,6 +2487,9 @@ class Whost(SimpleGladeApp):
         self.txtPrivateKey = self.get_widget("txtPrivateKey")
         self.btnBrowse = self.get_widget("btnBrowse")
         self.txtPort = self.get_widget("txtPort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtPortAdjustment = Gtk.Adjustment(value=22, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtPort.set_adjustment(txtPortAdjustment)
         self.cmbGroup.remove_all()
         for group in groups:
             self.cmbGroup.append_text(group)
@@ -2464,8 +2497,16 @@ class Whost(SimpleGladeApp):
 
         self.chkDynamic = self.get_widget("chkDynamic")
         self.txtLocalPort = self.get_widget("txtLocalPort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtLocalPortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtLocalPort.set_adjustment(txtLocalPortAdjustment)
         self.txtRemoteHost = self.get_widget("txtRemoteHost")
         self.txtRemotePort = self.get_widget("txtRemotePort")
+        # Done programaticaly because engine does not see top-level abjustment object
+        # Local and remote port adjustments cannot be merged into one adjustment,
+        # because their vaues becomes dependent
+        txtRemotePortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        self.txtRemotePort.set_adjustment(txtRemotePortAdjustment)
         self.treeTunel = self.get_widget("treeTunel")
         self.txtComamnds = self.get_widget("txtCommands")
         self.chkComamnds = self.get_widget("chkCommands")
@@ -2475,12 +2516,18 @@ class Whost(SimpleGladeApp):
         buf.connect("changed", self.update_texttags)
         self.chkKeepAlive = self.get_widget("chkKeepAlive")
         self.txtKeepAlive = self.get_widget("txtKeepAlive")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtKeepaliveAdjustment = Gtk.Adjustment(value=0, lower=0, upper=3600, step_increment=1, page_increment=10)
+        self.txtKeepAlive.set_adjustment(txtKeepaliveAdjustment)
         self.btnFColor = self.get_widget("btnFColor")
         self.btnBColor = self.get_widget("btnBColor")
         self.chkX11 = self.get_widget("chkX11")
         self.chkAgent = self.get_widget("chkAgent")
         self.chkCompression = self.get_widget("chkCompression")
         self.txtCompressionLevel = self.get_widget("txtCompressionLevel")
+        # Done programaticaly because engine does not see top-level abjustment object
+        txtCompressionLevelAdjustment = Gtk.Adjustment(value=6, lower=1, upper=9, step_increment=1, page_increment=3)
+        self.txtCompressionLevel.set_adjustment(txtCompressionLevelAdjustment)
         self.txtExtraParams = self.get_widget("txtExtraParams")
         self.chkLogging = self.get_widget("chkLogging")
         self.cmbBackspace = self.get_widget("cmbBackspace")
@@ -2601,8 +2648,8 @@ class Whost(SimpleGladeApp):
             fcolor=""
             bcolor=""
         else:
-            fcolor = self.btnFColor.selected_color
-            bcolor = self.btnBColor.selected_color
+            fcolor = color_to_hex(self.btnFColor.get_rgba())
+            bcolor = color_to_hex(self.btnBColor.get_rgba())
 
         x11 = self.chkX11.get_active()
         agent = self.chkAgent.get_active()
@@ -2699,7 +2746,7 @@ class Whost(SimpleGladeApp):
         self.txtExtraParams.set_sensitive(not is_local)
 
         if widget.get_active_text()=="ssh":
-            self.get_widget("table2").show()
+            self.get_widget("tunnelGrid").show()
             self.txtKeepAlive.set_sensitive(True)
             self.chkKeepAlive.set_sensitive(True)
             self.chkX11.set_sensitive(True)
@@ -2710,7 +2757,7 @@ class Whost(SimpleGladeApp):
             self.btnBrowse.set_sensitive(True)
             port = "22"
         else:
-            self.get_widget("table2").hide()
+            self.get_widget("tunnelGrid").hide()
             self.txtKeepAlive.set_text('0')
             self.txtKeepAlive.set_sensitive(False)
             self.chkKeepAlive.set_sensitive(False)
@@ -2871,6 +2918,7 @@ class Wconfig(SimpleGladeApp):
         self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)
         self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
         self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
+        self.addParam(_(u"Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
         self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
         self.addParam(_(u"Título"), "conf.APP_TITLE", str)
 
@@ -3067,6 +3115,9 @@ class Wconfig(SimpleGladeApp):
         else:
             wMain.get_widget("btnDonate").show()
 
+        # Update servers window colors
+        wMain.updateTree()
+
         #Recrear menu de comandos personalizados
         wMain.populateCommandsMenu()
         wMain.writeConfig()
@@ -3231,7 +3282,7 @@ class NotebookTabLabel(Gtk.HBox):
         label.show()
         self.eb.show()
         close_image = Gtk.Image.new_from_icon_name("window-close", Gtk.IconSize.MENU)
-        b, image_w, image_h = Gtk.icon_size_lookup(Gtk.IconSize.MENU)
+        _, image_w, image_h = Gtk.icon_size_lookup(Gtk.IconSize.MENU)
         self.widget_=widget_
         self.popup = popup_
         close_btn = Gtk.Button()
@@ -3306,7 +3357,7 @@ class NotebookTabLabel(Gtk.HBox):
                 self.popup.mnuSplitV.hide()
 
             #enable or disable log checkbox according to terminal 
-            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_child().log_handler_id != 0 )
+            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_children()[0].log_handler_id != 0 )
             self.popup.popup( None, None, None, None, event.button, event.time)
             return True
         elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:

@@ -1323,6 +1323,9 @@ msgstr "_Хосты"
 msgid "Título"
 msgstr "Заголовок"
 
+msgid "Deshabilitar franjas alternas en la ventana de hosts"
+msgstr "Отключить чередование полос в окне хостов"
+
 #: ../gnome_connection_manager.py:2850
 msgid "Título dinámico"
 msgstr "Динамический заголовок"
