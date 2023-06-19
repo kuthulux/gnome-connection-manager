@@ -16,7 +16,12 @@ The easiest way to install GCM is to download the deb or rpm package from [relea
 #### Fedora/Redhat
 `sudo yum install gnome-connection-manager-1.2.0.noarch.rpm`
 
+#### Windows
+Install Latest Visual C++ Redistributor
 
+python -m pip install --upgrade pip
+
+python -m pip install pycairo pygobject PyGtk 
 
 ### From Sources
 Download or clone the repository and execute the file `gnome_connection_manager.py`
