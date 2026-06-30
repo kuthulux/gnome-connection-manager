@@ -1,0 +1,1175 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: da_DK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "Annuller"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "Gem"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "Åbn"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "Venter…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "Forbind"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "Afbryd"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "xfreerdp-indstillinger:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "xfreerdp-log:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp blev ikke fundet"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "Forbinder…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "Session afsluttet"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "Afsluttet (kode {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "Serielport:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "Eks.: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "Baudhastighed:"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "Overførselshastighed i baud"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "Skabelon:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "Indlæs leverandørens anbefalede serielindstillinger"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "Databits:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "Antal databits pr. byte (8 = standard)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "Paritet:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "Paritetsbit: Ingen (N) = standard, Lige (E), Ulige (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "Stopbits:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "Stopbits: 1 = standard, 2 = RS-485 / ældre hardware"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "Flowkontrol:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"Flowkontrol:\n"
+"  Ingen = standardkonsol\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (fuldt kabel)\n"
+"  DSR/DTR = ældre hardware"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"Ekstra rå-indstillinger givet til programmet\n"
+"Eks.: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "Importer fra libvirt"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "Hypervisor SSH-bruger:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "Hypervisorer (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "Registreret libvirt-URI"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+msgstr ""
+"Eks.: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "Tilføj"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>Forbindelsestyper der skal importeres:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (ProxyJump -J via hypervisor når VM-IP er kendt, ellers hypervisor-"
+"shell + -t ssh bruger@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH-tunnel håndteres "
+"automatisk)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (tjekker port 3389 fra hypervisor via nc/nmap - springes over hvis "
+"porten er lukket)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  Scan hypervisors"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "Overskriv eksisterende forbindelser med samme navn og protokol"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ Markér alle"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ Fjern markering for alle"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "Proto"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "VM-navn"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "Gruppe"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / Vært"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "Status"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "Importeret"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  Importer valgte"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  Luk"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"Ingen URI fundet i dconf (er virt-manager ikke konfigureret?).\n"
+"Tilføj dine URI'er manuelt nedenfor."
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "Ugyldigt libvirt-mål."
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "Ingen URI valgt."
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "Ingen forbindelsestype valgt."
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  Scan igen"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr ""
+"Ingen forbindelse at importere (alle findes allerede eller ingen valgt)."
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ Importeret"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  Scan Proxmox-værter"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "Registrerede Proxmox-mål (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "Registreret Proxmox-mål"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "Tilføj et Proxmox-mål:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "Eks.: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (ikke tilgængelig her: Proxmox kræver API-billet/proxy)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"Ingen SSH-URI fundet i dconf.\n"
+"Indtast en IP/vært nedenfor og klik på Tilføj."
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "Ugyldigt Proxmox-mål."
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "Intet Proxmox-mål valgt."
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>Dobbeltklik på en celle for at redigere den.\n"
+"Filformat: <tt>[serial_templates]</tt> i <tt>gcm.conf</tt>\n"
+"<tt>Min enhed = 9600,n,n,8,1</tt>  (baud,flow,paritet,bits,stop)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "Skabelonnavn"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "Baudhastighed"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "Flow"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "Paritet"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "Databits"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "Stop"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ Tilføj"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− Fjern"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "Gendan standardindstillinger"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "Serielle skabeloner"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "Ny skabelon"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "Standard SSH-bruger (VM'er):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "søg..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "Omdøb fane"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "Indtast nyt navn"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr ""
+"Tilstanden for kontinuerlig log er aktiv og kan ikke deaktiveres pr. fane."
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "Kopier"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "Indsæt"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "Kopier og indsæt"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "Markér alle"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "Kopier alt"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "Gem buffer til fil"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "Opdel H"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "Opdel V"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "Nulstil konsol"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "Nulstil og ryd konsol"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4674
+msgid "Clone console"
+msgstr "Klon konsol"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "Aktivér logning"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "Luk konsol"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "Brugerdefinerede kommandoer"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "Kopier adresse"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "Tilføj vært"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "Rediger"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "Fjern"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "Dupliker vært"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "Udvid alle"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "Skjul alle"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "Genopret forbindelse til vært"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "Ingen vært importeret."
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "Ingen ny vært (dubletter ignoreret)."
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "Kan ikke åbne logfilen til skrivning"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "Fejl ved forbindelse til server"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "Ugyldig post i konfigurationsfilen"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "Gem som"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "Kan ikke åbne filen til skrivning"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "Der er"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "åbne konsoller, vil du afslutte alligevel?"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "Importer servere"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "Indtast adgangskode"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "Ugyldig adgangskode"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "Serverlisten vil blive overskrevet, vil du fortsætte?"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "Ugyldig fil"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "Eksporter servere"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "Vil du virkelig fjerne værten"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "Vil du virkelig fjerne alle værter i gruppen"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "Ingen åbne konsoller"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "Lokal"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "Vært"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "Fjern"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "Felterne gruppe, navn og vært er obligatoriske"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "Ugyldig port"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "Værtsnavn"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "findes allerede for gruppe"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "Fejl ved gemning af vært. Beskrivelse"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "Indtast fjernvært"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "Lokal port allerede tildelt"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "Ordseparator"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "Bufferstørrelse"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "Transparens"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "Logsti"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "Tilstand for kontinuerlig VTE-fanelogning"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "Åbn lokal konsol ved opstart"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "Log lokale konsolsessioner"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "Indsæt ved højreklik"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "Kopier markering til udklipsholder"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "Bekræft ved lukning af konsol"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "Bekræft ved lukning af konsol med midterklik"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "Cirkulér mellem faner ved forrige/næste fane"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "Aldrig"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "Altid"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "Kun ved ren afslutning"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "Bekræft ved afslutning"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "Søg efter opdateringer"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "Deaktiver alternerende striber i værtsvinduet"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "Dynamisk titel"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "Titel"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "Handling"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "Genvej"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "Kommando"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "Vælg skrifttype"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "Aktiver"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "OK"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"En ny version er tilgængelig: https://github.com/MathildeDec/gnome-"
+"connection-manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"Dette er gnome-connection-manager, skrevet og vedligeholdt af\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "En simpel ssh-forbindelsesmanager til Gnome"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "Projektets hjemmeside"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "Cluster"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "Luk"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "Vælg konsoller der skal bruges:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "Ryd markering"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "Vend markering om"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "Indtast teksten der skal sendes til konsollerne: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">CTRL+OP/CTRL+NED for historik</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "Indstillinger"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "Generelt"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "Baggrundsfarve:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "Forgrundsfarve:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "Vælg baggrundsfarve"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "Vælg forgrundsfarve"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "Standardfarver"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "Brug standard fast bredde-skrifttype"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "Skrifttype:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "Farver"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "Standardkommandoer"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "Brugerdefinerede kommandoer"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "Genveje"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "Rediger vært"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "Navn"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "Type"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "Port"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "Bruger"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "Adgangskode"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "Privat nøgle"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "Brug formatet gruppe1/gruppe2/gruppe3 til at oprette undergrupper"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "seriel"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "lokal"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "Lad stå tomt for adgangskodefri/offentlig nøgle-godkendelse"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "X11-videresendelse"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "Agentvideresendelse"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "Komprimering"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "Ekstra argumenter"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "Aktivér logning"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "Sekunder mellem keep-alive-pakker"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"Komprimeringsniveau: \n"
+"tomt: standardkomprimering\n"
+"1: min\n"
+"9: maks"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "Ekstra argumenter til kommandolinjen"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "Egenskaber"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "Dynamisk"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "Opret dynamisk portvideresendelse"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "Lokal port"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "Fjernvært"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "Fjernport"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "Portvideresendelse"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "Send kommandoer efter login"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>Brug ##D=millisekunder for at tilføje en forsinkelse.\n"
+"Eks.: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "Kommandoer"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "Tastsekvenser"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "Backspace:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "Delete:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "Automatisk"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "ASCII Backspace \t[Ctrl+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "ASCII Delete    \t[Ctrl+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "Delete-sekvens \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "TTY-sletning"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "Farver og taster"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "Gnome Connection Manager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_Fil"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "Gem den aktive konsols buffer til en fil"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "Gem buffer som"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "Importer serverliste fra fil"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "_Importer servere"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "Eksporter serverliste til fil"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "_Eksporter servere"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "Importer fra Proxmox"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_Afslut"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_Rediger"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_Vis"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "Vis værktøjslinje"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "Vis panel"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "_Servere"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_Hjælp"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_Om"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "Åbn lokal konsol"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr "Forbind til den valgte vært eller alle værter i den valgte gruppe"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "Tilføj ny vært"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "Rediger værters egenskaber"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "Fjern valgt vært"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "Opdel konsol horisontalt"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "Opdel konsol vertikalt"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "Fjern opdeling af alle konsoller"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "Send kommandoer til flere værter på samme tid"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "etiket"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "side 1"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "side 2"

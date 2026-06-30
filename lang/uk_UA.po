@@ -1,0 +1,1175 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: uk_UA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "Скасувати"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "Зберегти"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "Відкрити"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "Очікування…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "Підключити"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "Відключити"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "Параметри xfreerdp:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "Журнал xfreerdp:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp не знайдено"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "Підключення…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "Сесію завершено"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "Завершено (код {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "Послідовний порт:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "Напр.: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "Швидкість (бод):"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "Швидкість передачі в бодах"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "Шаблон:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "Завантажити налаштування порту, рекомендовані виробником"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "Біти даних:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "Кількість бітів даних на байт (8 = стандарт)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "Парність:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "Біт парності: Немає (N) = стандарт, Парний (E), Непарний (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "Стоп-біти:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "Стоп-біти: 1 = стандарт, 2 = RS-485 / застаріле обладнання"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "Керування потоком:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"Керування потоком:\n"
+"  Немає = стандартна консоль\n"
+"  XON/XOFF = програмне (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = апаратне (повний кабель)\n"
+"  DSR/DTR = застаріле обладнання"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"Додаткові необроблені опції, що передаються програмі\n"
+"Напр.: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "Імпорт з libvirt"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "Користувач SSH гіпервізора:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "Гіпервізори (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "Виявлений URI libvirt"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+msgstr ""
+"Напр.: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "Додати"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>Типи з'єднань для імпорту:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (ProxyJump -J через гіпервізор, якщо відома IP-адреса ВМ, інакше "
+"оболонка гіпервізора + -t ssh user@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - тунель SSH створюється "
+"автоматично)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (перевірка порту 3389 з гіпервізора через nc/nmap - пропускається, якщо"
+" порт закрито)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  Сканувати гіпервізори"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "Перезаписати наявні з'єднання з такою ж назвою і протоколом"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ Вибрати всі"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ Скасувати всі позначки"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "Протокол"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "Ім'я ВМ"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "Група"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / Хост"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "Стан"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "Імпортовано"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  Імпортувати вибране"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  Закрити"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"URI не знайдено в dconf (virt-manager не налаштовано?).\n"
+"Додайте URI вручну нижче."
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "Недійсна ціль libvirt."
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "URI не вибрано."
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "Тип з'єднання не вибрано."
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  Сканувати знову"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr "Немає з'єднань для імпорту (всі вже існують або нічого не вибрано)."
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ Імпортовано"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  Сканувати хости Proxmox"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "Виявлені цілі Proxmox (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "Виявлена ціль Proxmox"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "Додати ціль Proxmox:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "Напр.: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (недоступно тут: Proxmox потребує API-тикет/проксі)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"URI SSH не знайдено в dconf.\n"
+"Введіть IP/хост нижче та натисніть «Додати»."
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "Недійсна ціль Proxmox."
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "Ціль Proxmox не вибрано."
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>Двічі натисніть на клітинку для редагування.\n"
+"Формат файлу: <tt>[serial_templates]</tt> у <tt>gcm.conf</tt>\n"
+"<tt>Мій пристрій = 9600,n,n,8,1</tt>  (бод,потік,парність,біти,стоп)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "Назва шаблону"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "Швидкість (бод)"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "Потік"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "Парність"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "Біти даних"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "Стоп"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ Додати"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− Видалити"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "Відновити значення за замовчуванням"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "Шаблони послідовного порту"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "Новий шаблон"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "Стандартний користувач SSH (ВМ):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "пошук..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "Перейменувати вкладку"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "Введіть нове ім'я"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr ""
+"Режим безперервного журналювання активний і не може бути вимкнений для "
+"окремої вкладки."
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "Копіювати"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "Вставити"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "Копіювати та вставити"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "Вибрати все"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "Копіювати все"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "Зберегти буфер у файл"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "Розділити по горизонталі"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "Розділити по вертикалі"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "Скинути консоль"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "Скинути та очистити консоль"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4674
+msgid "Clone console"
+msgstr "Клонувати консоль"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "Увімкнути журналювання"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "Закрити консоль"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "Користувацькі команди"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "Копіювати адресу"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "Додати хост"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "Редагувати"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "Видалити"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "Дублювати хост"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "Розгорнути все"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "Згорнути все"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "Перепідключитися до хоста"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "Хост не імпортовано."
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "Немає нових хостів (дублікати ігноровано)."
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "Не вдалося відкрити файл журналу для запису"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "Помилка підключення до сервера"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "Недійсний запис у файлі конфігурації"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "Зберегти як"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "Не вдалося відкрити файл для запису"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "Відкрито"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "консолей, вийти попри все?"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "Імпорт серверів"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "Введіть пароль"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "Невірний пароль"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "Список серверів буде перезаписано, продовжити?"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "Недійсний файл"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "Експорт серверів"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "Ви дійсно хочете видалити хост"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "Ви дійсно хочете видалити всі хости в групі"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "Немає відкритих консолей"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "Локальний"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "Хост"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "Віддалений"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "Поля «група», «ім'я» та «хост» обов'язкові"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "Недійсний порт"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "Ім'я хоста"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "вже існує для групи"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "Помилка збереження хоста. Опис"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "Введіть віддалений хост"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "Локальний порт вже призначено"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "Роздільник слів"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "Розмір буфера"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "Прозорість"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "Шлях до журналів"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "Режим безперервного журналювання вкладок VTE"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "Відкривати локальну консоль при запуску"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "Журналювати сесії локальної консолі"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "Вставляти правим клацанням"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "Копіювати виділення в буфер обміну"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "Підтверджувати при закритті консолі"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "Підтверджувати при закритті консолі середньою кнопкою миші"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "Циклічно переключатися між вкладками при переході вперед/назад"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "Ніколи"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "Завжди"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "Тільки при коректному виході"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "Підтверджувати при виході"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "Перевіряти оновлення"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "Вимкнути чергування смуг у вікні хостів"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "Динамічний заголовок"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "Заголовок"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "Дія"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "Комбінація клавіш"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "Команда"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "Вибрати шрифт"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "Активувати"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "Гаразд"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"Доступна нова версія: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"Це gnome-connection-manager, написаний та підтримуваний\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Чилі"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "Простий менеджер SSH-з'єднань для Gnome"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "Домашня сторінка проєкту"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "Кластер"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "Закрити"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "Виберіть консолі для використання:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "Очистити виділення"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "Інвертувати виділення"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "Введіть текст для надсилання в консолі: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">CTRL+ВГОРУ/CTRL+ВНИЗ для історії</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "Налаштування"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "Загальні"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "Колір фону:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "Колір тексту:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "Вибрати колір фону"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "Вибрати колір тексту"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "Кольори за замовчуванням"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "Використовувати стандартний моноширинний шрифт"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "Шрифт:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "Кольори"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "Стандартні команди"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "Користувацькі команди"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "Комбінації клавіш"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "Редагувати хост"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "Ім'я"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "Опис"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "Тип"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "Порт"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "Користувач"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "Пароль"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "Закритий ключ"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "Для створення підгруп використовуйте формат група1/група2/група3"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "послідовний"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "локальний"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "Залиште порожнім для автентифікації без пароля / за публічним ключем"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "Перенаправлення X11"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "Перенаправлення агента"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "Стиснення"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "Додаткові аргументи"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "Увімкнути журналювання"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "Секунд між keep-alive пакетами"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"Рівень стиснення:\n"
+"порожньо: стиснення за замовчуванням\n"
+"1: мін\n"
+"9: макс"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "Додаткові аргументи для командного рядка"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "Властивості"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "Динамічний"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "Створити динамічне перенаправлення порту"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "Локальний порт"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "Віддалений хост"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "Віддалений порт"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "Перенаправлення порту"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "Надсилати команди після входу"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>Використовуйте ##D=мілісекунди, щоб додати затримку.\n"
+"Напр.: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "Команди"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "Послідовності клавіш"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "Backspace:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "Delete:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "Автоматично"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "ASCII Backspace \t[Ctrl+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "ASCII Delete    \t[Ctrl+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "Послідовність Delete \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "Очищення TTY"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "Кольори та клавіші"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "Gnome Connection Manager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_Файл"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "Зберегти буфер активної консолі у файл"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "Зберегти буфер як"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "Імпортувати список серверів з файлу"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "_Імпорт серверів"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "Експортувати список серверів у файл"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "_Експорт серверів"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "Імпорт з Proxmox"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_Вихід"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_Редагувати"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_Вигляд"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "Показати панель інструментів"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "Показати панель"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "_Сервери"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_Довідка"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_Про програму"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "Відкрити локальну консоль"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr "Підключитися до вибраного хоста або всіх хостів вибраної групи"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "Додати новий хост"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "Редагувати властивості хостів"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "Видалити вибраний хост"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "Розділити консоль по горизонталі"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "Розділити консоль по вертикалі"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "Об'єднати всі консолі"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "Надіслати команди кількох хостам одночасно"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "позначка"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "сторінка 1"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "сторінка 2"

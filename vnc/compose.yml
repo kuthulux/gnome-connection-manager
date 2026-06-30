@@ -1,0 +1,13 @@
+services:
+  vnc:
+    build: .
+    container_name: vnc-test
+    ports:
+      - "5901:5901"
+    environment:
+      VNC_PASSWORD: testpass
+      VNC_DISPLAY: ":1"
+      VNC_GEOMETRY: 1280x800
+      VNC_DEPTH: 24
+    shm_size: 256m
+    restart: unless-stopped

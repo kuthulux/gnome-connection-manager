@@ -9,10 +9,22 @@ fconfigure stdin -blocking 0
 
 
 #capturar redimension de tamaño de pantalla y pasarlo al proceso ssh hijo
+# fix #87: debounce WINCH (max 1 resize per 200ms) to avoid flooding window-change
+# packets to network devices (MikroTik, etc.) that freeze on too many resize events
+set winch_pending 0
+proc do_winch {} {
+    global winch_pending
+    set winch_pending 0
+    set rows [stty rows]
+    set cols [stty columns]
+    stty rows $rows columns $cols < $spawn_out(slave,name)
+}
 trap {
- set rows [stty rows]
- set cols [stty columns]
- stty rows $rows columns $cols < $spawn_out(slave,name)
+    global winch_pending
+    if {!$winch_pending} {
+        set winch_pending 1
+        after 200 do_winch
+    }
 } WINCH
 
 

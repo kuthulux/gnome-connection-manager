@@ -9,88 +9,257 @@
 # They are required to keep user's code
 
 # Gnome Connection Manager
-# Renzo Bertuzzi (kuthulu@gmail.com) - CHILE
-#
-#TODO
-# - ayuda
-# - drag'n drop hosts entre grupos
-# - sftp
-# - master password (al iniciar la aplicacion)
-# - guardar estado de consolas abiertas (y estado de split)
-# - sortcut para moverse entre notebooks
-# - quitar los "accelerator" del archivo .glade (o dejarlos opcionales)
-# - soporte picocom (o minicom, o pyserial, ser2net) para comunicación serial
-# - Permitir modificar combinacion para cerrar aplicacion CTRL+Q
-# - Icono en system tray
-# - Quitar shortcut ALT+F para archivo
-# - Permitir deshabilitar shortcuts
-# - soporte proxy socks/http para ssh
-# - cluster mode: would be nice to have a drop-down list on the cluster button and once selected \"the text to send to hosts box\" should be activated on the right of the cluster button. The box should stay on the toolbar and not over the terminal window
-# - hide chars** in cluster mode (un checkbox para mostrar/ocultar entrada)
-# - seleccionar varios hosts y conectarse
-# - seleccionar varios hosts y editarlos
-# - permitir establecer colores a nivel de grupos
-# - permitir cambiar nombre de grupo
-# - overwrite colors (like putty)
-# - Cambiar charset en consola o en propiedades del host
-# - One "nice to have" would be the ability for GCM to use my existing PuTTY sessions instead of entering everything a second time. External script for that that parses ~/putty/session files
-# - Enter passwords in commands and hide them, #P=password (Angelo Corsaro). TextView doesnt support masking text, it needs a different implementation. Pending.
-# - Persist history of cluster commands. is it really necessary?
-# - Option to disable shortcuts
+# Renzo Bertuzzi - CHILE
+# Fork Mathilde Deuscher - FRANCE
 
-from __future__ import with_statement
-import os
-import operator
-import sys
+# Import en haut du fichier
 import base64
-import time
-import tempfile
-import traceback
+import json
+import logging
+import operator
+import os
 import re
 import shlex
-import cairo
+import subprocess
+import sys
+import threading
+import time
+from threading import Thread
+from typing import TYPE_CHECKING
+from urllib.parse import urlparse
+
+from ssh_migrate_gcm import migrate_ssh_hosts, patch_edit_host_dialog
+
+if TYPE_CHECKING:
+    # `_` est injecté dans les builtins à l'exécution par bindtextdomain().
+    # Cette déclaration sert uniquement au type-checker (Pylance) : elle évite
+    # les faux positifs "_ is not defined" sans affecter le runtime.
+    def _(message: str) -> str: ...
+
+
+try:
+    from loguru import logger as _loguru_logger
+
+    _LOGURU_OK = True
+except ImportError:
+    _LOGURU_OK = False
+
+
+def _dep_install_hint(pkg_debian, pkg_fedora, pkg_arch=None):
+    """Retourne la commande d'installation selon l'OS détecté (/etc/os-release)."""
+    try:
+        with open("/etc/os-release") as _f:
+            _rel = _f.read().lower()
+    except OSError:
+        _rel = ""
+    if any(
+        x in _rel for x in ("ubuntu", "debian", "mint", "pop", "kali", "raspbian", "linuxmint")
+    ):
+        return f"sudo apt install {pkg_debian}"
+    if any(x in _rel for x in ("fedora", "rhel", "centos", "rocky", "alma", "oracle")):
+        return f"sudo dnf install {pkg_fedora}"
+    if any(x in _rel for x in ("arch", "manjaro", "endeavouros", "garuda")):
+        return f"sudo pacman -S {pkg_arch or pkg_fedora}"
+    if any(x in _rel for x in ("opensuse", "suse")):
+        return f"sudo zypper install {pkg_debian}"
+    return (
+        f"Debian/Ubuntu : sudo apt install {pkg_debian}\n"
+        f"  Fedora/RHEL   : sudo dnf install {pkg_fedora}"
+    )
+
+
+try:
+    import paramiko
+
+    _PARAMIKO_OK = True
+except ImportError:
+    _PARAMIKO_OK = False
+
+try:
+    from ssh_config_editor import SshConfigEditorDialog
+
+    _SSH_CONFIG_EDITOR_OK = True
+except ImportError:
+    _SSH_CONFIG_EDITOR_OK = False
+
+try:
+    from ssh_key_manager_dialog import SSHKeyManagerDialog
+
+    _SSH_KEY_MANAGER_OK = True
+except ImportError:
+    _SSH_KEY_MANAGER_OK = False
 
 try:
     import gi
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('Vte', '2.91')
-    from gi.repository import Gtk, Gdk, Vte, Pango, GObject, GLib
-except:
-    sys.exit("python3-gi and gir1.2-vte-2.91 required")
 
-#check Terminal version
-TERMINAL_V048 = 'spawn_async' in Vte.Terminal.__dict__
+    gi.require_version("Gtk", "3.0")
+    gi.require_version("Vte", "2.91")
+    gi.require_version("Gdk", "3.0")
+    from gi.repository import Gdk, GLib, GObject, Gtk, Pango, Vte
+except Exception:
+    dep_msg = (
+        "\n[GCM] Erreur : dépendances GTK3 / VTE manquantes.\n"
+        "  → "
+        + _dep_install_hint(
+            "python3-gi gir1.2-gtk-3.0 gir1.2-vte-2.91",
+            "python3-gobject vte291",
+            "python-gobject vte3",
+        )
+        + "\n"
+    )
+    if _LOGURU_OK:
+        _loguru_logger.error(dep_msg.strip())
+    else:
+        sys.stderr.write(dep_msg)
+    sys.exit(1)
 
-#Ver si expect esta instalado
+# check Terminal version
+TERMINAL_V048 = "spawn_async" in Vte.Terminal.__dict__
+# Vérification runtime du signal 'output-written' (VTE >= 0.60)
+# GObject.signal_lookup retourne 0 si le signal n'existe pas.
+try:
+    from gi.repository import GObject as _GObj
+
+    _HAS_OUTPUT_WRITTEN = bool(_GObj.signal_lookup("output-written", Vte.Terminal))
+except Exception:
+    _HAS_OUTPUT_WRITTEN = (Vte.MAJOR_VERSION, Vte.MINOR_VERSION) >= (0, 60)
+
+# Ver si expect esta instalado
 try:
     e = os.system("expect >/dev/null 2>&1 -v")
 except:
     e = -1
 if e != 0:
-    error = Gtk.MessageDialog (modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text='You must install expect')
+    error = Gtk.MessageDialog(
+        modal=True,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.OK,
+        text="You must install expect",
+    )
     error.run()
-    sys.exit (1)
+    sys.exit(1)
 
-#Gdk.threads_init()
+# Gdk.threads_init()
 
-from SimpleGladeApp import SimpleGladeApp
-from SimpleGladeApp import bindtextdomain
+import re as _re
 
+_gcm_app_name = ""
+
+
+def bindtextdomain(app_name, locale_dir=None):
+    """Configure le domaine gettext pour les traductions.
+
+    Args:
+        app_name (str): Nom du domaine de traduction.
+        locale_dir (str, optional): Dossier contenant les fichiers .mo.
+    """
+    global _gcm_app_name
+    _gcm_app_name = app_name
+    import builtins
+    import gettext
+    import locale
+
+    def _lang_candidates():
+        """Retourne les langues candidates, avec fallback anglais en dernier."""
+
+        def _expand_locale(loc):
+            # fr_FR.UTF-8@euro -> fr_FR.UTF-8@euro, fr_FR, fr
+            if not loc:
+                return []
+            out = [loc]
+            base = loc.split("@", 1)[0]
+            base = base.split(".", 1)[0]
+            if base and base not in out:
+                out.append(base)
+            if "_" in base:
+                short = base.split("_", 1)[0]
+                if short and short not in out:
+                    out.append(short)
+            return out
+
+        langs = []
+        seen = set()
+
+        language_env = os.environ.get("LANGUAGE", "")
+        if language_env:
+            for item in [x for x in language_env.split(":") if x]:
+                for cand in _expand_locale(item):
+                    if cand not in seen:
+                        seen.add(cand)
+                        langs.append(cand)
+
+        for key in ("LC_ALL", "LC_MESSAGES", "LANG"):
+            val = os.environ.get(key, "")
+            if not val:
+                continue
+            for cand in _expand_locale(val):
+                if cand not in seen:
+                    seen.add(cand)
+                    langs.append(cand)
+
+        for fallback in ("en_US", "en"):
+            if fallback not in seen:
+                seen.add(fallback)
+                langs.append(fallback)
+        return langs
+
+    try:
+        locale.setlocale(locale.LC_ALL, "")
+    except (OSError, locale.Error):
+        try:
+            os.environ["LANG"] = "en_US.UTF-8"
+            os.environ["LANGUAGE"] = "en"
+            locale.setlocale(locale.LC_ALL, "")
+        except Exception:
+            builtins.__dict__["_"] = lambda x: x
+            return
+
+    try:
+        locale.bindtextdomain(app_name, locale_dir)
+        gettext.bindtextdomain(app_name, locale_dir)
+        gettext.textdomain(app_name)
+        translation = gettext.translation(
+            app_name,
+            localedir=locale_dir,
+            languages=_lang_candidates(),
+            fallback=True,
+        )
+        builtins.__dict__["_"] = translation.gettext
+    except Exception:
+        builtins.__dict__["_"] = lambda x: x
+
+
+# Import des modules refactorisés
 import configparser
+
 import pyAES
 import urlregex
+from models import Host, HostUtils
+from utils import GCMBase, conf
+from widgets import (
+    EntryDialog,
+    MultilineCellRenderer,
+    NotebookTabLabel,
+    RdpEmbeddedTab,
+    RdpTab,
+    SerialTab,
+    SpiceTab,
+    VncTab,
+    vte_run,
+)
 
 app_name = "Gnome Connection Manager"
-app_version = "1.2.1"
-app_web = "http://www.kuthulu.com/gcm"
+app_version = "1.3.3"
+app_web = "https://github.com/MathildeDec/gnome-connection-manager"
 app_fileversion = "1"
 
 BASE_PATH = os.path.dirname(os.path.abspath(sys.argv[0]))
 
-SSH_BIN = 'ssh'
-TEL_BIN = 'telnet'
-SHELL   = os.environ["SHELL"]
-DEFAULT_TERM_TYPE = 'xterm-256color'
+SSH_BIN = "ssh"
+TEL_BIN = "telnet"
+
+SHELL = os.environ["SHELL"]
+DEFAULT_TERM_TYPE = "xterm-256color"
 
 SSH_COMMAND = BASE_PATH + "/ssh.expect"
 try:
@@ -103,11 +272,13 @@ if USERHOME_DIR is None or USERHOME_DIR == "":
     except:
         USERHOME_DIR = ""
 
-assert( (USERHOME_DIR is not None) and (USERHOME_DIR != "") ), \
-    "FATAL: Could not determine home directory for the current user";
+assert (USERHOME_DIR is not None) and (USERHOME_DIR != ""), (
+    "FATAL: Could not determine home directory for the current user"
+)
 
-assert os.path.isdir(USERHOME_DIR), \
-    "FATAL: Could not locate home directory '%s' for the current user" % (USERHOME_DIR);
+assert os.path.isdir(USERHOME_DIR), (
+    "FATAL: Could not locate home directory '%s' for the current user" % (USERHOME_DIR)
+)
 
 CONFIG_DIR = USERHOME_DIR + "/.gcm"
 CONFIG_FILE = CONFIG_DIR + "/gcm.conf"
@@ -116,21 +287,76 @@ KEY_FILE = CONFIG_DIR + "/.gcm.key"
 if not os.path.exists(CONFIG_DIR):
     os.makedirs(CONFIG_DIR)
 
-domain_name="gcm-lang"
+# Initialiser les valeurs de conf dépendantes du contexte d'exécution
+conf.LOG_PATH = CONFIG_DIR + "/logs"
+conf.CONTINUOUS_LOG_PATH = CONFIG_DIR + "/log"
+conf.APP_TITLE = app_name
 
-#these colors are defined in vte sourcecode, but there is no way to read them (vte.cc 0.60.1, line 2371)
+
+def _setup_app_logger():
+    """Initialise le logger applicatif (Loguru) avec fallback stdlib.
+
+    Returns:
+        object: Logger configuré (`loguru.logger` ou `logging.Logger`).
+    """
+    log_dir = os.path.join(CONFIG_DIR, "log")
+    log_file = os.path.join(log_dir, "gcm-app.log")
+    os.makedirs(log_dir, exist_ok=True)
+
+    if _LOGURU_OK:
+        _loguru_logger.remove()
+        _loguru_logger.add(
+            sys.stderr,
+            level="DEBUG",
+            enqueue=True,
+            backtrace=False,
+            diagnose=False,
+        )
+        _loguru_logger.add(
+            log_file,
+            level="DEBUG",
+            rotation="10 MB",
+            retention="14 days",
+            encoding="utf-8",
+            enqueue=True,
+            backtrace=True,
+            diagnose=False,
+        )
+        return _loguru_logger
+
+    fallback = logging.getLogger("gcm")
+    fallback.setLevel(logging.DEBUG)
+    if not fallback.handlers:
+        fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+        sh = logging.StreamHandler(sys.stderr)
+        sh.setLevel(logging.DEBUG)
+        sh.setFormatter(fmt)
+        fh = logging.FileHandler(log_file, encoding="utf-8")
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(fmt)
+        fallback.addHandler(sh)
+        fallback.addHandler(fh)
+    fallback.warning("loguru non installé, fallback sur logging standard")
+    return fallback
+
+
+app_logger = _setup_app_logger()
+
+domain_name = "gcm-lang"
+
+# these colors are defined in vte sourcecode, but there is no way to read them (vte.cc 0.60.1, line 2371)
 DEFAULT_BGCOLOR = "#000000"
 DEFAULT_FGCOLOR = "#C0C0C0"
 
 HSPLIT = 0
 VSPLIT = 1
 
-_COPY =      ["copy"]
-_PASTE =     ["paste"]
-_COPY_ALL =  ["copy_all"]
-_SAVE =      ["save"]
-_FIND =      ["find"]
-_CLEAR =     ["reset"]
+_COPY = ["copy"]
+_PASTE = ["paste"]
+_COPY_ALL = ["copy_all"]
+_SAVE = ["save"]
+_FIND = ["find"]
+_CLEAR = ["reset"]
 _FIND_NEXT = ["find_next"]
 _FIND_BACK = ["find_back"]
 _CONSOLE_PREV = ["console_previous"]
@@ -158,58 +384,84 @@ locale_dir = BASE_PATH + "/lang"
 
 bindtextdomain(domain_name, locale_dir)
 
-groups={}
-shortcuts={}
+groups = {}
+shortcuts = {}
 
-enc_passwd=''
+enc_passwd = ""
 
-#Variables de configuracion
-class conf():
-    WORD_SEPARATORS="-A-Za-z0-9,./?%&#:_=+@~"
-    BUFFER_LINES=2000
-    STARTUP_LOCAL=True
-    LOG_LOCAL=False
-    CONFIRM_ON_EXIT=True
-    FONT_COLOR = ""
-    BACK_COLOR = ""
-    TRANSPARENCY = 0
-    TERM = ""
-    PASTE_ON_RIGHT_CLICK = 1
-    CONFIRM_ON_CLOSE_TAB = 1
-    CONFIRM_ON_CLOSE_TAB_MIDDLE = 1
-    AUTO_CLOSE_TAB = 0
-    CYCLE_TABS = True
-    COLLAPSED_FOLDERS = ""
-    LEFT_PANEL_WIDTH = 100
-    CHECK_UPDATES=True
-    WINDOW_WIDTH = -1
-    WINDOW_HEIGHT = -1
-    FONT = ""
-    HIDE_DONATE = False
-    DISABLE_HOSTS_STRIPES = False
-    AUTO_COPY_SELECTION = 0
-    LOG_PATH = CONFIG_DIR + "/logs"
-    SHOW_TOOLBAR = True
-    SHOW_PANEL = True
-    VERSION = 0
-    UPDATE_TITLE = 0
-    APP_TITLE = app_name
 
+# Variables de configuracion
 def msgbox(text, parent=None):
-    msgBox = Gtk.MessageDialog(parent=parent, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text=text)
+    """Affiche une boite de dialogue d'erreur modale.
+
+    Args:
+        text (str): Message a afficher.
+        parent (Gtk.Window, optional): Fenetre parente. Defaults to None.
+    """
+    msgBox = Gtk.MessageDialog(
+        parent=parent,
+        modal=True,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.OK,
+        text=text,
+    )
     msgBox.set_icon_from_file(ICON_PATH)
     msgBox.run()
     msgBox.destroy()
 
+
 def msgconfirm(text):
-    msgBox = Gtk.MessageDialog(parent=wMain.window, modal=True, message_type=Gtk.MessageType.QUESTION, buttons=Gtk.ButtonsType.OK_CANCEL, text=text)
+    """Affiche une boite de dialogue de confirmation OK/Annuler.
+
+    Args:
+        text (str): Message de confirmation a afficher.
+
+    Returns:
+        Gtk.ResponseType: ResponseType.OK ou ResponseType.CANCEL.
+    """
+    msgBox = Gtk.MessageDialog(
+        parent=wMain.window,
+        modal=True,
+        message_type=Gtk.MessageType.QUESTION,
+        buttons=Gtk.ButtonsType.OK_CANCEL,
+        text=text,
+    )
     msgBox.set_icon_from_file(ICON_PATH)
     response = msgBox.run()
     msgBox.destroy()
     return response
 
 
-def inputbox(title, text, default='', password=False):
+def msginfo(text):
+    """Affiche une boite de dialogue d'information (bouton OK).
+
+    Args:
+        text (str): Message a afficher.
+    """
+    msgBox = Gtk.MessageDialog(
+        parent=wMain.window,
+        modal=True,
+        message_type=Gtk.MessageType.INFO,
+        buttons=Gtk.ButtonsType.OK,
+        text=text,
+    )
+    msgBox.set_icon_from_file(ICON_PATH)
+    msgBox.run()
+    msgBox.destroy()
+
+
+def inputbox(title, text, default="", password=False):
+    """Affiche une boite de saisie de texte.
+
+    Args:
+        title (str): Titre de la boite de dialogue.
+        text (str): Label/description affiché au-dessus du champ de saisie.
+        default (str, optional): Valeur par defaut. Defaults to ''.
+        password (bool, optional): Masquer le texte saisi. Defaults to False.
+
+    Returns:
+        str or None: Texte saisi, ou None si annulé.
+    """
     msgBox = EntryDialog(title, text, default, mask=password)
     msgBox.set_icon_from_file(ICON_PATH)
     if msgBox.run() == Gtk.ResponseType.OK:
@@ -219,8 +471,16 @@ def inputbox(title, text, default='', password=False):
     msgBox.destroy()
     return response
 
+
 def show_font_dialog(parent, title, button):
-    if not hasattr(parent, 'dlgFont'):
+    """Ouvre une boite de dialogue de selection de police GTK.
+
+    Args:
+        parent: Parametre parent.
+        title: Parametre title.
+        button: Parametre button.
+    """
+    if not hasattr(parent, "dlgFont"):
         parent.dlgFont = None
 
     if parent.dlgFont == None:
@@ -233,18 +493,31 @@ def show_font_dialog(parent, title, button):
     if response == Gtk.ResponseType.OK:
         button.selected_font = Pango.FontDescription(fontsel.get_font_name())
         button.set_label(button.selected_font.to_string())
-        button.get_child().modify_font(button.selected_font)
+        set_widget_font(button.get_child(), button.selected_font)
     parent.dlgFont.hide()
 
-def show_open_dialog(parent, title, action):
-    dlg = Gtk.FileChooserDialog(title=title, parent=parent, action=action)
-    dlg.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
 
-    dlg.add_button(Gtk.STOCK_SAVE if action==Gtk.FileChooserAction.SAVE else Gtk.STOCK_OPEN, Gtk.ResponseType.OK)
+def show_open_dialog(parent, title, action):
+    """Affiche un dialogue de selection de fichier (ouverture ou sauvegarde).
+
+    Args:
+        parent (Gtk.Widget): Widget parent pour la dialogues.
+        title (str): Titre du dialogue.
+        action (Gtk.FileChooserAction): OPEN ou SAVE.
+
+    Returns:
+        str or None: Chemin du fichier selectionne, ou None si annule.
+    """
+    dlg = Gtk.FileChooserDialog(title=title, parent=parent, action=action)
+    dlg.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+    dlg.add_button(
+        _("Save") if action == Gtk.FileChooserAction.SAVE else _("Open"),
+        Gtk.ResponseType.OK,
+    )
     dlg.set_do_overwrite_confirmation(True)
-    if not hasattr(parent,'lastPath'):
+    if not hasattr(parent, "lastPath"):
         parent.lastPath = USERHOME_DIR
-    dlg.set_current_folder( parent.lastPath )
+    dlg.set_current_folder(parent.lastPath)
 
     if dlg.run() == Gtk.ResponseType.OK:
         filename = dlg.get_filename()
@@ -254,19 +527,94 @@ def show_open_dialog(parent, title, action):
     dlg.destroy()
     return filename
 
+
 def parse_color_rgba(spec):
+    """Convertit une couleur CSS/hex en objet Gdk.RGBA.
+
+    Args:
+        spec (str): Specification de couleur (ex: '#FF0000', 'red', 'rgba(255,0,0,1)').
+
+    Returns:
+        Gdk.RGBA: Objet couleur RGBA parse.
+    """
     rgba = Gdk.RGBA()
     b = rgba.parse(spec)
     return rgba
 
+
 def parse_color(spec):
+    """Parse une chaine couleur CSS/Gdk en composantes RGBA.
+
+    Args:
+        color_str (str): Chaine couleur (ex: '#rrggbb' ou 'rgba(r,g,b,a)').
+
+    Returns:
+        tuple: Tuple (r, g, b, a) normalise entre 0.0 et 1.0.
+    """
     return parse_color_rgba(spec).to_color()
 
+
+def set_widget_font(widget, font_desc):
+    """Applique une police à un widget via CssProvider (override_font est déprécié).
+
+    Args:
+        widget: Widget Gtk sur lequel appliquer la police.
+        font_desc (Pango.FontDescription): Description de la police.
+    """
+    try:
+        family = font_desc.get_family() or "monospace"
+        size_pango = font_desc.get_size()
+        if font_desc.get_size_is_absolute():
+            size_pt = size_pango / Pango.SCALE
+        else:
+            size_pt = size_pango / Pango.SCALE
+        # Construire un CSS valide GTK3 (pas la syntaxe Pango)
+        parts = [f'font-family: "{family}";']
+        if size_pt > 0:
+            parts.append(f"font-size: {size_pt:.1f}pt;")
+        weight = font_desc.get_weight()
+        if weight >= 700:
+            parts.append("font-weight: bold;")
+        style = font_desc.get_style()
+        if style == Pango.Style.ITALIC:
+            parts.append("font-style: italic;")
+        elif style == Pango.Style.OBLIQUE:
+            parts.append("font-style: oblique;")
+        css = ("* { %s }" % " ".join(parts)).encode()
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css)
+        widget.get_style_context().add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+    except Exception:
+        pass
+
+
 def color_to_hex(rgba, diff=0):
-    return "#%x%x%x" % (int(rgba.red*255+diff),int(rgba.green*255+diff),int(rgba.blue*255+diff))
+    """Convertit des composantes RGBA en chaine hexadecimale CSS.
+
+    Args:
+        r (float): Rouge entre 0.0 et 1.0.
+        g (float): Vert entre 0.0 et 1.0.
+        b (float): Bleu entre 0.0 et 1.0.
+
+    Returns:
+        str: Chaine '#rrggbb'.
+    """
+    return "#%x%x%x" % (
+        int(rgba.red * 255 + diff),
+        int(rgba.green * 255 + diff),
+        int(rgba.blue * 255 + diff),
+    )
 
 
 def get_key_name(event):
+    """Retourne le nom lisible d'une touche clavier GTK.
+
+    Args:
+        keyval (int): Valeur de touche Gdk.
+
+    Returns:
+        str: Nom de la touche.
+    """
     name = ""
     if event.state & Gdk.ModifierType.CONTROL_MASK:
         name = name + "CTRL+"
@@ -278,42 +626,74 @@ def get_key_name(event):
         name = name + "SUPER+"
     return name + Gdk.keyval_name(event.keyval).upper()
 
+
 def get_username():
-    return os.getenv('USER') or os.getenv('LOGNAME') or os.getenv('USERNAME')
+    """Retourne le nom d'utilisateur de la session courante.
+
+    Returns:
+        str: Nom d'utilisateur.
+    """
+    return os.getenv("USER") or os.getenv("LOGNAME") or os.getenv("USERNAME")
+
 
 def get_password():
+    """Retourne le mot de passe associe a une entree depuis le trousseau.
+
+    Returns:
+        str: Mot de passe ou chaine vide si absent.
+    """
+    app_logger.debug(f"get_password() called, returning: {get_username() + enc_passwd}")
     return get_username() + enc_passwd
 
+
 def load_encryption_key():
+    """Charge ou genere la cle de chiffrement locale.
+
+    Returns:
+        bytes: Cle de chiffrement.
+    """
     global enc_passwd
     try:
         if os.path.exists(KEY_FILE):
             with open(KEY_FILE) as f:
                 enc_passwd = f.read()
         else:
-            enc_passwd = ''
+            enc_passwd = ""
     except:
         msgbox("Error trying to open key_file")
-        enc_passwd = ''
+        enc_passwd = ""
+
 
 def initialise_encyption_key():
+    """Initialise la cle AES pour le chiffrement des mots de passe."""
     global enc_passwd
     import random
+
     x = int(str(random.random())[2:])
     y = int(str(random.random())[2:])
-    enc_passwd = "%x" % (x*y)
+    enc_passwd = "%x" % (x * y)
     try:
-        with os.fdopen(os.open(KEY_FILE, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
+        with os.fdopen(os.open(KEY_FILE, os.O_WRONLY | os.O_CREAT, 0o600), "w") as f:
             f.write(enc_passwd)
     except:
         msgbox("Error initialising key_file")
 
+
 ## funciones para encryptar passwords - no son muy seguras, pero impiden que los pass se guarden en texto plano
 def xor(pw, str1):
+    """Applique un XOR octet-a-octet entre deux sequences.
+
+    Args:
+        data (bytes): Donnees a chiffrer.
+        key (bytes): Cle XOR.
+
+    Returns:
+        bytes: Resultat du XOR.
+    """
     c = 0
     liste = []
-    for k in xrange(len(str1)):
-        if c > len(pw)-1:
+    for k in range(len(str1)):
+        if c > len(pw) - 1:
             c = 0
         fi = ord(pw[c])
         c += 1
@@ -322,86 +702,2386 @@ def xor(pw, str1):
         liste += [chr(fin)]
     return liste
 
+
 def encrypt_old(passw, string):
+    """Chiffre une chaine avec l'ancien algorithme XOR (compatibilite).
+
+    Args:
+        plaintext (str): Texte en clair.
+
+    Returns:
+        str: Texte chiffre encode.
+    """
     try:
         ret = xor(passw, string)
-        s = base64.b64encode("".join(ret))
+        s = base64.b64encode("".join(ret).encode()).decode()
     except:
         s = ""
     return s
 
+
 def decrypt_old(passw, string):
+    """Dechiffre une chaine chiffree avec l'ancien algorithme XOR.
+
+    Args:
+        ciphertext (str): Texte chiffre encode.
+
+    Returns:
+        str: Texte en clair.
+    """
     try:
-        ret = xor(passw, base64.b64decode(string))
+        decoded = base64.b64decode(string if isinstance(string, bytes) else string.encode())
+        ret = xor(passw, decoded.decode())
         s = "".join(ret)
     except:
         s = ""
     return s
 
+
 def encrypt(passw, string):
+    """Chiffre une chaine avec AES.
+
+    Args:
+        plaintext (str): Texte en clair.
+
+    Returns:
+        str: Texte chiffre encode en base64.
+    """
     try:
         s = pyAES.encrypt(string, passw)
     except:
-        traceback.print_exc()
+        app_logger.exception("Erreur de chiffrement AES")
         s = ""
     return s
 
+
 def decrypt(passw, string):
+    """Dechiffre une chaine chiffree avec AES.
+
+    Args:
+        ciphertext (str): Texte chiffre base64.
+
+    Returns:
+        str: Texte en clair.
+    """
     try:
         s = decrypt_old(passw, string) if conf.VERSION == 0 else pyAES.decrypt(string, passw)
     except:
-        traceback.print_exc()
+        app_logger.exception("Erreur de déchiffrement AES")
         s = ""
+    app_logger.debug(f"decrypt() called with passw={passw}, string={string}, returning: {s}")
     return s
 
+
 def vte_feed(terminal, data):
+    """Envoie des donnees au terminal VTE via le PTY (ecriture directe sur fd).
+
+    Utilise l'ecriture directe sur le fd PTY pour une compatibilite maximale
+    avec toutes les versions de VTE. Fallback sur feed_child() si PTY indisponible.
+
+    Args:
+        terminal (Vte.Terminal): Terminal VTE cible.
+        data (str or bytes): Donnees a envoyer (str UTF-8 ou bytes bruts).
+    """
+    # fix #82: écriture directe sur le fd PTY (fiable toutes versions VTE)
+    data_bytes = data.encode("utf-8") if isinstance(data, str) else data
+    try:
+        pty = terminal.get_pty()
+        if pty is not None:
+            fd = pty.get_fd()
+            if fd >= 0:
+                os.write(fd, data_bytes)
+                return
+    except Exception:
+        pass
+    # fallback feed_child pour VTE anciens
     if TERMINAL_V048 or (Vte.MAJOR_VERSION, Vte.MINOR_VERSION) >= (0, 42):
         try:
-            terminal.feed_child(data.encode('utf-8'))
-        except TypeError as e:
-            # https://bugs.launchpad.net/ubuntu/+source/ubuntu-release-upgrader/+bug/1780501
-            # The doc does not say clearly at which version the feed_child* function has lost # the "len" parameter :(
+            terminal.feed_child(data_bytes)
+        except TypeError:
             terminal.feed_child(data, len(data))
     else:
         terminal.feed_child(data, len(data))
 
-def vte_run(terminal, command, arg=None):
-    term_type = terminal.host.term if hasattr(terminal, 'host') and terminal.host.term else conf.TERM or os.getenv("TERM") or DEFAULT_TERM_TYPE
-    envv = [ 'PATH=%s' % os.getenv("PATH"), 'TERM=%s' % term_type ]
-    args = []
-    args.append(command)
-    if arg:
-        args += arg
-    flag_spawn = GLib.SpawnFlags.DEFAULT if command == SHELL else GLib.SpawnFlags.FILE_AND_ARGV_ZERO
-    if TERMINAL_V048:
-        terminal.spawn_async(Vte.PtyFlags.DEFAULT,
-                           os.getenv("HOME"),
-                           args,
-                           envv,
-                           flag_spawn | GLib.SpawnFlags.SEARCH_PATH,
-                           None,
-                           None,
-                           -1,
-                           None,
-                           lambda term,pid,err,user_data: None,
-                           None)
-    else:
-        terminal.spawn_sync(Vte.PtyFlags.DEFAULT,
-                           os.getenv("HOME"),
-                           args,
-                           envv,
-                           flag_spawn | GLib.SpawnFlags.DO_NOT_REAP_CHILD | GLib.SpawnFlags.SEARCH_PATH,
-                           None,
-                           None,
-                           None)
 
-class Wmain(SimpleGladeApp):
+def _rdp_socket_available():
+    """Teste si Gtk.Socket (XEmbed) est utilisable.
 
-    def __init__(self, path="gnome-connection-manager.glade",
-                 root="wMain",
-                 domain=domain_name, **kwargs):
+    XEmbed necessite un serveur X11. On verifie :
+      1. La variable d'environnement DISPLAY est definie (X11 ou XWayland).
+      2. Le backend Gdk actif est bien X11 (GdkX11Display), pas Wayland pur.
+
+    Returns:
+        bool: True si XEmbed est possible (X11 / XWayland), False sous Wayland pur.
+    """
+    # if not os.environ.get("DISPLAY"):
+    #     return False
+
+    display = Gdk.Display.get_default()
+    if display is None:
+        return False
+
+    return type(display).__name__ == "GdkX11Display"
+
+    # try:
+    #     display = Gdk.Display.get_default()
+    #     if display is None:
+    #         return False
+    #     # Sous Wayland pur le type est GdkWaylandDisplay
+    #     return "Wayland" not in type(display).__name__
+    # except Exception:
+    #     return False
+
+
+# ─── VNC / SPICE (#102) ──────────────────────────────────────────────────────
+
+# Port par défaut par protocole (serial : débit par défaut 9600)
+_PROTO_DEFAULTS = {
+    "ssh": "22",
+    "telnet": "23",
+    "rdp": "3389",
+    "vnc": "5900",
+    "spice": "5930",
+    "serial": "9600",
+    "local": "",
+}
+
+# Templates série : (débit, flow, parity, databits, stopbits)
+#   flow : n=none  x=xon/xoff  h=rts/cts
+#   parity : n=none  e=even  o=odd
+# Templates série par défaut (immuables — utilisés comme fallback).
+_SERIAL_TEMPLATES_DEFAULT = {
+    "Cisco IOS / IOS-XE / NX-OS": ("9600", "n", "n", "8", "1"),
+    "HP Comware (H3C)": ("9600", "n", "n", "8", "1"),
+    "Aruba AOS-S / AOS-CX": ("9600", "n", "n", "8", "1"),
+    "Juniper JunOS": ("9600", "n", "n", "8", "1"),
+    "Fortinet FortiOS": ("9600", "n", "n", "8", "1"),
+    "Palo Alto PAN-OS": ("9600", "n", "n", "8", "1"),
+    "F5 TMOS": ("19200", "n", "n", "8", "1"),
+    "Linux / Raspberry Pi": ("115200", "n", "n", "8", "1"),
+    "Arduino / ESP32": ("115200", "n", "n", "8", "1"),
+    "RS-485 Modbus RTU": ("9600", "n", "n", "8", "1"),
+    "Libre (manuel)": ("9600", "n", "n", "8", "1"),
+}
+# Copie mutable chargée au démarrage (peut être étendue / modifiée par l'user).
+_SERIAL_TEMPLATES = dict(_SERIAL_TEMPLATES_DEFAULT)
+
+
+def _serial_templates_load(cp):
+    """Charge les templates série depuis une section [serial_templates] du ConfigParser.
+
+    Format de chaque entrée :
+        nom_du_template = baud,flow,parity,databits,stopbits
+    Ex : Mon routeur = 9600,n,n,8,1
+
+    Les templates du fichier *remplacent entièrement* les valeurs par défaut
+    pour les noms existants et *ajoutent* les entrées inconnues.
+
+    Args:
+        cp (configparser.RawConfigParser): Objet de configuration déjà lu.
+    """
+    global _SERIAL_TEMPLATES
+    if not cp.has_section("serial_templates"):
+        # Section absente → garder les défauts, signaler l'absence pour injection
+        _SERIAL_TEMPLATES = dict(_SERIAL_TEMPLATES_DEFAULT)
+        return False
+    _SERIAL_TEMPLATES = dict(_SERIAL_TEMPLATES_DEFAULT)
+    for name, value in cp.items("serial_templates"):
+        # Les noms sont en minuscules dans ConfigParser — on reconstruit la casse
+        # originale depuis les défauts, sinon on garde tel quel.
+        original_name = name
+        for k in _SERIAL_TEMPLATES_DEFAULT:
+            if k.lower() == name.lower():
+                original_name = k
+                break
+        parts = [p.strip() for p in value.split(",")]
+        if len(parts) == 5:
+            _SERIAL_TEMPLATES[original_name] = tuple(parts)
+    return True
+
+
+def _serial_templates_save(cp):
+    """Écrit la section [serial_templates] dans le ConfigParser.
+
+    Args:
+        cp (configparser.RawConfigParser): Objet de configuration à mettre à jour.
+    """
+    if cp.has_section("serial_templates"):
+        cp.remove_section("serial_templates")
+    cp.add_section("serial_templates")
+    for name, tpl in _SERIAL_TEMPLATES.items():
+        cp.set("serial_templates", name, ",".join(tpl))
+
+
+LIBVIRT_DEFAULT_USER = "root"  # écrasé par config["libvirt_default_user"]
+
+
+def _vm_name_split(vm_name):
+    """Segmente le nom d'une VM en (groupe, nom_court).
+
+    Le premier token (séparateur _, - ou espace) devient le groupe en
+    MAJUSCULES ; le reste est le nom court affiché. Sans séparateur, le
+    groupe vaut "LIBVIRT".
+
+    Args:
+        vm_name (str): Nom brut de la VM libvirt.
+
+    Returns:
+        tuple[str, str]: (groupe, nom_court).
+    """
+    m = re.match(r"^([^_\-\s]+)[_\-\s](.*)", vm_name)
+    if m:
+        return m.group(1).upper(), m.group(2)
+    return "LIBVIRT", vm_name
+
+
+def _collect_ssh_keys():
+    """Liste les clés privées SSH de ~/.ssh, Ed25519 en premier puis RSA.
+
+    Returns:
+        list[str]: Chemins absolus vers les fichiers de clé privée.
+    """
+    ssh_dir = os.path.expanduser("~/.ssh")
+    if not os.path.isdir(ssh_dir):
+        return []
+    order = {"ed25519": 0, "rsa": 1}
+    keys = []
+    for fname in os.listdir(ssh_dir):
+        if fname.endswith(".pub") or fname in (
+            "known_hosts",
+            "known_hosts.old",
+            "config",
+            "authorized_keys",
+        ):
+            continue
+        full = os.path.join(ssh_dir, fname)
+        if not os.path.isfile(full):
+            continue
+        try:
+            head = open(full, "rb").read(80).decode(errors="replace")
+            if "PRIVATE KEY" not in head:
+                continue
+        except OSError:
+            continue
+        kt = "other"
+        if "ed25519" in fname.lower() or "ED25519" in head:
+            kt = "ed25519"
+        elif "rsa" in fname.lower() or "RSA" in head:
+            kt = "rsa"
+        keys.append((order.get(kt, 2), full))
+    keys.sort(key=lambda x: x[0])
+    return [k for _, k in keys]
+
+
+def _paramiko_connect(hostname, port, username, log_fn=None):
+    """Etablit une connexion SSH par clé (Ed25519 > RSA > agent).
+
+    Args:
+        hostname (str): Adresse de l'hôte SSH.
+        port (int): Port SSH.
+        username (str): Utilisateur SSH.
+        log_fn (callable, optional): Fonction de log.
+
+    Returns:
+        paramiko.SSHClient or None: Client connecté ou None si echec.
+    """
+    if not _PARAMIKO_OK:
+        if log_fn:
+            log_fn(
+                "ERREUR : paramiko non installé → "
+                + _dep_install_hint("python3-paramiko", "python3-paramiko", "python-paramiko")
+            )
+        return None
+    keys = _collect_ssh_keys()
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    key_classes = [
+        getattr(paramiko, "Ed25519Key", None),
+        getattr(paramiko, "RSAKey", None),
+        getattr(paramiko, "ECDSAKey", None),
+        getattr(paramiko, "DSSKey", None),
+    ]
+    key_classes = [c for c in key_classes if c is not None]
+
+    for key_path in keys:
+        pkey = None
+        for cls in key_classes:
+            try:
+                pkey = cls.from_private_key_file(key_path)
+                break
+            except Exception:
+                continue
+        if pkey is None:
+            continue
+        try:
+            client.connect(
+                hostname=hostname,
+                port=port,
+                username=username,
+                pkey=pkey,
+                timeout=10,
+                look_for_keys=False,
+                allow_agent=False,
+            )
+            if log_fn:
+                log_fn(f"  SSH OK → {username}@{hostname}:{port} [{os.path.basename(key_path)}]")
+            return client
+        except paramiko.AuthenticationException:
+            continue
+        except Exception as e:
+            if log_fn:
+                log_fn(f"  Erreur clé {os.path.basename(key_path)} : {e}")
+    try:
+        client.connect(
+            hostname=hostname,
+            port=port,
+            username=username,
+            timeout=10,
+            look_for_keys=False,
+            allow_agent=True,
+        )
+        if log_fn:
+            log_fn(f"  SSH OK → {username}@{hostname}:{port} [agent]")
+        return client
+    except Exception as e:
+        if log_fn:
+            log_fn(f"  ERREUR SSH (toutes clés échouées) : {e}")
+        return None
+
+
+def _libvirt_get_uris_from_dconf():
+    """Lit les URIs libvirt configurées dans dconf (virt-manager).
+
+    Returns:
+        list[str]: Liste d'URIs libvirt.
+    """
+    try:
+        r = subprocess.run(
+            ["dconf", "read", "/org/virt-manager/virt-manager/connections/uris"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        raw = r.stdout.strip()
+        if not raw or raw == "@as []":
+            return []
+        return re.findall(r"'([^']+)'", raw)
+    except Exception:
+        return []
+
+
+def _libvirt_ssh_run(client, cmd, timeout=30):
+    """Execute une commande sur un client SSH paramiko.
+
+    Args:
+        client (paramiko.SSHClient): Client SSH connecté.
+        cmd (str): Commande shell à exécuter.
+        timeout (int, optional): Timeout en secondes. Defaults to 30.
+
+    Returns:
+        str: Sortie standard de la commande.
+    """
+    _, stdout, _ = client.exec_command(cmd, timeout=timeout)
+    return stdout.read().decode(errors="replace").strip()
+
+
+def _libvirt_nmap_scan(client, run_fn, log_fn):
+    """Lance nmap -sn sur tous les sous-réseaux de l'hyperviseur.
+
+    Returns:
+        dict: mac_lower → ip
+    """
+    result = {}
+    # Obtenir les sous-réseaux
+    out = run_fn(client, "ip -o -f inet addr show")
+    subnets, seen = [], set()
+    for line in out.splitlines():
+        m = re.search(r"inet (\d+\.\d+\.\d+\.\d+)/(\d+)", line)
+        if not m:
+            continue
+        ip_str, prefix = m.group(1), int(m.group(2))
+        if ip_str.startswith("127.") or ip_str.startswith("169.254."):
+            continue
+        parts = list(map(int, ip_str.split(".")))
+        mask = (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF
+        net_i = 0
+        for p in parts:
+            net_i = (net_i << 8) | p
+        net_i &= mask
+        np_ = [(net_i >> (8 * i)) & 0xFF for i in reversed(range(4))]
+        cidr = f"{'.'.join(map(str, np_))}/{prefix}"
+        if cidr not in seen:
+            seen.add(cidr)
+            subnets.append(cidr)
+    if not subnets:
+        return result
+    # Vérifier que nmap est dispo
+    nmap_bin = run_fn(client, "which nmap 2>/dev/null")
+    if not nmap_bin:
+        log_fn("  nmap non disponible sur l'hyperviseur — scan réseau ignoré")
+        return result
+    nmap_ver = run_fn(client, "nmap --version 2>/dev/null | head -1")
+    ver_m = re.search(r"Nmap version (\d+)", nmap_ver)
+    flag = "-sn" if ver_m and int(ver_m.group(1)) >= 6 else "-sP"
+    for cidr in subnets:
+        log_fn(f"  nmap {flag} {cidr}…")
+        xml_out = run_fn(
+            client,
+            f"nmap {flag} {cidr} -oX - --host-timeout 5s 2>/dev/null",
+            timeout=300,
+        )
+        if not xml_out:
+            continue
+        count = 0
+        for host_block in re.findall(r"<host\b.*?</host>", xml_out, re.DOTALL):
+            ip_m = re.search(r'<address addr="([^"]+)" addrtype="ipv4"', host_block)
+            mac_m = re.search(r'<address addr="([^"]+)" addrtype="mac"', host_block)
+            if ip_m and mac_m:
+                result[mac_m.group(1).lower()] = ip_m.group(1)
+                count += 1
+        log_fn(f"    → {count} hôte(s) avec MAC sur {cidr}")
+    return result
+
+
+def _check_port_open(client, run_fn, ip, port, timeout=5):
+    """Vérifie si un port TCP est accessible depuis l'hyperviseur (nc ou nmap).
+
+    Essaie netcat d'abord (plus rapide), puis nmap en fallback.
+
+    Args:
+        client: Client SSH paramiko connecté.
+        run_fn (callable): run(client, cmd, timeout) → str.
+        ip (str): IP cible.
+        port (int): Port TCP à sonder.
+        timeout (int): Timeout de sonde en secondes.
+
+    Returns:
+        bool: True si le port est ouvert.
+    """
+    if not ip:
+        return False
+    out = run_fn(
+        client,
+        f"nc -z -w {timeout} {ip} {port} 2>/dev/null && echo OPEN || echo CLOSED",
+        timeout=timeout + 3,
+    )
+    if "OPEN" in out:
+        return True
+    if "CLOSED" in out:
+        return False
+    # Fallback nmap
+    out = run_fn(
+        client,
+        f"nmap -p {port} -sT --host-timeout {timeout}s {ip} -oG - 2>/dev/null",
+        timeout=timeout + 5,
+    )
+    return f"{port}/open" in out.lower()
+
+
+def _libvirt_fetch_hosts(uris, ssh_user, log_fn, progress_fn, proto_filter=None):
+    """Collecte les VMs libvirt via SSH sur les hyperviseurs donnés.
+
+    Résolution IP : domifaddr (agent/arp) → DHCP leases → ARP noyau → nmap.
+
+    Règles de génération des entrées :
+    - SSH : jamais direct ; ProxyJump (-J) si IP connue, sinon -t ssh user@vm_name
+      via le shell de l'hyperviseur.  Le port de l'hyperviseur est toujours
+      respecté (ex : qemu+ssh://root@ip:542/system → ProxyJump port 542).
+    - SPICE : virt-viewer --connect qemu+ssh://user@host[:port]/system vm_name
+      (tunnel SSH géré nativement par virt-viewer/remote-viewer).
+    - RDP : seulement si port 3389 détecté ouvert depuis l'hyperviseur (nc/nmap).
+
+    Args:
+        uris (list[str]): URIs libvirt (qemu+ssh://...).
+        ssh_user (str): Utilisateur SSH pour se connecter aux VMs.
+        log_fn (callable): Fonction de log (msg: str).
+        progress_fn (callable): Progression (frac: float, texte: str).
+        proto_filter (set[str] | None): {'ssh','spice','rdp'} ou None = tous.
+
+    Returns:
+        list[dict]: Hôtes prêts à importer dans GCM.
+    """
+    if not _PARAMIKO_OK:
+        log_fn(
+            "ERREUR : paramiko non installé → "
+            + _dep_install_hint("python3-paramiko", "python3-paramiko", "python-paramiko")
+        )
+        return []
+    if proto_filter is None:
+        proto_filter = {"ssh", "spice", "rdp"}
+    results = []
+    total = len(uris)
+
+    def run(client, cmd, timeout=30):
+        return _libvirt_ssh_run(client, cmd, timeout)
+
+    for idx, uri in enumerate(uris):
+        log_fn(f"\n── Hyperviseur : {uri}")
+        progress_fn(idx / total, f"Connexion à {uri}…")
+        parsed = urlparse(uri)
+        scheme = parsed.scheme
+        transport = (
+            scheme.split("+")[1] if "+" in scheme else ("tcp" if parsed.hostname else "local")
+        )
+        hv_host = parsed.hostname or "localhost"
+        hv_port = parsed.port or 22
+        hv_user = parsed.username or "root"
+        if transport == "local":
+            log_fn("  → URI locale ignorée (qemu:///system).")
+            continue
+        client = _paramiko_connect(hv_host, hv_port, hv_user, log_fn)
+        if client is None:
+            continue
+        try:
+            vm_names = [
+                n for n in run(client, "virsh list --all --name").splitlines() if n.strip()
+            ]
+            log_fn(f"  {len(vm_names)} VM(s) trouvée(s)")
+
+            # ── ARP noyau ────────────────────────────────────────────────────
+            arp = {}
+            for line in run(
+                client, "ip neigh show 2>/dev/null || arp -n 2>/dev/null"
+            ).splitlines():
+                m = re.search(
+                    r"(\d+\.\d+\.\d+\.\d+).*?([0-9a-f]{2}(?::[0-9a-f]{2}){5})",
+                    line,
+                    re.I,
+                )
+                if m:
+                    arp[m.group(2).lower()] = m.group(1)
+
+            # ── DHCP leases virsh ────────────────────────────────────────────
+            dhcp = {}
+            for net in run(client, "virsh net-list --name").splitlines():
+                net = net.strip()
+                if not net:
+                    continue
+                for line in run(client, f"virsh net-dhcp-leases {net} 2>/dev/null").splitlines():
+                    parts = line.split()
+                    if len(parts) >= 4 and ":" in parts[1]:
+                        ip_raw = parts[3].split("/")[0]
+                        if re.match(r"\d+\.\d+\.\d+\.\d+", ip_raw):
+                            dhcp[parts[1].lower()] = ip_raw
+
+            # ── nmap ping scan ────────────────────────────────────────────────
+            nmap_table = _libvirt_nmap_scan(client, run, log_fn)
+            combined = {**arp, **dhcp, **nmap_table}
+            log_fn(f"  Table MAC→IP : {len(combined)} entrées")
+
+            # ── enumération des VMs ──────────────────────────────────────────
+            for vm_name in vm_names:
+                state = run(client, f"virsh domstate {vm_name}").strip()
+                xml = run(client, f"virsh dumpxml {vm_name}")
+                ip_addr = ""
+                spice_port = ""
+
+                # Port SPICE depuis le XML
+                m_spice = re.search(
+                    r'<graphics[^>]+type=[\'"]spice[\'"][^>]*port=[\'"](\d+)[\'"]',
+                    xml,
+                )
+                if m_spice and m_spice.group(1) != "-1":
+                    spice_port = m_spice.group(1)
+
+                # Résolution IP via interfaces XML
+                for block in re.findall(r"<interface.*?</interface>", xml, re.DOTALL):
+                    mac_m = re.search(r"<mac address=['\"]([^'\"]+)['\"]", block)
+                    if not mac_m:
+                        continue
+                    mac = mac_m.group(1).lower()
+                    if state == "running":
+                        for src in ("agent", "arp"):
+                            out2 = run(
+                                client,
+                                f"virsh domifaddr {vm_name} --source {src} 2>/dev/null",
+                            )
+                            for ln in out2.splitlines():
+                                if mac in ln.lower():
+                                    m2 = re.search(r"(\d+\.\d+\.\d+\.\d+)", ln)
+                                    if m2:
+                                        ip_addr = m2.group(1)
+                                        break
+                            if ip_addr:
+                                break
+                    if not ip_addr:
+                        ip_addr = combined.get(mac) or ""
+                    if ip_addr:
+                        break
+
+                grp, short = _vm_name_split(vm_name)
+                is_windows = bool(
+                    re.search(
+                        r"win|w(?:2k|2019|2022|2016|2012|srv|dc|server)",
+                        vm_name,
+                        re.IGNORECASE,
+                    )
+                )
+                vm_user = "Administrator" if is_windows else ssh_user
+                added = False
+
+                # ── SSH : toujours via l'hyperviseur (jamais direct) ──────────
+                if "ssh" in proto_filter:
+                    if ip_addr:
+                        if hv_port != 22:
+                            jump_flag = f"-J {hv_user}@{hv_host}:{hv_port}"
+                        else:
+                            jump_flag = f"-J {hv_user}@{hv_host}"
+                        results.append(
+                            {
+                                "name": short,
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 22,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} — SSH ProxyJump via "
+                                    f"{hv_user}@{hv_host}:{hv_port} → {ip_addr}"
+                                ),
+                                "group": f"{grp}/ssh" if grp else "ssh",
+                                "hypervisor": hv_host,
+                                "protocol": "ssh",
+                                "extra_params": jump_flag,
+                            }
+                        )
+                    else:
+                        post_cmd = f"-t ssh {vm_user}@{vm_name}"
+                        results.append(
+                            {
+                                "name": short,
+                                "host": hv_host,
+                                "user": hv_user,
+                                "port": hv_port,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} — SSH via hyperviseur "
+                                    f"{hv_host}:{hv_port} → ssh {vm_user}@{vm_name} (IP inconnue)"
+                                ),
+                                "group": f"{grp}/ssh" if grp else "ssh",
+                                "hypervisor": hv_host,
+                                "protocol": "ssh",
+                                "extra_params": post_cmd,
+                            }
+                        )
+                    log_fn(
+                        f"  + [{grp}] {short:28s}  {ip_addr or '(IP inconnue)':16s}"
+                        f"  [{state}]  SSH"
+                    )
+                    added = True
+
+                # ── SPICE : virt-viewer --connect libvirt URI (tunnel SSH auto) ─
+                if "spice" in proto_filter and spice_port:
+                    if hv_port != 22:
+                        lv_uri = f"qemu+ssh://{hv_user}@{hv_host}:{hv_port}/system"
+                    else:
+                        lv_uri = f"qemu+ssh://{hv_user}@{hv_host}/system"
+                    results.append(
+                        {
+                            "name": short,
+                            "host": hv_host,
+                            "user": hv_user,
+                            "port": int(spice_port),
+                            "password": "",
+                            "description": (
+                                f"[{state}] {vm_name} — SPICE via {lv_uri} "
+                                f"(tunnel SSH géré par virt-viewer)"
+                            ),
+                            "group": f"{grp}/spice" if grp else "spice",
+                            "hypervisor": hv_host,
+                            "protocol": "spice",
+                            "extra_params": f"--connect {lv_uri} {vm_name}",
+                        }
+                    )
+                    log_fn(
+                        f"  + [{grp}] {short:28s}  port SPICE {spice_port:>5s}  [{state}]  SPICE"
+                    )
+                    added = True
+
+                # ── RDP : seulement si port 3389 ouvert (sondé depuis l'HV) ──
+                if "rdp" in proto_filter and ip_addr:
+                    log_fn(f"  ↳ Sondage RDP 3389 sur {ip_addr}…")
+                    if _check_port_open(client, run, ip_addr, 3389):
+                        results.append(
+                            {
+                                "name": short,
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 3389,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} — RDP (port 3389 confirmé ouvert)"
+                                ),
+                                "group": f"{grp}/rdp" if grp else "rdp",
+                                "hypervisor": hv_host,
+                                "protocol": "rdp",
+                                "extra_params": "",
+                            }
+                        )
+                        log_fn(f"  + [{grp}] {short:28s}  {ip_addr:16s}  [{state}]  RDP ✓")
+                        added = True
+                    else:
+                        log_fn(f"  ↳ port 3389 fermé sur {ip_addr} — RDP ignoré")
+
+                # ── VNC : seulement si port 5900 ouvert (sondé depuis l'HV) ──
+                if "vnc" in proto_filter and ip_addr:
+                    log_fn(f"  ↳ Sondage VNC 5900 sur {ip_addr}…")
+                    if _check_port_open(client, run, ip_addr, 5900):
+                        results.append(
+                            {
+                                "name": short,
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 5900,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} — VNC (port 5900 confirmé ouvert)"
+                                ),
+                                "group": f"{grp}/vnc" if grp else "vnc",
+                                "hypervisor": hv_host,
+                                "protocol": "vnc",
+                                "extra_params": "",
+                            }
+                        )
+                        log_fn(f"  + [{grp}] {short:28s}  {ip_addr:16s}  [{state}]  VNC ✓")
+                        added = True
+                    else:
+                        log_fn(f"  ↳ port 5900 fermé sur {ip_addr} — VNC ignoré")
+
+                if not added:
+                    log_fn(f"  - {vm_name} : aucune connexion générée")
+
+        finally:
+            client.close()
+        progress_fn((idx + 1) / total, f"{idx + 1}/{total} hyperviseurs traités")
+    return results
+
+
+def _proxmox_fetch_hosts(uris, ssh_user, log_fn, progress_fn, proto_filter=None):
+    """Collecte les VMs Proxmox via SSH sur les hyperviseurs donnés.
+
+    Les hôtes d'entrée utilisent le même format que l'import libvirt
+    (URI type qemu+ssh://user@host[:port]/system), mais l'inventaire est
+    réalisé nativement avec les commandes Proxmox (`qm`).
+
+    Args:
+        uris (list[str]): Cibles hyperviseurs (URI SSH).
+        ssh_user (str): Utilisateur SSH des VMs invitées.
+        log_fn (callable): Fonction de log.
+        progress_fn (callable): Progression (frac: float, texte: str).
+        proto_filter (set[str] | None): {'ssh','spice','rdp','vnc'} ou None = tous.
+
+    Returns:
+        list[dict]: Hôtes prêts à importer dans GCM.
+    """
+    if not _PARAMIKO_OK:
+        log_fn(
+            "ERREUR : paramiko non installé → "
+            + _dep_install_hint("python3-paramiko", "python3-paramiko", "python-paramiko")
+        )
+        return []
+    if proto_filter is None:
+        proto_filter = {"ssh", "spice", "rdp"}
+
+    results = []
+    total = len(uris)
+
+    def run(client, cmd, timeout=30):
+        return _libvirt_ssh_run(client, cmd, timeout)
+
+    def _extract_first_ipv4(qm_agent_output):
+        try:
+            data = json.loads(qm_agent_output)
+            for iface in data.get("result", []):
+                for addr in iface.get("ip-addresses", []):
+                    ip = addr.get("ip-address", "")
+                    if re.match(r"\d+\.\d+\.\d+\.\d+$", ip) and not ip.startswith("127."):
+                        return ip
+        except Exception:
+            pass
+        m = re.search(r'"ip-address"\s*:\s*"(\d+\.\d+\.\d+\.\d+)"', qm_agent_output)
+        return m.group(1) if m else ""
+
+    for idx, uri in enumerate(uris):
+        log_fn(f"\n── Hyperviseur Proxmox : {uri}")
+        progress_fn(idx / total, f"Connexion à {uri}…")
+        parsed = urlparse(uri)
+        hv_host = parsed.hostname or "localhost"
+        hv_port = parsed.port or 22
+        hv_user = parsed.username or "root"
+
+        client = _paramiko_connect(hv_host, hv_port, hv_user, log_fn)
+        if client is None:
+            continue
+
+        try:
+            qm_out = run(client, "qm list")
+            vm_rows = []
+            for line in qm_out.splitlines():
+                line = line.strip()
+                if not line or line.lower().startswith("vmid"):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3 and parts[0].isdigit():
+                    vm_rows.append((parts[0], parts[1], parts[2]))
+            log_fn(f"  {len(vm_rows)} VM(s) trouvée(s)")
+
+            for vmid, vm_name, state in vm_rows:
+                grp, short = _vm_name_split(vm_name)
+                is_windows = bool(
+                    re.search(
+                        r"win|w(?:2k|2019|2022|2016|2012|srv|dc|server)",
+                        vm_name,
+                        re.IGNORECASE,
+                    )
+                )
+                vm_user = "Administrator" if is_windows else ssh_user
+                ip_addr = ""
+
+                if state == "running":
+                    qga_out = run(
+                        client,
+                        f"qm guest cmd {vmid} network-get-interfaces 2>/dev/null",
+                        timeout=20,
+                    )
+                    ip_addr = _extract_first_ipv4(qga_out)
+
+                # Fallback 1 : config ipconfig0 (cloud-init / statique Proxmox)
+                if not ip_addr:
+                    cfg_out = run(client, f"qm config {vmid} | grep '^ipconfig'", timeout=10)
+                    m_cfg = re.search(r"ip=(\d+\.\d+\.\d+\.\d+)", cfg_out)
+                    if m_cfg and not m_cfg.group(1).startswith("169."):
+                        ip_addr = m_cfg.group(1)
+
+                # Fallback 2 : ARP filtré par MAC de la VM
+                if not ip_addr:
+                    # Récupérer la MAC de la VM depuis qm config
+                    mac_out = run(
+                        client,
+                        f"qm config {vmid} | grep -oP '(?<=virtio=|e1000=|rtl8139=)[0-9A-Fa-f:]+' | head -1",
+                        timeout=10,
+                    )
+                    vm_mac = mac_out.strip().lower() if mac_out.strip() else ""
+                    arp_out = run(client, "ip neigh show 2>/dev/null || arp -n 2>/dev/null")
+                    for line in arp_out.splitlines():
+                        if vm_mac and vm_mac not in line.lower():
+                            continue
+                        m = re.search(r"(\d+\.\d+\.\d+\.\d+)", line)
+                        if m and not m.group(1).startswith("127."):
+                            ip_addr = m.group(1)
+                            break
+
+                # Fallback 3 : nmap ping scan (même pipeline que libvirt)
+                if not ip_addr and state == "running":
+                    nmap_table = _libvirt_nmap_scan(client, run, log_fn)
+                    if nmap_table:
+                        # Prendre la première IP découverte correspondant à une MAC VM connue
+                        mac_out2 = run(
+                            client,
+                            f"qm config {vmid} | grep -oP '[0-9A-Fa-f]{{2}}(:[0-9A-Fa-f]{{2}}){{5}}' | head -1",
+                            timeout=10,
+                        )
+                        vm_mac2 = mac_out2.strip().lower() if mac_out2.strip() else ""
+                        if vm_mac2 and vm_mac2 in nmap_table:
+                            ip_addr = nmap_table[vm_mac2]
+                        elif not ip_addr and nmap_table:
+                            # dernier recours : première IP du subnet (peu fiable)
+                            log_fn(f"  ↳ nmap : MAC VM introuvable, IP non résolue pour {vm_name}")
+
+                if ip_addr:
+                    log_fn(f"  ↳ IP {vm_name} : {ip_addr}")
+                else:
+                    log_fn(f"  ↳ IP {vm_name} : inconnue (QGA/ARP/nmap ont échoué)")
+
+                added = False
+
+                if "ssh" in proto_filter:
+                    if ip_addr:
+                        jump_flag = (
+                            f"-J {hv_user}@{hv_host}:{hv_port}"
+                            if hv_port != 22
+                            else f"-J {hv_user}@{hv_host}"
+                        )
+                        results.append(
+                            {
+                                "name": short,
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 22,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} (VMID {vmid}) — SSH ProxyJump via "
+                                    f"{hv_user}@{hv_host}:{hv_port} → {ip_addr}"
+                                ),
+                                "group": f"{grp}/ssh" if grp else "ssh",
+                                "hypervisor": hv_host,
+                                "protocol": "ssh",
+                                "extra_params": jump_flag,
+                            }
+                        )
+                    else:
+                        post_cmd = f"-t ssh {vm_user}@{vm_name}"
+                        results.append(
+                            {
+                                "name": short,
+                                "host": hv_host,
+                                "user": hv_user,
+                                "port": hv_port,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} (VMID {vmid}) — SSH via hyperviseur "
+                                    f"{hv_host}:{hv_port} → ssh {vm_user}@{vm_name} (IP inconnue)"
+                                ),
+                                "group": f"{grp}/ssh" if grp else "ssh",
+                                "hypervisor": hv_host,
+                                "protocol": "ssh",
+                                "extra_params": post_cmd,
+                            }
+                        )
+                    log_fn(
+                        f"  + [{grp}] {short:28s}  {ip_addr or '(IP inconnue)':16s}"
+                        f"  [{state}]  SSH"
+                    )
+                    added = True
+
+                if "spice" in proto_filter:
+                    # Proxmox SPICE : détecter vga qxl depuis qm config
+                    vga_out = run(client, f"qm config {vmid} | grep '^vga:'", timeout=10)
+                    has_qxl = "qxl" in vga_out.lower()
+                    if has_qxl:
+                        node_name = run(client, "hostname").strip()
+                        results.append(
+                            {
+                                "name": short,
+                                "host": hv_host,
+                                "user": hv_user,
+                                "port": hv_port,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} (VMID {vmid}) — SPICE via Proxmox proxy "
+                                    f"{hv_host} (ticket généré à la connexion)"
+                                ),
+                                "group": f"{grp}/spice" if grp else "spice",
+                                "hypervisor": hv_host,
+                                "protocol": "spice",
+                                "extra_params": f"--proxmox {node_name} {vmid}",
+                            }
+                        )
+                        log_fn(f"  + [{grp}] {short:28s}  VMID {vmid:>5s}  [{state}]  SPICE (qxl)")
+                        added = True
+                    else:
+                        log_fn(
+                            f"  ↳ SPICE ignoré pour {vm_name} : pas de vga qxl (vga='{vga_out.strip()}')"
+                        )
+
+                if "rdp" in proto_filter and ip_addr:
+                    log_fn(f"  ↳ Sondage RDP 3389 sur {ip_addr}…")
+                    if _check_port_open(client, run, ip_addr, 3389):
+                        results.append(
+                            {
+                                "name": f"{short}",
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 3389,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} (VMID {vmid}) — RDP "
+                                    "(port 3389 confirmé ouvert)"
+                                ),
+                                "group": f"{grp}/rdp" if grp else "rdp",
+                                "hypervisor": hv_host,
+                                "protocol": "rdp",
+                                "extra_params": "",
+                            }
+                        )
+                        log_fn(f"  + [{grp}] {short:28s}  {ip_addr:16s}  [{state}]  RDP ✓")
+                        added = True
+                    else:
+                        log_fn(f"  ↳ port 3389 fermé sur {ip_addr} — RDP ignoré")
+
+                if "vnc" in proto_filter and ip_addr:
+                    log_fn(f"  ↳ Sondage VNC 5900 sur {ip_addr}…")
+                    if _check_port_open(client, run, ip_addr, 5900):
+                        results.append(
+                            {
+                                "name": f"{short}",
+                                "host": ip_addr,
+                                "user": vm_user,
+                                "port": 5900,
+                                "password": "",
+                                "description": (
+                                    f"[{state}] {vm_name} (VMID {vmid}) — VNC "
+                                    "(port 5900 confirmé ouvert)"
+                                ),
+                                "group": f"{grp}/vnc" if grp else "vnc",
+                                "hypervisor": hv_host,
+                                "protocol": "vnc",
+                                "extra_params": "",
+                            }
+                        )
+                        log_fn(f"  + [{grp}] {short:28s}  {ip_addr:16s}  [{state}]  VNC ✓")
+                        added = True
+                    else:
+                        log_fn(f"  ↳ port 5900 fermé sur {ip_addr} — VNC ignoré")
+
+                if not added:
+                    log_fn(f"  - {vm_name} : aucune connexion générée")
+
+        finally:
+            client.close()
+
+        progress_fn((idx + 1) / total, f"{idx + 1}/{total} hyperviseurs traités")
+
+    return results
+
+
+class LibvirtImportDialog:
+    """Dialogue GTK3 d'import de VMs depuis les hyperviseurs libvirt.
+
+    Flux en deux phases :
+    1. Paramètres : URIs, user SSH, types de protocoles (SSH/SPICE/RDP).
+       → bouton « Scanner »
+    2. Tableau de prévisualisation : connexions découvertes, avec marquage
+       des entrées déjà présentes dans GCM, cases à cocher, import sélectif.
+
+    SSH  : jamais direct – ProxyJump (-J) si IP connue, sinon shell HV + -t.
+    SPICE: virt-viewer/remote-viewer --connect qemu+ssh://… (tunnel auto).
+    RDP  : uniquement si port 3389 confirmé ouvert (sondé depuis l'HV).
+    """
+
+    # Colonnes du ListStore de prévisualisation
+    _COL_SEL = 0  # bool — à importer ?
+    _COL_PROTO = 1  # str  — SSH / SPICE / RDP
+    _COL_NAME = 2  # str  — nom court
+    _COL_GROUP = 3  # str  — groupe GCM
+    _COL_HOST = 4  # str  — IP ou hostname
+    _COL_STATE = 5  # str  — état VM (running / shut off / …)
+    _COL_EXISTS = 6  # bool — déjà présent dans GCM
+    _COL_EXIST_LBL = 7  # str  — "✓ existe" ou ""
+    _COL_FG = 8  # str  — couleur foreground
+    _COL_IDX = 9  # int  — index dans self._discovered
+
+    def __init__(self, parent_window, on_done_callback, default_user="root"):
+        """Initialise le dialogue d'import libvirt.
+
+        Args:
+            parent_window (Gtk.Window): Fenêtre parente.
+            on_done_callback (callable): Appelée avec list[dict] lors de l'import.
+            default_user (str): Utilisateur SSH par défaut.
+        """
+        self.parent = parent_window
+        self.on_done = on_done_callback
+        self.default_user = default_user
+        self._discovered = []
+        self._build_ui()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Construction de l'UI
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _build_ui(self):
+        dlg = Gtk.Dialog(
+            title=_("Import from libvirt"),
+            transient_for=self.parent,
+            modal=True,
+        )
+        dlg.set_default_size(820, 720)
+        self._dlg = dlg
+        box = dlg.get_content_area()
+        box.set_spacing(8)
+        box.set_margin_start(12)
+        box.set_margin_end(12)
+        box.set_margin_top(12)
+        box.set_margin_bottom(12)
+
+        # ── Phase 1 : Paramètres de scan ─────────────────────────────────────
+        self._scan_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+
+        # User SSH hyperviseur
+        hb_user = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb_user.pack_start(Gtk.Label(label=_("Hypervisor SSH user:")), False, False, 0)
+        self._entry_user = Gtk.Entry()
+        self._entry_user.set_text(self.default_user)
+        self._entry_user.set_width_chars(12)
+        hb_user.pack_start(self._entry_user, False, False, 0)
+        self._scan_box.pack_start(hb_user, False, False, 0)
+
+        # Liste des URIs libvirt
+        lbl_uri = Gtk.Label(label=_("Hypervisors (virt-manager / dconf):"))
+        lbl_uri.set_xalign(0)
+        self._scan_box.pack_start(lbl_uri, False, False, 2)
+        self._lbl_uri = lbl_uri
+
+        self._uri_store = Gtk.ListStore(bool, str)
+        tv_uri = Gtk.TreeView(model=self._uri_store)
+        tv_uri.set_headers_visible(True)
+        cr_toggle = Gtk.CellRendererToggle()
+        cr_toggle.connect("toggled", self._on_uri_toggled)
+        tv_uri.append_column(Gtk.TreeViewColumn("", cr_toggle, active=0))
+        col_uri_txt = Gtk.TreeViewColumn(_("Detected libvirt URI"), Gtk.CellRendererText(), text=1)
+        col_uri_txt.set_expand(True)
+        tv_uri.append_column(col_uri_txt)
+        self._col_uri_txt = col_uri_txt
+        sw_uri = Gtk.ScrolledWindow()
+        sw_uri.set_min_content_height(150)
+        sw_uri.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw_uri.add(tv_uri)
+        self._scan_box.pack_start(sw_uri, False, False, 0)
+
+        # Saisie manuelle d'une cible libvirt (en plus de dconf)
+        hb_manual = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        lbl_manual_uri = Gtk.Label(label=_("Import from libvirt"))
+        hb_manual.pack_start(lbl_manual_uri, False, False, 0)
+        self._lbl_manual_uri = lbl_manual_uri
+        self._entry_manual_uri = Gtk.Entry()
+        self._entry_manual_uri.set_placeholder_text(
+            _("Ex: 192.168.105.41 | root@192.168.105.41 | qemu+ssh://root@192.168.105.41/system")
+        )
+        self._entry_manual_uri.connect("activate", self._on_add_manual_uri)
+        hb_manual.pack_start(self._entry_manual_uri, True, True, 0)
+        btn_add_uri = Gtk.Button(label=_("Add"))
+        btn_add_uri.connect("clicked", self._on_add_manual_uri)
+        hb_manual.pack_start(btn_add_uri, False, False, 0)
+        self._scan_box.pack_start(hb_manual, False, False, 0)
+
+        # Protocoles
+        lbl_proto = Gtk.Label()
+        lbl_proto.set_markup(_("<b>Connection types to import:</b>"))
+        lbl_proto.set_xalign(0)
+        self._scan_box.pack_start(lbl_proto, False, False, 4)
+
+        proto_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self._chk_ssh = Gtk.CheckButton(
+            label=_(
+                "SSH  (ProxyJump -J via hypervisor when VM IP is known, "
+                "otherwise hypervisor shell + -t ssh user@vm)"
+            )
+        )
+        self._chk_ssh.set_active(True)
+        self._chk_spice = Gtk.CheckButton(
+            label=_(
+                "SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled automatically)"
+            )
+        )
+        self._chk_spice.set_active(True)
+        self._chk_rdp = Gtk.CheckButton(
+            label=_(
+                "RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is closed)"
+            )
+        )
+        self._chk_rdp.set_active(True)
+        self._chk_vnc = Gtk.CheckButton(
+            label=_(
+                "VNC  (probe port 5900 from hypervisor via nc/nmap - skipped if port is closed)"
+            )
+        )
+        self._chk_vnc.set_active(False)
+        for chk in (self._chk_ssh, self._chk_spice, self._chk_rdp, self._chk_vnc):
+            proto_box.pack_start(chk, False, False, 0)
+        self._scan_box.pack_start(proto_box, False, False, 0)
+
+        # Zone de log
+        self._log_buf = Gtk.TextBuffer()
+        lv = Gtk.TextView(buffer=self._log_buf)
+        lv.set_editable(False)
+        lv.set_monospace(True)
+        lv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        sw_log = Gtk.ScrolledWindow()
+        sw_log.set_min_content_height(100)
+        sw_log.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw_log.add(lv)
+        self._scan_box.pack_start(sw_log, False, False, 0)
+        self._log_view = lv
+
+        # Barre de progression
+        self._progress = Gtk.ProgressBar()
+        self._progress.set_show_text(True)
+        self._progress.set_text(_("Waiting…"))
+        self._scan_box.pack_start(self._progress, False, False, 0)
+
+        # Bouton Scanner (aligné à droite)
+        self._btn_scan = Gtk.Button(label=_("🔍  Scan Libvirt hypervisors"))
+        self._btn_scan.get_style_context().add_class("suggested-action")
+        self._btn_scan.connect("clicked", self._on_scan_clicked)
+        scan_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        scan_btn_box.pack_end(self._btn_scan, False, False, 0)
+        self._scan_box.pack_start(scan_btn_box, False, False, 0)
+
+        # Wrap _scan_box dans un ScrolledWindow pour éviter le dépassement écran
+        sw_scan = Gtk.ScrolledWindow()
+        sw_scan.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sw_scan.set_min_content_height(300)
+        sw_scan.set_max_content_height(500)
+        sw_scan.add(self._scan_box)
+        box.pack_start(sw_scan, False, False, 0)
+
+        # ── Phase 2 : Tableau de prévisualisation (caché au départ) ──────────
+        self._preview_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self._preview_box.set_no_show_all(True)
+
+        box.pack_start(self._preview_box, True, True, 0)
+
+        box.pack_start(Gtk.Separator(), False, False, 4)
+
+        # Résumé
+        self._lbl_summary = Gtk.Label(label="")
+        self._lbl_summary.set_xalign(0)
+        self._preview_box.pack_start(self._lbl_summary, False, False, 0)
+
+        # Case « Écraser »
+        self._chk_overwrite = Gtk.CheckButton(
+            label=_("Overwrite existing connections with the same name and protocol")
+        )
+        self._chk_overwrite.set_active(False)
+        self._preview_box.pack_start(self._chk_overwrite, False, False, 0)
+
+        # Tout cocher / Tout décocher
+        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        btn_all = Gtk.Button(label=_("✓ Check all"))
+        btn_all.connect("clicked", lambda w: self._select_all(True))
+        btn_none = Gtk.Button(label=_("✗ Uncheck all"))
+        btn_none.connect("clicked", lambda w: self._select_all(False))
+        ctrl_box.pack_start(btn_all, False, False, 0)
+        ctrl_box.pack_start(btn_none, False, False, 0)
+        self._preview_box.pack_start(ctrl_box, False, False, 0)
+
+        # TreeView de prévisualisation
+        self._preview_store = Gtk.ListStore(
+            bool,  # COL_SEL
+            str,  # COL_PROTO
+            str,  # COL_NAME
+            str,  # COL_GROUP
+            str,  # COL_HOST
+            str,  # COL_STATE
+            bool,  # COL_EXISTS
+            str,  # COL_EXIST_LBL
+            str,  # COL_FG
+            int,  # COL_IDX
+        )
+        tv_prev = Gtk.TreeView(model=self._preview_store)
+        tv_prev.set_enable_search(True)
+        tv_prev.set_search_column(self._COL_NAME)
+        self._tv_preview = tv_prev
+
+        # Col 0 : case à cocher
+        cr_sel = Gtk.CellRendererToggle()
+        cr_sel.connect("toggled", self._on_preview_toggled)
+        col_sel = Gtk.TreeViewColumn("", cr_sel, active=self._COL_SEL)
+        col_sel.set_min_width(28)
+        tv_prev.append_column(col_sel)
+
+        # Col 1 : protocole
+        cr_proto = Gtk.CellRendererText()
+        col_proto = Gtk.TreeViewColumn(
+            _("Proto"),
+            cr_proto,
+            text=self._COL_PROTO,
+            foreground=self._COL_FG,
+        )
+        col_proto.set_min_width(55)
+        tv_prev.append_column(col_proto)
+
+        # Col 2 : nom VM
+        cr_name = Gtk.CellRendererText()
+        col_name = Gtk.TreeViewColumn(
+            _("VM name"),
+            cr_name,
+            text=self._COL_NAME,
+            foreground=self._COL_FG,
+        )
+        col_name.set_expand(True)
+        col_name.set_min_width(170)
+        tv_prev.append_column(col_name)
+
+        # Col 3 : groupe
+        cr_grp = Gtk.CellRendererText()
+        col_grp = Gtk.TreeViewColumn(
+            _("Group"),
+            cr_grp,
+            text=self._COL_GROUP,
+            foreground=self._COL_FG,
+        )
+        col_grp.set_min_width(90)
+        tv_prev.append_column(col_grp)
+
+        # Col 4 : IP / hôte
+        cr_host = Gtk.CellRendererText()
+        col_host = Gtk.TreeViewColumn(
+            _("IP / Host"),
+            cr_host,
+            text=self._COL_HOST,
+            foreground=self._COL_FG,
+        )
+        col_host.set_min_width(120)
+        tv_prev.append_column(col_host)
+
+        # Col 5 : état VM
+        cr_state = Gtk.CellRendererText()
+        col_state = Gtk.TreeViewColumn(
+            _("State"),
+            cr_state,
+            text=self._COL_STATE,
+            foreground=self._COL_FG,
+        )
+        col_state.set_min_width(75)
+        tv_prev.append_column(col_state)
+
+        # Col 7 : déjà importé ?
+        cr_exist = Gtk.CellRendererText()
+        col_exist = Gtk.TreeViewColumn(
+            _("Imported"),
+            cr_exist,
+            text=self._COL_EXIST_LBL,
+            foreground=self._COL_FG,
+        )
+        col_exist.set_min_width(70)
+        tv_prev.append_column(col_exist)
+
+        # ScrolledWindow (~30 lignes visibles, défilable pour > 250 lignes)
+        sw_prev = Gtk.ScrolledWindow()
+        sw_prev.set_min_content_height(500)
+        sw_prev.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        sw_prev.add(tv_prev)
+        sw_prev.set_vexpand(True)
+        self._preview_box.pack_start(sw_prev, True, True, 0)
+
+        # Boutons de la phase 2
+        import_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        self._btn_import = Gtk.Button(label=_("⬇  Import selected"))
+        self._btn_import.get_style_context().add_class("suggested-action")
+        self._btn_import.connect("clicked", self._on_import_clicked)
+        btn_cancel2 = Gtk.Button(label=_("Cancel"))
+        btn_cancel2.connect("clicked", lambda w: self._dlg.destroy())
+        import_btn_box.pack_end(self._btn_import, False, False, 0)
+        import_btn_box.pack_end(btn_cancel2, False, False, 6)
+        self._preview_box.pack_start(import_btn_box, False, False, 0)
+
+        # Bouton Fermer (barre d'action standard)
+        dlg.add_button(_("✕  Close"), Gtk.ResponseType.CANCEL)
+        dlg.connect("response", lambda d, r: d.destroy())
+
+        dlg.show_all()
+        self._preview_box.hide()
+        self._populate_uris()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Peuplement des URIs
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _populate_uris(self):
+        """Charge la liste initiale des URI libvirt depuis dconf.
+
+        Si aucune URI n'est trouvée, un exemple par défaut est ajouté pour
+        permettre un démarrage rapide du scan.
+
+        Returns:
+            None: Met à jour `self._uri_store` en place.
+        """
+        uris = _libvirt_get_uris_from_dconf()
+        if not uris:
+            self._log(
+                _(
+                    "No URI found in dconf (virt-manager not configured?).\n"
+                    "Add your URIs manually below."
+                )
+            )
+            self._uri_store.append([True, "qemu+ssh://root@hyperviseur/system"])
+            return
+        for uri in uris:
+            self._uri_store.append([True, uri])
+
+    def _normalize_manual_uri(self, raw_target):
+        """Convertit une saisie libre en URI qemu+ssh://.../system.
+
+        Args:
+            raw_target (str): Cible saisie (IP, user@host, URI complète, etc.).
+
+        Returns:
+            str: URI normalisée, ou chaîne vide si entrée invalide.
+        """
+        raw = (raw_target or "").strip()
+        if not raw:
+            return ""
+        if "://" in raw:
+            return raw
+
+        if "@" in raw:
+            user, hostport = raw.split("@", 1)
+            user = user or "root"
+        else:
+            user, hostport = "root", raw
+
+        host = hostport
+        port = None
+        if ":" in hostport:
+            h, p = hostport.rsplit(":", 1)
+            if p.isdigit():
+                host, port = h, int(p)
+
+        host = host.strip()
+        if not host:
+            return ""
+        if port is None or port == 22:
+            return f"qemu+ssh://{user}@{host}/system"
+        return f"qemu+ssh://{user}@{host}:{port}/system"
+
+    def _on_add_manual_uri(self, widget):
+        """Ajoute une URI libvirt saisie manuellement dans la liste.
+
+        Args:
+            widget (Gtk.Widget): Widget déclencheur (bouton ou entrée).
+
+        Returns:
+            None: Met à jour la liste des URI et le log UI.
+        """
+        uri = self._normalize_manual_uri(self._entry_manual_uri.get_text())
+        if not uri:
+            self._log(_("Invalid libvirt target."))
+            return
+        existing = [row[1] for row in self._uri_store]
+        if uri in existing:
+            self._log(_(f"Cible déjà présente : {uri}"))
+            self._entry_manual_uri.set_text("")
+            return
+        self._uri_store.append([True, uri])
+        self._log(_(f"Cible ajoutée : {uri}"))
+        self._entry_manual_uri.set_text("")
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Helpers log / progress
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _log(self, msg):
+        """Ajoute un message dans la zone de log du dialogue.
+
+        Args:
+            msg (str): Texte à afficher.
+
+        Returns:
+            None: Planifie l'ajout du message dans le thread GTK.
+        """
+
+        def _do():
+            buf = self._log_buf
+            buf.insert(buf.get_end_iter(), msg + "\n")
+            self._log_view.scroll_mark_onscreen(buf.get_insert())
+            return False
+
+        GLib.idle_add(_do)
+
+    def _set_progress(self, frac, text):
+        """Met à jour la barre de progression du scan.
+
+        Args:
+            frac (float): Fraction de progression entre 0 et 1.
+            text (str): Texte d'état à afficher.
+
+        Returns:
+            None: Planifie la mise à jour de la progress bar.
+        """
+
+        def _do():
+            self._progress.set_fraction(frac)
+            self._progress.set_text(text)
+            return False
+
+        GLib.idle_add(_do)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # URI toggle
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_uri_toggled(self, renderer, path):
+        """Inverse l'état coché d'une URI dans la liste de scan.
+
+        Args:
+            renderer (Gtk.CellRendererToggle): Renderer source.
+            path (str): Chemin de ligne dans le modèle Gtk.
+
+        Returns:
+            None: Inverse l'état de sélection de la ligne.
+        """
+        self._uri_store[path][0] = not self._uri_store[path][0]
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Phase 1 → Scan
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_scan_clicked(self, widget):
+        """Lance le scan des hyperviseurs libvirt sélectionnés.
+
+        Ajoute aussi une URI saisie mais non encore validée avant de démarrer
+        le thread de collecte.
+
+        Args:
+            widget (Gtk.Widget): Bouton scanner.
+
+        Returns:
+            None: Démarre un thread de scan et met à jour l'UI.
+        """
+        self._btn_scan.set_sensitive(False)
+        if hasattr(self, "_entry_manual_uri"):
+            pending_uri = self._normalize_manual_uri(self._entry_manual_uri.get_text())
+            if pending_uri:
+                existing = [row[1] for row in self._uri_store]
+                if pending_uri not in existing:
+                    self._uri_store.append([True, pending_uri])
+                    self._log(_(f"Cible ajoutée automatiquement : {pending_uri}"))
+                self._entry_manual_uri.set_text("")
+        uris = [row[1] for row in self._uri_store if row[0]]
+        if not uris:
+            self._log(_("No URI selected."))
+            self._btn_scan.set_sensitive(True)
+            return
+        user = self._entry_user.get_text().strip() or "root"
+        proto_filter = set()
+        if self._chk_ssh.get_active():
+            proto_filter.add("ssh")
+        if self._chk_spice.get_active():
+            proto_filter.add("spice")
+        if self._chk_rdp.get_active():
+            proto_filter.add("rdp")
+        if hasattr(self, "_chk_vnc") and self._chk_vnc.get_active():
+            proto_filter.add("vnc")
+        if not proto_filter:
+            self._log(_("No connection type selected."))
+            self._btn_scan.set_sensitive(True)
+            return
+
+        def worker():
+            results = _libvirt_fetch_hosts(uris, user, self._log, self._set_progress, proto_filter)
+            GLib.idle_add(self._show_preview, results)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Phase 2 → Tableau de prévisualisation
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _host_exists(self, name, grp):
+        """Vérifie si un hôte avec ce nom existe déjà dans le groupe GCM."""
+        if grp in groups:
+            return any(h.name == name for h in groups[grp])
+        return False
+
+    def _show_preview(self, host_dicts):
+        """Affiche les résultats du scan dans la grille de prévisualisation.
+
+        Args:
+            host_dicts (list[dict]): Connexions détectées prêtes à importer.
+
+        Returns:
+            None: Remplit la grille de prévisualisation et met à jour le résumé.
+        """
+        self._discovered = host_dicts
+        self._preview_store.clear()
+
+        n_new = 0
+        n_exists = 0
+        for idx, hd in enumerate(host_dicts):
+            name = hd.get("name", "")
+            grp = hd.get("group", "LIBVIRT")
+            proto = hd.get("protocol", "ssh").upper()
+            host = hd.get("host", "")
+            desc = hd.get("description", "")
+            # Extraire l'état de la VM depuis la description ([running], [shut off]…)
+            m = re.search(r"\[([^\]]+)\]", desc)
+            state_str = m.group(1) if m else ""
+            exists = self._host_exists(name, grp)
+            exist_lbl = "✓ existe" if exists else ""
+            fg = "#888888" if exists else "black"
+            # Cocher par défaut seulement les nouvelles entrées
+            selected = not exists
+            if exists:
+                n_exists += 1
+            else:
+                n_new += 1
+            self._preview_store.append(
+                [
+                    selected,
+                    proto,
+                    name,
+                    grp,
+                    host,
+                    state_str,
+                    exists,
+                    exist_lbl,
+                    fg,
+                    idx,
+                ]
+            )
+
+        total = len(host_dicts)
+        self._lbl_summary.set_markup(
+            f"<b>{total}</b> connexion(s) trouvée(s) — "
+            f"<span foreground='#007700'>{n_new} nouvelle(s)</span>, "
+            f"<span foreground='#888888'>{n_exists} déjà importée(s)</span>"
+        )
+        self._set_progress(1.0, f"{total} connexion(s) découverte(s)")
+        self._log(
+            f"\nScan terminé — {total} connexion(s) : "
+            f"{n_new} nouvelle(s), {n_exists} déjà présente(s)."
+        )
+        # Afficher la phase 2
+        self._preview_box.set_no_show_all(False)
+        self._preview_box.show_all()
+        # Réinitialiser le bouton Scanner
+        self._btn_scan.set_label(_("🔄  Rescan"))
+        self._btn_scan.set_sensitive(True)
+        # Agrandir le dialogue pour afficher le tableau
+        self._dlg.resize(820, 900)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Sélection globale
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_preview_toggled(self, renderer, path):
+        """Inverse la sélection d'une ligne de prévisualisation.
+
+        Args:
+            renderer (Gtk.CellRendererToggle): Renderer source.
+            path (str): Chemin de ligne dans le modèle Gtk.
+
+        Returns:
+            None: Inverse l'état coché de la ligne.
+        """
+        self._preview_store[path][self._COL_SEL] = not self._preview_store[path][self._COL_SEL]
+
+    def _select_all(self, value):
+        """Coche ou décoche toutes les lignes de prévisualisation.
+
+        Args:
+            value (bool): État à appliquer à toute la liste.
+
+        Returns:
+            None: Applique l'état à toutes les lignes.
+        """
+        for row in self._preview_store:
+            row[self._COL_SEL] = value
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Import final
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_import_clicked(self, widget):
+        """Importe les éléments sélectionnés vers la configuration GCM.
+
+        Args:
+            widget (Gtk.Widget): Bouton d'import.
+
+        Returns:
+            None: Déclenche l'import et met à jour l'UI.
+        """
+        self._btn_import.set_sensitive(False)
+        overwrite = self._chk_overwrite.get_active()
+        to_import = []
+        for row in self._preview_store:
+            if not row[self._COL_SEL]:
+                continue
+            exists = row[self._COL_EXISTS]
+            if exists and not overwrite:
+                continue  # ignorer les existants si écrasement désactivé
+            idx = row[self._COL_IDX]
+            to_import.append(self._discovered[idx])
+
+        if not to_import:
+            self._log(_("No connection to import (all already exist or none selected)."))
+            self._btn_import.set_sensitive(True)
+            return
+
+        self.on_done(to_import)
+        self._btn_import.set_label(_("✓ Imported"))
+        n = len(to_import)
+        self._lbl_summary.set_markup(f"<b>{n}</b> connexion(s) importée(s) avec succès.")
+
+
+class ProxmoxImportDialog:
+    """Dialogue GTK3 d'import de VMs depuis Proxmox (scan natif `qm`).
+
+    Classe indépendante — aucun lien avec LibvirtImportDialog.
+    Même structure UI en deux phases (scan → prévisualisation) mais :
+    - Inventaire via `qm list` / `qm config` (Proxmox natif)
+    - SPICE via ticket pvesh (vga:qxl requis)
+    - Résolution IP : QGA → ipconfig0 → ARP/MAC → nmap
+    """
+
+    # Colonnes du ListStore de prévisualisation (identiques à libvirt)
+    _COL_SEL = 0
+    _COL_PROTO = 1
+    _COL_NAME = 2
+    _COL_GROUP = 3
+    _COL_HOST = 4
+    _COL_STATE = 5
+    _COL_EXISTS = 6
+    _COL_EXIST_LBL = 7
+    _COL_FG = 8
+    _COL_IDX = 9
+
+    def __init__(self, parent_window, on_done_callback, default_user="root"):
+        self.parent = parent_window
+        self.on_done = on_done_callback
+        self.default_user = default_user
+        self._discovered = []
+        self._build_ui()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Construction de l'UI
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _build_ui(self):
+        dlg = Gtk.Dialog(
+            title=_("Import from Proxmox"),
+            transient_for=self.parent,
+            modal=True,
+        )
+        dlg.set_default_size(820, 720)
+        self._dlg = dlg
+        box = dlg.get_content_area()
+        box.set_spacing(8)
+        box.set_margin_start(12)
+        box.set_margin_end(12)
+        box.set_margin_top(12)
+        box.set_margin_bottom(12)
+
+        # ── Phase 1 : Paramètres de scan ─────────────────────────────────────
+        self._scan_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+
+        # User SSH hyperviseur
+        hb_user = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb_user.pack_start(Gtk.Label(label=_("Hypervisor SSH user:")), False, False, 0)
+        self._entry_user = Gtk.Entry()
+        self._entry_user.set_text(self.default_user)
+        self._entry_user.set_width_chars(12)
+        hb_user.pack_start(self._entry_user, False, False, 0)
+        self._scan_box.pack_start(hb_user, False, False, 0)
+
+        # Liste des cibles Proxmox
+        lbl_uri = Gtk.Label(label=_("Proxmox targets:"))
+        lbl_uri.set_xalign(0)
+        self._scan_box.pack_start(lbl_uri, False, False, 2)
+
+        self._uri_store = Gtk.ListStore(bool, str)
+        tv_uri = Gtk.TreeView(model=self._uri_store)
+        tv_uri.set_headers_visible(True)
+        cr_toggle = Gtk.CellRendererToggle()
+        cr_toggle.connect("toggled", self._on_uri_toggled)
+        tv_uri.append_column(Gtk.TreeViewColumn("", cr_toggle, active=0))
+        col_uri_txt = Gtk.TreeViewColumn(
+            _("Proxmox target (qemu+ssh://user@host/system)"),
+            Gtk.CellRendererText(),
+            text=1,
+        )
+        col_uri_txt.set_expand(True)
+        tv_uri.append_column(col_uri_txt)
+        sw_uri = Gtk.ScrolledWindow()
+        sw_uri.set_min_content_height(120)
+        sw_uri.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw_uri.add(tv_uri)
+        self._scan_box.pack_start(sw_uri, False, False, 0)
+
+        # Saisie manuelle d'une cible Proxmox
+        hb_manual = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb_manual.pack_start(Gtk.Label(label=_("Add a Proxmox target:")), False, False, 0)
+        self._entry_manual_uri = Gtk.Entry()
+        self._entry_manual_uri.set_placeholder_text(
+            _("Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22")
+        )
+        self._entry_manual_uri.connect("activate", self._on_add_manual_uri)
+        hb_manual.pack_start(self._entry_manual_uri, True, True, 0)
+        btn_add_uri = Gtk.Button(label=_("Add"))
+        btn_add_uri.connect("clicked", self._on_add_manual_uri)
+        hb_manual.pack_start(btn_add_uri, False, False, 0)
+        self._scan_box.pack_start(hb_manual, False, False, 0)
+
+        # Protocoles
+        lbl_proto = Gtk.Label()
+        lbl_proto.set_markup(_("<b>Connection types to import:</b>"))
+        lbl_proto.set_xalign(0)
+        self._scan_box.pack_start(lbl_proto, False, False, 4)
+
+        proto_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self._chk_ssh = Gtk.CheckButton(
+            label=_(
+                "SSH  (ProxyJump -J via hypervisor when VM IP is known, "
+                "otherwise hypervisor shell + -t ssh user@vm)"
+            )
+        )
+        self._chk_ssh.set_active(True)
+        self._chk_spice = Gtk.CheckButton(
+            label=_("SPICE  (vga:qxl required — ticket generated at connection time via pvesh)")
+        )
+        self._chk_spice.set_active(True)
+        self._chk_rdp = Gtk.CheckButton(
+            label=_(
+                "RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is closed)"
+            )
+        )
+        self._chk_rdp.set_active(True)
+        self._chk_vnc = Gtk.CheckButton(
+            label=_(
+                "VNC  (probe port 5900 from hypervisor via nc/nmap - skipped if port is closed)"
+            )
+        )
+        self._chk_vnc.set_active(False)
+        for chk in (self._chk_ssh, self._chk_spice, self._chk_rdp, self._chk_vnc):
+            proto_box.pack_start(chk, False, False, 0)
+        self._scan_box.pack_start(proto_box, False, False, 0)
+
+        # Zone de log
+        self._log_buf = Gtk.TextBuffer()
+        lv = Gtk.TextView(buffer=self._log_buf)
+        lv.set_editable(False)
+        lv.set_monospace(True)
+        lv.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+        sw_log = Gtk.ScrolledWindow()
+        sw_log.set_min_content_height(100)
+        sw_log.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw_log.add(lv)
+        self._scan_box.pack_start(sw_log, False, False, 0)
+        self._log_view = lv
+
+        # Barre de progression
+        self._progress = Gtk.ProgressBar()
+        self._progress.set_show_text(True)
+        self._progress.set_text(_("Waiting…"))
+        self._scan_box.pack_start(self._progress, False, False, 0)
+
+        # Bouton Scanner
+        self._btn_scan = Gtk.Button(label=_("🔍  Scan Proxmox hosts"))
+        self._btn_scan.get_style_context().add_class("suggested-action")
+        self._btn_scan.connect("clicked", self._on_scan_clicked)
+        scan_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        scan_btn_box.pack_end(self._btn_scan, False, False, 0)
+        self._scan_box.pack_start(scan_btn_box, False, False, 0)
+
+        sw_scan = Gtk.ScrolledWindow()
+        sw_scan.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        sw_scan.set_min_content_height(300)
+        sw_scan.set_max_content_height(500)
+        sw_scan.add(self._scan_box)
+        box.pack_start(sw_scan, False, False, 0)
+
+        # ── Phase 2 : Tableau de prévisualisation (caché au départ) ──────────
+        self._preview_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self._preview_box.set_no_show_all(True)
+        box.pack_start(self._preview_box, True, True, 0)
+        box.pack_start(Gtk.Separator(), False, False, 4)
+
+        self._lbl_summary = Gtk.Label(label="")
+        self._lbl_summary.set_xalign(0)
+        self._preview_box.pack_start(self._lbl_summary, False, False, 0)
+
+        self._chk_overwrite = Gtk.CheckButton(
+            label=_("Overwrite existing connections with the same name and protocol")
+        )
+        self._chk_overwrite.set_active(False)
+        self._preview_box.pack_start(self._chk_overwrite, False, False, 0)
+
+        ctrl_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        btn_all = Gtk.Button(label=_("✓ Check all"))
+        btn_all.connect("clicked", lambda w: self._select_all(True))
+        btn_none = Gtk.Button(label=_("✗ Uncheck all"))
+        btn_none.connect("clicked", lambda w: self._select_all(False))
+        ctrl_box.pack_start(btn_all, False, False, 0)
+        ctrl_box.pack_start(btn_none, False, False, 0)
+        self._preview_box.pack_start(ctrl_box, False, False, 0)
+
+        self._preview_store = Gtk.ListStore(bool, str, str, str, str, str, bool, str, str, int)
+        tv_prev = Gtk.TreeView(model=self._preview_store)
+        tv_prev.set_enable_search(True)
+        tv_prev.set_search_column(self._COL_NAME)
+        self._tv_preview = tv_prev
+
+        cr_sel = Gtk.CellRendererToggle()
+        cr_sel.connect("toggled", self._on_preview_toggled)
+        col_sel = Gtk.TreeViewColumn("", cr_sel, active=self._COL_SEL)
+        col_sel.set_min_width(28)
+        tv_prev.append_column(col_sel)
+
+        for title, col_idx, min_w, expand in (
+            (_("Proto"), self._COL_PROTO, 55, False),
+            (_("VM name"), self._COL_NAME, 170, True),
+            (_("Group"), self._COL_GROUP, 90, False),
+            (_("IP / Host"), self._COL_HOST, 120, False),
+            (_("State"), self._COL_STATE, 75, False),
+            (_("Imported"), self._COL_EXIST_LBL, 70, False),
+        ):
+            cr = Gtk.CellRendererText()
+            col = Gtk.TreeViewColumn(title, cr, text=col_idx, foreground=self._COL_FG)
+            col.set_min_width(min_w)
+            col.set_expand(expand)
+            tv_prev.append_column(col)
+
+        sw_prev = Gtk.ScrolledWindow()
+        sw_prev.set_min_content_height(500)
+        sw_prev.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        sw_prev.add(tv_prev)
+        sw_prev.set_vexpand(True)
+        self._preview_box.pack_start(sw_prev, True, True, 0)
+
+        import_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        self._btn_import = Gtk.Button(label=_("⬇  Import selected"))
+        self._btn_import.get_style_context().add_class("suggested-action")
+        self._btn_import.connect("clicked", self._on_import_clicked)
+        btn_cancel2 = Gtk.Button(label=_("Cancel"))
+        btn_cancel2.connect("clicked", lambda w: self._dlg.destroy())
+        import_btn_box.pack_end(self._btn_import, False, False, 0)
+        import_btn_box.pack_end(btn_cancel2, False, False, 6)
+        self._preview_box.pack_start(import_btn_box, False, False, 0)
+
+        dlg.add_button(_("✕  Close"), Gtk.ResponseType.CANCEL)
+        dlg.connect("response", lambda d, r: d.destroy())
+
+        dlg.show_all()
+        self._preview_box.hide()
+        self._populate_uris()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Peuplement des cibles Proxmox
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _populate_uris(self):
+        uris = [u for u in _libvirt_get_uris_from_dconf() if "+ssh://" in u and "/system" in u]
+        if not uris:
+            self._log(_("No SSH URI found in dconf.\nEnter an IP/host below and click Add."))
+            return
+        for uri in uris:
+            self._uri_store.append([True, uri])
+
+    def _normalize_manual_uri(self, raw_target):
+        """Convertit une saisie libre en URI qemu+ssh://.../system.
+
+        Args:
+            raw_target (str): Cible saisie (IP, user@host, URI complète, etc.).
+
+        Returns:
+            str: URI normalisée, ou chaîne vide si entrée invalide.
+        """
+        raw = (raw_target or "").strip()
+        if not raw:
+            return ""
+        if "://" in raw:
+            return raw
+        if "@" in raw:
+            user, hostport = raw.split("@", 1)
+            user = user or "root"
+        else:
+            user, hostport = "root", raw
+        host = hostport
+        port = 22
+        if ":" in hostport:
+            h, p = hostport.rsplit(":", 1)
+            if p.isdigit():
+                host, port = h, int(p)
+        host = host.strip()
+        if not host:
+            return ""
+        return f"qemu+ssh://{user}@{host}:{port}/system"
+
+    def _on_add_manual_uri(self, widget):
+        """Ajoute une cible Proxmox saisie manuellement à la liste.
+
+        Args:
+            widget (Gtk.Widget): Widget déclencheur.
+
+        Returns:
+            None: Met à jour la liste des cibles et le log UI.
+        """
+        uri = self._normalize_manual_uri(self._entry_manual_uri.get_text())
+        if not uri:
+            self._log(_("Invalid Proxmox target."))
+            return
+        existing = [row[1] for row in self._uri_store]
+        if uri in existing:
+            self._log(_(f"Cible déjà présente : {uri}"))
+            self._entry_manual_uri.set_text("")
+            return
+        self._uri_store.append([True, uri])
+        self._log(_(f"Cible ajoutée : {uri}"))
+        self._entry_manual_uri.set_text("")
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Helpers log / progress
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _log(self, msg):
+        def _do():
+            buf = self._log_buf
+            buf.insert(buf.get_end_iter(), msg + "\n")
+            self._log_view.scroll_mark_onscreen(buf.get_insert())
+            return False
+
+        GLib.idle_add(_do)
+
+    def _set_progress(self, frac, text):
+        def _do():
+            self._progress.set_fraction(frac)
+            self._progress.set_text(text)
+            return False
+
+        GLib.idle_add(_do)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # URI toggle
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_uri_toggled(self, renderer, path):
+        self._uri_store[path][0] = not self._uri_store[path][0]
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Phase 1 → Scan Proxmox
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_scan_clicked(self, widget):
+        self._btn_scan.set_sensitive(False)
+        pending_uri = self._normalize_manual_uri(self._entry_manual_uri.get_text())
+        if pending_uri:
+            existing = [row[1] for row in self._uri_store]
+            if pending_uri not in existing:
+                self._uri_store.append([True, pending_uri])
+                self._log(_(f"Cible ajoutée automatiquement : {pending_uri}"))
+            self._entry_manual_uri.set_text("")
+        uris = [row[1] for row in self._uri_store if row[0]]
+        if not uris:
+            self._log(_("No Proxmox target selected."))
+            self._btn_scan.set_sensitive(True)
+            return
+        user = self._entry_user.get_text().strip() or "root"
+        proto_filter = set()
+        if self._chk_ssh.get_active():
+            proto_filter.add("ssh")
+        if self._chk_spice.get_active():
+            proto_filter.add("spice")
+        if self._chk_rdp.get_active():
+            proto_filter.add("rdp")
+        if self._chk_vnc.get_active():
+            proto_filter.add("vnc")
+        if not proto_filter:
+            self._log(_("No connection type selected."))
+            self._btn_scan.set_sensitive(True)
+            return
+
+        def worker():
+            results = _proxmox_fetch_hosts(uris, user, self._log, self._set_progress, proto_filter)
+            GLib.idle_add(self._show_preview, results)
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Phase 2 → Tableau de prévisualisation
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _host_exists(self, name, grp):
+        if grp in groups:
+            return any(h.name == name for h in groups[grp])
+        return False
+
+    def _show_preview(self, host_dicts):
+        self._discovered = host_dicts
+        self._preview_store.clear()
+        n_new = 0
+        n_exists = 0
+        for idx, hd in enumerate(host_dicts):
+            name = hd.get("name", "")
+            grp = hd.get("group", "PROXMOX")
+            proto = hd.get("protocol", "ssh").upper()
+            host = hd.get("host", "")
+            desc = hd.get("description", "")
+            m = re.search(r"\[([^\]]+)\]", desc)
+            state_str = m.group(1) if m else ""
+            exists = self._host_exists(name, grp)
+            exist_lbl = "✓ existe" if exists else ""
+            fg = "#888888" if exists else "black"
+            selected = not exists
+            if exists:
+                n_exists += 1
+            else:
+                n_new += 1
+            self._preview_store.append(
+                [selected, proto, name, grp, host, state_str, exists, exist_lbl, fg, idx]
+            )
+        total = len(host_dicts)
+        self._lbl_summary.set_markup(
+            f"<b>{total}</b> connexion(s) trouvée(s) — "
+            f"<span foreground='#007700'>{n_new} nouvelle(s)</span>, "
+            f"<span foreground='#888888'>{n_exists} déjà importée(s)</span>"
+        )
+        self._set_progress(1.0, f"{total} connexion(s) découverte(s)")
+        self._log(
+            f"\nScan Proxmox terminé — {total} connexion(s) : "
+            f"{n_new} nouvelle(s), {n_exists} déjà présente(s)."
+        )
+        self._preview_box.set_no_show_all(False)
+        self._preview_box.show_all()
+        self._btn_scan.set_label(_("🔄  Rescan"))
+        self._btn_scan.set_sensitive(True)
+        self._dlg.resize(820, 900)
+
+    def _on_preview_toggled(self, renderer, path):
+        self._preview_store[path][self._COL_SEL] = not self._preview_store[path][self._COL_SEL]
+
+    def _select_all(self, value):
+        for row in self._preview_store:
+            row[self._COL_SEL] = value
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Import final
+    # ──────────────────────────────────────────────────────────────────────────
+
+    def _on_import_clicked(self, widget):
+        self._btn_import.set_sensitive(False)
+        overwrite = self._chk_overwrite.get_active()
+        to_import = []
+        for row in self._preview_store:
+            if not row[self._COL_SEL]:
+                continue
+            if row[self._COL_EXISTS] and not overwrite:
+                continue
+            to_import.append(self._discovered[row[self._COL_IDX]])
+        if not to_import:
+            self._log(_("No connection to import (all already exist or none selected)."))
+            self._btn_import.set_sensitive(True)
+            return
+        self.on_done(to_import)
+        self._btn_import.set_label(_("✓ Imported"))
+        self._lbl_summary.set_markup(
+            f"<b>{len(to_import)}</b> connexion(s) importée(s) avec succès."
+        )
+
+
+class SerialTemplatesTab:
+    """Onglet 'Templates Série' dans Gtk.Notebook des préférences GCM.
+
+    Permet d'ajouter, modifier et supprimer des templates série personnalisés.
+    Les modifications sont appliquées dans _SERIAL_TEMPLATES global et
+    persistées dans [serial_templates] de gcm.conf.
+    """
+
+    _COL_NAME = 0
+    _COL_BAUD = 1
+    _COL_FLOW = 2
+    _COL_PARITY = 3
+    _COL_DATABITS = 4
+    _COL_STOPBITS = 5
+
+    _BAUD_VALUES = (
+        "300",
+        "1200",
+        "2400",
+        "4800",
+        "9600",
+        "19200",
+        "38400",
+        "57600",
+        "115200",
+        "230400",
+        "460800",
+        "921600",
+    )
+    _FLOW_CODES = ("n", "x", "h", "d")
+    _PARITY_CODES = ("n", "e", "o")
+    _DATABITS_VALUES = ("5", "6", "7", "8")
+    _STOPBITS_VALUES = ("1", "2")
+
+    def __init__(self, notebook):
+        self._build(notebook)
+
+    def _build(self, notebook):
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        outer.set_margin_start(10)
+        outer.set_margin_end(10)
+        outer.set_margin_top(10)
+        outer.set_margin_bottom(10)
+
+        lbl_help = Gtk.Label()
+        lbl_help.set_markup(
+            _(
+                "<i>Double-click a cell to edit it.\n"
+                "File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+                "<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+            )
+        )
+        lbl_help.set_xalign(0)
+        lbl_help.set_line_wrap(True)
+        outer.pack_start(lbl_help, False, False, 0)
+
+        self._store = Gtk.ListStore(str, str, str, str, str, str)
+        self._populate_store()
+
+        tv = Gtk.TreeView(model=self._store)
+        tv.set_reorderable(True)
+        self._tv = tv
+
+        for title, col_idx, width in (
+            (_("Template name"), self._COL_NAME, 200),
+            (_("Baud rate"), self._COL_BAUD, 80),
+            (_("Flow"), self._COL_FLOW, 70),
+            (_("Parity"), self._COL_PARITY, 80),
+            (_("Data bits"), self._COL_DATABITS, 80),
+            (_("Stop"), self._COL_STOPBITS, 60),
+        ):
+            if col_idx == self._COL_NAME:
+                renderer = Gtk.CellRendererText()
+                renderer.set_property("editable", True)
+                renderer.connect("edited", self._on_cell_edited, col_idx)
+                col = Gtk.TreeViewColumn(title, renderer, text=col_idx)
+            else:
+                choices = {
+                    self._COL_BAUD: self._BAUD_VALUES,
+                    self._COL_FLOW: self._FLOW_CODES,
+                    self._COL_PARITY: self._PARITY_CODES,
+                    self._COL_DATABITS: self._DATABITS_VALUES,
+                    self._COL_STOPBITS: self._STOPBITS_VALUES,
+                }[col_idx]
+                renderer = Gtk.CellRendererCombo()
+                renderer.set_property("editable", True)
+                renderer.set_property("has-entry", False)
+                m = Gtk.ListStore(str)
+                for c in choices:
+                    m.append([c])
+                renderer.set_property("model", m)
+                renderer.set_property("text-column", 0)
+                renderer.connect("edited", self._on_cell_edited, col_idx)
+                col = Gtk.TreeViewColumn(title, renderer, text=col_idx)
+            col.set_min_width(width)
+            col.set_resizable(True)
+            tv.append_column(col)
+
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw.set_vexpand(True)
+        sw.add(tv)
+        outer.pack_start(sw, True, True, 0)
+
+        btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        btn_add = Gtk.Button(label=_("+ Add"))
+        btn_add.connect("clicked", self._on_add)
+        btn_del = Gtk.Button(label=_("− Remove"))
+        btn_del.connect("clicked", self._on_delete)
+        btn_rst = Gtk.Button(label=_("Restore defaults"))
+        btn_rst.connect("clicked", self._on_restore_defaults)
+        for b in (btn_add, btn_del, btn_rst):
+            btn_box.pack_start(b, False, False, 0)
+        outer.pack_start(btn_box, False, False, 0)
+
+        notebook.append_page(outer, Gtk.Label(label=_("Serial Templates")))
+        outer.show_all()
+        notebook.show_all()
+
+    def _populate_store(self):
+        self._store.clear()
+        for name, tpl in _SERIAL_TEMPLATES.items():
+            baud, flow, parity, databits, stopbits = tpl
+            self._store.append([name, baud, flow, parity, databits, stopbits])
+
+    def _on_cell_edited(self, renderer, path, new_text, col_idx):
+        self._store[path][col_idx] = new_text.strip()
+
+    def _on_add(self, widget):
+        self._store.append([_("New template"), "9600", "n", "n", "8", "1"])
+
+    def _on_delete(self, widget):
+        sel = self._tv.get_selection()
+        model, it = sel.get_selected()
+        if it is not None:
+            model.remove(it)
+
+    def _on_restore_defaults(self, widget):
+        global _SERIAL_TEMPLATES
+        _SERIAL_TEMPLATES = dict(_SERIAL_TEMPLATES_DEFAULT)
+        self._populate_store()
+
+    def apply(self):
+        """Applique les modifications dans _SERIAL_TEMPLATES global."""
+        global _SERIAL_TEMPLATES
+        _SERIAL_TEMPLATES = {}
+        for row in self._store:
+            name = row[self._COL_NAME].strip()
+            baud = row[self._COL_BAUD].strip()
+            flow = row[self._COL_FLOW].strip()
+            parity = row[self._COL_PARITY].strip()
+            databits = row[self._COL_DATABITS].strip()
+            stopbits = row[self._COL_STOPBITS].strip()
+            if name and baud:
+                _SERIAL_TEMPLATES[name] = (baud, flow, parity, databits, stopbits)
+
+
+class LibvirtPrefsTab:
+    """Onglet 'Libvirt' pour le Gtk.Notebook des préférences GCM."""
+
+    def __init__(self, notebook, config):
+        """Construit et ajoute l'onglet Libvirt au notebook des prefs.
+
+        Args:
+            notebook (Gtk.Notebook): Notebook des préférences.
+            config (dict): Configuration globale GCM.
+        """
+        self._config = config
+        self._build(notebook)
+
+    def _build(self, notebook):
+        """Construit le contenu de l'onglet.
+
+        Args:
+            notebook (Gtk.Notebook): Notebook cible.
+        """
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        box.set_margin_start(14)
+        box.set_margin_end(14)
+        box.set_margin_top(14)
+        box.set_margin_bottom(14)
+        hb = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        hb.pack_start(Gtk.Label(label=_("Default SSH user (VMs):")), False, False, 0)
+        self._entry_user = Gtk.Entry()
+        self._entry_user.set_text(self._config.get("libvirt_default_user", LIBVIRT_DEFAULT_USER))
+        self._entry_user.set_width_chars(22)
+        hb.pack_start(self._entry_user, False, False, 0)
+        box.pack_start(hb, False, False, 0)
+        lbl = Gtk.Label()
+        lbl.set_markup(
+            "<b>Authentification SSH</b>\n"
+            "<i>Clés testées dans l'ordre : Ed25519 → RSA → autres → agent système\n"
+            "Répertoire : ~/.ssh   —   Aucun mot de passe demandé</i>\n\n"
+            "<b>Groupes automatiques</b>\n"
+            "<i>Premier token du nom VM (_, -, espace) → groupe MAJUSCULES\n"
+            "Sans séparateur → groupe LIBVIRT</i>"
+        )
+        lbl.set_xalign(0)
+        box.pack_start(lbl, False, False, 0)
+        box.show_all()
+        notebook.append_page(box, Gtk.Label(label=_("Libvirt")))
+
+    def apply(self, config):
+        """Applique les changements de l'onglet à la configuration.
+
+        Args:
+            config (dict): Configuration globale GCM à mettre à jour.
+        """
+        user = self._entry_user.get_text().strip() or "root"
+        config["libvirt_default_user"] = user
+        global LIBVIRT_DEFAULT_USER
+        LIBVIRT_DEFAULT_USER = user
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class Wmain(GCMBase):
+    def __init__(
+        self,
+        path="gnome-connection-manager.glade",
+        root="wMain",
+        domain=domain_name,
+        **kwargs,
+    ):
+        """Initialise l'instance.
+
+        Args:
+            path: Parametre path.
+            root: Parametre root.
+            domain: Parametre domain.
+        """
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, **kwargs)
+        GCMBase.__init__(self, path, root, domain, **kwargs)
 
         global wMain
         wMain = self
@@ -419,72 +3099,136 @@ class Wmain(SimpleGladeApp):
             initialise_encyption_key()
 
         settings = Gtk.Settings.get_default()
-        settings.set_property("gtk-menu-images", True)
-        settings.set_property("gtk-button-images", True)
+        # Suivre le thème GTK du bureau (GNOME/XFCE/MATE/…)
+        # Priorité : variable d'env GTK_THEME > gsettings GNOME > thème courant
+        _desktop_theme = None
+        try:
+            import subprocess as _sp
+
+            _gs = _sp.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", "gtk-theme"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+            )
+            if _gs.returncode == 0:
+                _desktop_theme = _gs.stdout.strip().strip("'\"")
+        except Exception:
+            pass
+        if not _desktop_theme:
+            # Fallback : lire ~/.config/gtk-3.0/settings.ini
+            try:
+                import configparser as _cp
+                import pathlib as _pl
+
+                _ini = _pl.Path.home() / ".config" / "gtk-3.0" / "settings.ini"
+                if _ini.exists():
+                    _c = _cp.ConfigParser()
+                    _c.read(str(_ini))
+                    _desktop_theme = _c.get("Settings", "gtk-theme-name", fallback=None)
+            except Exception:
+                pass
+        if _desktop_theme:
+            try:
+                settings.set_property("gtk-theme-name", _desktop_theme)
+            except Exception:
+                pass
+        # Suivre aussi le mode sombre si le bureau l'a activé
+        try:
+            _dark = _sp.run(
+                ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                capture_output=True,
+                text=True,
+                timeout=3,
+            )
+            if _dark.returncode == 0 and "dark" in _dark.stdout.lower():
+                settings.set_property("gtk-application-prefer-dark-theme", True)
+        except Exception:
+            pass
+        # gtk-menu-images / gtk-button-images sont dépréciés depuis GTK 3.10
+        # On force via CSS à la place
+        try:
+            settings.set_property("gtk-menu-images", True)
+            settings.set_property("gtk-button-images", True)
+        except Exception:
+            pass  # ignoré sur GTK >= 3.10 sans ces propriétés
         settings.props.gtk_menu_bar_accel = None
 
         self.enable_window_transparency(self.window)
         self.window.connect("style-updated", self.enable_window_transparency)
 
         self.update_visual()
-        self.get_widget("wMain").get_screen().connect('composited-changed', self.update_visual)
+        self.get_widget("wMain").get_screen().connect("composited-changed", self.update_visual)
 
         if conf.WINDOW_WIDTH != -1 and conf.WINDOW_HEIGHT != -1:
             self.get_widget("wMain").resize(conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT)
         else:
             self.get_widget("wMain").maximize()
         self.get_widget("wMain").show()
-        #Just added children in glade to eliminate GTK warning, remove all children
+        # Just added children in glade to eliminate GTK warning, remove all children
         for x in self.nbConsole.get_children():
             self.nbConsole.remove(x)
         self.nbConsole.set_scrollable(True)
         self.nbConsole.set_group_name("11")
-        self.nbConsole.connect('page_removed', self.on_page_removed)
+        self.nbConsole.connect("page_removed", self.on_page_removed)
         self.nbConsole.connect("page-added", self.on_page_added)
         self.nbConsole.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
         self.nbConsole.connect("scroll-event", self.on_tab_scroll)
 
         self.hpMain.previous_position = 150
 
-        if conf.LEFT_PANEL_WIDTH!=0:
+        if conf.LEFT_PANEL_WIDTH != 0:
             self.set_panel_visible(conf.SHOW_PANEL)
         self.set_toolbar_visible(conf.SHOW_TOOLBAR)
+        # Thème GTK — init depuis conf (THEME_MODE = system/light/dark)
+        _tm = getattr(conf, "THEME_MODE", "system")
+        if _tm == "dark":
+            self._apply_dark_mode(True)
+        elif _tm == "light":
+            self._apply_dark_mode(False)
+        else:  # system
+            self._apply_dark_mode(conf.DARK_MODE)  # valeur auto-détectée au chargement
+        mnu_dark = self.get_widget("mnu_dark_mode")
+        if mnu_dark:
+            mnu_dark.set_active(conf.DARK_MODE)
 
-        #a veces no se posiciona correctamente con 400 ms, asi que se repite el llamado
-        GLib.timeout_add(400, lambda : self.hpMain.set_position(conf.LEFT_PANEL_WIDTH))
-        GLib.timeout_add(900, lambda : self.hpMain.set_position(conf.LEFT_PANEL_WIDTH))
-
-        if conf.HIDE_DONATE:
-            self.get_widget("btnDonate").hide()
+        # a veces no se posiciona correctamente con 400 ms, asi que se repite el llamado
+        GLib.timeout_add(400, lambda: self.hpMain.set_position(conf.LEFT_PANEL_WIDTH))
+        GLib.timeout_add(900, lambda: self.hpMain.set_position(conf.LEFT_PANEL_WIDTH))
 
         if conf.CHECK_UPDATES:
             GLib.timeout_add(2000, lambda: self.check_updates())
 
-        #load style.css
+        # load style.css — fix #81: non-fatal if style.css is missing
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
-        provider.load_from_path(BASE_PATH + "/style.css")
-        Gtk.StyleContext.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        try:
+            provider.load_from_path(BASE_PATH + "/style.css")
+        except Exception:
+            pass  # style.css absent — UI continues without custom theme
+        Gtk.StyleContext.add_provider_for_screen(
+            screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
 
-
-        #Por cada parametro de la linea de comandos buscar el host y agregar un tab
+        # Por cada parametro de la linea de comandos buscar el host y agregar un tab
         for arg in sys.argv[1:]:
             i = arg.rfind("/")
-            if i!=-1:
+            if i != -1:
                 group = arg[:i]
-                name = arg[i+1:]
-                if group!='' and name!='' and group in groups:
+                name = arg[i + 1 :]
+                if group != "" and name != "" and group in groups:
                     for h in groups[group]:
-                        if h.name==name:
+                        if h.name == name:
                             self.addTab(self.nbConsole, h)
                             break
 
-        self.get_widget('txtSearch').set_placeholder_text(_('buscar...'))
+        self.get_widget("txtSearch").set_placeholder_text(_("search..."))
 
         if conf.STARTUP_LOCAL:
-            self.addTab(self.nbConsole,'local')
+            self.addTab(self.nbConsole, "local")
 
     def update_visual(self):
+        """Met a jour les proprietes visuelles de la fenetre principale."""
         window = self.get_widget("wMain")
         screen = window.get_screen()
         visual = screen.get_rgba_visual()
@@ -495,36 +3239,50 @@ class Wmain(SimpleGladeApp):
             window.set_visual(visual)
             window.transparency = True
             window.realize()
-            if window.get_property('visible'):
+            if window.get_property("visible"):
                 window.hide()
                 window.show()
         else:
-            sys.stderr.write('System doesn\'t support transparency\n')
+            sys.stderr.write("System doesn't support transparency\n")
             window.transparency = False
             window.set_visual(screen.get_system_visual())
 
-
     def enable_window_transparency(self, window):
-        #hack to allow transparent widgets inside a opaque window
-        #the key is to set the alpha channel of the window's background color to 0.9999, in that way the window is opaque but still allows transparent children
+        # hack to allow transparent widgets inside a opaque window
+        # the key is to set the alpha channel of the window's background color to 0.9999, in that way the window is opaque but still allows transparent children
 
-        #remove previously addded css to get the background color from the current gtk theme
+        # remove previously addded css to get the background color from the current gtk theme
+        """Active ou desactive la transparence de la fenetre si le compositeur le permet.
+
+        Args:
+            window: Parametre window.
+        """
         if hasattr(window, "style_provider") and window.style_provider:
             Gtk.StyleContext.remove_provider_for_screen(
-                Gdk.Screen.get_default(),
-                window.style_provider
+                Gdk.Screen.get_default(), window.style_provider
             )
 
-        #get window background color
+        # get window background color — fix: get_background_color est deprecie en GTK3 recent,
+        # on utilise lookup_color() avec fallback sur une couleur neutre
         context = window.get_style_context()
-        color = context.get_background_color(Gtk.StateFlags.NORMAL)
+        found, color = context.lookup_color("theme_bg_color")
+        if not found:
+            found, color = context.lookup_color("bg_color")
+        if not found:
+            color = Gdk.RGBA()
+            color.parse("#f0f0f0")
 
-        #set the background color to the same as the gtk theme, but with alpha 0.99999 (it looks opaque but allows to have transparent widgets)
+        # set the background color to the same as the gtk theme, but with alpha 0.99999 (it looks opaque but allows to have transparent widgets)
         CSS = b"""
         window.background {
             background-color: rgba(%d, %d, %d, %f);
         }
-        """ % (color.red*255, color.green*255, color.blue*255, 0.999999)
+        """ % (
+            color.red * 255,
+            color.green * 255,
+            color.blue * 255,
+            0.999999,
+        )
 
         window.style_provider = Gtk.CssProvider()
         window.style_provider.load_from_data(CSS)
@@ -532,15 +3290,20 @@ class Wmain(SimpleGladeApp):
         context.add_provider_for_screen(
             window.get_screen(),
             window.style_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
         )
 
-    #-- Wmain.new {
+    # -- Wmain.new {
     def new(self):
+        """Cree et retourne une nouvelle instance depuis le fichier Glade.
+
+        Returns:
+            instance: Nouvelle instance de la classe.
+        """
         self.hpMain = self.get_widget("hpMain")
-        self.hpMainWindow = Gtk.Window()
-        self.hpMainWindow.add(self.hpMain)
         self.wMainWindow = self.builder.get_object("wMain")
+        # hpMainWindow est un alias vers wMainWindow utilisé pour le fullscreen
+        self.hpMainWindow = self.wMainWindow
         self.nbConsole = self.get_widget("nbConsole")
         self.treeServers = self.get_widget("treeServers")
         self.menuServers = self.get_widget("menuServers")
@@ -548,24 +3311,34 @@ class Wmain(SimpleGladeApp):
         self.current = None
         self.count = 0
         self.row_activated = False
-    #-- Wmain.new }
 
-    #-- Wmain custom methods {
+    # -- Wmain.new }
+
+    # -- Wmain custom methods {
     #   Write your own methods here
 
     def check_updates(self):
+        """Verifie la disponibilite d'une mise a jour en ligne."""
         checker = CheckUpdates(self)
         checker.start()
 
     def on_terminal_click(self, widget, event, *args):
+        """Gestionnaire de clic sur un terminal VTE.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+            event (Gdk.EventButton): Evenement souris.
+        """
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
             if conf.PASTE_ON_RIGHT_CLICK:
                 widget.paste_clipboard()
             else:
                 self.popupMenu.mnuCopy.set_sensitive(widget.get_has_selection())
-                self.popupMenu.mnuLog.set_active( hasattr(widget, "log_handler_id") and widget.log_handler_id != 0 )
+                self.popupMenu.mnuLog.set_active(
+                    hasattr(widget, "log_handler_id") and widget.log_handler_id != 0
+                )
                 self.popupMenu.terminal = widget
-                self.popupMenu.popup( None, None, None, None, event.button, event.time)
+                self.popupMenu.popup(None, None, None, None, event.button, event.time)
 
             # enable/disable split menu
             nb = widget.get_parent().get_parent()
@@ -574,7 +3347,11 @@ class Wmain(SimpleGladeApp):
 
             return True
 
-        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 1 and event.get_state() &  Gdk.ModifierType.CONTROL_MASK:
+        elif (
+            event.type == Gdk.EventType.BUTTON_PRESS
+            and event.button == 1
+            and event.get_state() & Gdk.ModifierType.CONTROL_MASK
+        ):
             url, tag = widget.match_check_event(event)
             if tag == widget.tag_url:
                 url = "http://%s" % url
@@ -584,16 +3361,22 @@ class Wmain(SimpleGladeApp):
             if url:
                 Gtk.show_uri(Gdk.Screen.get_default(), url, Gtk.get_current_event_time())
 
-        #terminal doesnt emmit the "focus" signal when there is more than one visible on the screen, so force the focus
+        # terminal doesnt emmit the "focus" signal when there is more than one visible on the screen, so force the focus
         nb = widget.get_parent().get_parent()
         self.on_tab_focus(nb, nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
 
     def on_terminal_keypress(self, widget, event, *args):
-        #if shortcuts.has_key(get_key_name(event)):
+        # if shortcuts.has_key(get_key_name(event)):
+        """Gestionnaire de touche pressee dans un terminal VTE.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+            event (Gdk.EventKey): Evenement clavier.
+        """
         if get_key_name(event) in shortcuts:
             cmd = shortcuts[get_key_name(event)]
             if type(cmd) == list:
-                #comandos predefinidos
+                # comandos predefinidos
                 if cmd == _COPY:
                     self.terminal_copy(widget)
                 elif cmd == _PASTE:
@@ -603,15 +3386,15 @@ class Wmain(SimpleGladeApp):
                 elif cmd == _SAVE:
                     self.show_save_buffer(widget)
                 elif cmd == _FIND:
-                    self.get_widget('txtSearch').select_region(0, -1)
-                    self.get_widget('txtSearch').grab_focus()
+                    self.get_widget("txtSearch").select_region(0, -1)
+                    self.get_widget("txtSearch").grab_focus()
                 elif cmd == _FIND_NEXT:
-                    if hasattr(self, 'search'):
+                    if hasattr(self, "search"):
                         self.find_word()
                 elif cmd == _CLEAR:
-                   widget.reset(True, True)
+                    widget.reset(True, True)
                 elif cmd == _FIND_BACK:
-                    if hasattr(self, 'search'):
+                    if hasattr(self, "search"):
                         self.find_word(backwards=True)
                 elif cmd == _CLONE:
                     term = widget
@@ -641,14 +3424,14 @@ class Wmain(SimpleGladeApp):
                         Gtk.Window.unfullscreen(self.hpMainWindow)
                         Gtk.Window.unfullscreen(self.wMainWindow)
                         self.wMainWindow.set_decorated(True)
-                        self.wMainWindow.set_has_resize_grip(True)
+                        pass  # set_has_resize_grip déprécié GTK 3.14
                         self.get_widget("toolbar1").show()
                         self.get_widget("contextMenu").show()
                         self._current_fullscreen_state = False
                     else:
                         Gtk.Window.fullscreen(self.hpMainWindow)
                         self.wMainWindow.set_decorated(False)
-                        self.wMainWindow.set_has_resize_grip(False)
+                        pass  # set_has_resize_grip déprécié GTK 3.14
                         Gtk.Window.fullscreen(self.wMainWindow)
                         self.get_widget("toolbar1").hide()
                         self.get_widget("contextMenu").hide()
@@ -662,18 +3445,20 @@ class Wmain(SimpleGladeApp):
                         wid.destroy()
                 elif cmd == _CONSOLE_RECONNECT:
                     if not hasattr(widget, "command"):
-                        #widget.fork_command(SHELL)
+                        # widget.fork_command(SHELL)
                         vte_run(widget, SHELL)
                     else:
-                        #widget.fork_command(widget.command[0], widget.command[1])
+                        # widget.fork_command(widget.command[0], widget.command[1])
                         vte_run(widget, widget.command[0], widget.command[1])
                         while Gtk.events_pending():
                             Gtk.main_iteration()
 
-                        #esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
-                        if widget.command[2]!=None and widget.command[2]!='':
+                        # esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
+                        if widget.command[2] != None and widget.command[2] != "":
                             GLib.timeout_add(2000, self.send_data, widget, widget.command[2])
-                    widget.get_parent().get_parent().get_tab_label(widget.get_parent()).mark_tab_as_active()
+                    widget.get_parent().get_parent().get_tab_label(
+                        widget.get_parent()
+                    ).mark_tab_as_active()
                     return True
                 elif cmd == _CONNECT:
                     self.on_btnConnect_clicked(None)
@@ -683,71 +3468,87 @@ class Wmain(SimpleGladeApp):
                 elif cmd == _NEW_LOCAL:
                     self.on_btnLocal_clicked(None)
             else:
-                #comandos del usuario
+                # comandos del usuario
                 vte_feed(widget, cmd)
 
             return True
         return False
 
     def on_terminal_selection(self, widget, *args):
+        """Gestionnaire de changement de selection dans un terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+        """
         if conf.AUTO_COPY_SELECTION:
             if widget.get_has_selection():
                 self.terminal_copy(widget)
         return True
 
     def find_word(self, backwards=False):
+        """Recherche un mot dans le terminal actif.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+            word (str): Mot a rechercher.
+        """
         if not self.search:
             return
 
-        if (self.search['pcre2']):
+        if self.search["pcre2"]:
             if backwards:
-                self.search['terminal'].search_find_previous()
+                self.search["terminal"].search_find_previous()
             else:
-                self.search['terminal'].search_find_next()
+                self.search["terminal"].search_find_next()
             return
 
-        pos=-1
+        pos = -1
         if backwards:
-            lst = list(range(0, self.search['index']))
+            lst = list(range(0, self.search["index"]))
             lst.reverse()
-            lst.extend(reversed(range(self.search['index'], len(self.search['lines']))))
+            lst.extend(reversed(range(self.search["index"], len(self.search["lines"]))))
         else:
-            lst = list(range(self.search['index'], len(self.search['lines'])))
-            lst.extend(range(0, self.search['index']))
+            lst = list(range(self.search["index"], len(self.search["lines"])))
+            lst.extend(range(0, self.search["index"]))
         for i in lst:
-            pos = self.search['lines'][i].find(self.search['word'])
+            pos = self.search["lines"][i].find(self.search["word"])
             if pos != -1:
-                self.search['index'] = i if backwards else i + 1
-                #print('found at line %d column %d, index=%d, line: %s' % (i, pos, self.search['index'], self.search['lines'][i]))
-                GLib.timeout_add(0, lambda: self.search['terminal'].get_vadjustment().set_value(i))
-                #self.search['terminal'].get_vadjustment().set_value(i)
-                self.search['terminal'].queue_draw()
+                self.search["index"] = i if backwards else i + 1
+                # print('found at line %d column %d, index=%d, line: %s' % (i, pos, self.search['index'], self.search['lines'][i]))
+                GLib.timeout_add(0, lambda: self.search["terminal"].get_vadjustment().set_value(i))
+                # self.search['terminal'].get_vadjustment().set_value(i)
+                self.search["terminal"].queue_draw()
                 break
-        if pos==-1:
-            self.search['index'] = len(self.search['lines']) if backwards else 0
-
+        if pos == -1:
+            self.search["index"] = len(self.search["lines"]) if backwards else 0
 
     def init_search(self):
-        if hasattr(self, 'search') and self.search and self.get_widget('txtSearch').get_text() == self.search['word'] and self.current == self.search['terminal']:
-            return  True
+        """Initialise la barre de recherche dans le terminal."""
+        if (
+            hasattr(self, "search")
+            and self.search
+            and self.get_widget("txtSearch").get_text() == self.search["word"]
+            and self.current == self.search["terminal"]
+        ):
+            return True
 
         terminal = self.find_active_terminal(self.hpMain)
         if terminal == None:
             terminal = self.current
         else:
             self.current = terminal
-        if terminal==None:
+        if terminal == None:
             return False
 
         self.search = {}
-        text = self.get_widget('txtSearch').get_text()
-        if text == '' or text == _('buscar...'):
+        text = self.get_widget("txtSearch").get_text()
+        if text == "" or text == _("search..."):
             terminal.search_set_regex(None, 0)
             terminal.match_remove_all()
             return True
 
-        self.search['terminal'] = terminal
-        self.search['word'] = text
+        self.search["terminal"] = terminal
+        self.search["word"] = text
 
         r = re.escape(text)
         try:
@@ -756,120 +3557,154 @@ class Wmain(SimpleGladeApp):
             terminal.search_set_regex(new_reg, 0)
             terminal.search_set_wrap_around(True)
             terminal.match_add_regex(new_reg_m, 0)
-            self.search['pcre2'] = True
+            self.search["pcre2"] = True
             return True
         except Exception as e:
-            print(e, "Using custom search instead")
-            self.search['pcre2'] = False
-            #no hay soporte para pcre2, usar busqueda artesanal
-
+            app_logger.warning(f"PCRE2 indisponible ({e}), bascule sur recherche custom")
+            self.search["pcre2"] = False
+            # no hay soporte para pcre2, usar busqueda artesanal
 
         cols = terminal.get_column_count()
-        lines,b = terminal.get_text_range(0, 0, terminal.get_property('scrollback-lines'), cols, None, None )
+        lines, b = terminal.get_text_range(
+            0, 0, terminal.get_property("scrollback-lines"), cols, None, None
+        )
         wrapped = []
         for x in lines.splitlines():
-            if len(x)==0:
+            if len(x) == 0:
                 wrapped.append(x)
             else:
                 wrapped += self.chunkstring(x, cols)
-        self.search['lines'] = wrapped
-        self.search['index'] = len(self.search['lines'])
+        self.search["lines"] = wrapped
+        self.search["index"] = len(self.search["lines"])
         return True
 
     def chunkstring(self, string, length):
-        return (string[0+i:length+i] for i in range(0, len(string), length))
+        """Decoupe une chaine en morceaux de taille fixe.
+
+        Args:
+            string (str): Chaine a decouper.
+            length (int): Taille de chaque morceau.
+
+        Returns:
+            list[str]: Liste de sous-chaines.
+        """
+        return (string[0 + i : length + i] for i in range(0, len(string), length))
 
     def on_popupmenu(self, widget, item, *args):
-        if item == 'V': #PASTE
+        """Affiche le menu contextuel du terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+            event (Gdk.EventButton): Evenement souris.
+        """
+        if item == "V":  # PASTE
             self.terminal_paste(self.popupMenu.terminal)
             return True
-        elif item == 'C': #COPY
+        elif item == "C":  # COPY
             self.terminal_copy(self.popupMenu.terminal)
             return True
-        elif item == 'CV': #COPY and PASTE
+        elif item == "CV":  # COPY and PASTE
             self.terminal_copy_paste(self.popupMenu.terminal)
             return True
-        elif item == 'A': #SELECT ALL
+        elif item == "A":  # SELECT ALL
             self.terminal_select_all(self.popupMenu.terminal)
             return True
-        elif item == 'CA': #COPY ALL
+        elif item == "CA":  # COPY ALL
             self.terminal_copy_all(self.popupMenu.terminal)
             return True
-        elif item == 'X': #CLOSE CONSOLE
+        elif item == "X":  # CLOSE CONSOLE
             widget = self.popupMenu.terminal.get_parent()
             notebook = widget.get_parent()
-            page=notebook.page_num(widget)
+            page = notebook.page_num(widget)
             notebook.remove_page(page)
             return True
-        elif item == 'CP': #CUSTOM COMMANDS
+        elif item == "CP":  # CUSTOM COMMANDS
             vte_feed(self.popupMenu.terminal, args[0])
-        elif item == 'S': #SAVE BUFFER
+        elif item == "S":  # SAVE BUFFER
             self.show_save_buffer(self.popupMenu.terminal)
             return True
-        elif item == 'H': #COPY HOST ADDRESS TO CLIPBOARD
-            if self.treeServers.get_selection().get_selected()[1]!=None and not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
-                host = self.treeModel.get_value(self.treeServers.get_selection().get_selected()[1],1)
+        elif item == "H":  # COPY HOST ADDRESS TO CLIPBOARD
+            if self.treeServers.get_selection().get_selected()[
+                1
+            ] != None and not self.treeModel.iter_has_child(
+                self.treeServers.get_selection().get_selected()[1]
+            ):
+                host = self.treeModel.get_value(
+                    self.treeServers.get_selection().get_selected()[1], 1
+                )
                 cb = Gtk.Clipboard.get_default(Gdk.Display.get_default())
                 cb.set_text(host.host, len(host.host))
                 cb.store()
             return True
-        elif item == 'D': #DUPLICATE HOST
-            if self.treeServers.get_selection().get_selected()[1]!=None and not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
+        elif item == "D":  # DUPLICATE HOST
+            if self.treeServers.get_selection().get_selected()[
+                1
+            ] != None and not self.treeModel.iter_has_child(
+                self.treeServers.get_selection().get_selected()[1]
+            ):
                 selected = self.treeServers.get_selection().get_selected()[1]
                 group = self.get_group(selected)
                 host = self.treeModel.get_value(selected, 1)
-                newname = '%s (copy)' % (host.name)
+                newname = "%s (copy)" % (host.name)
                 newhost = host.clone()
                 for h in groups[group]:
                     if h.name == newname:
-                        newname = '%s (copy)' % (newname)
+                        newname = "%s (copy)" % (newname)
                 newhost.name = newname
-                groups[group].append( newhost )
+                groups[group].append(newhost)
                 self.updateTree()
                 self.writeConfig()
             return True
-        elif item == 'R': #RENAME TAB
-            text = inputbox(_('Renombrar consola'), _('Ingrese nuevo nombre'), self.popupMenuTab.label.get_text().strip())
-            if text != None and text != '':
+        elif item == "R":  # RENAME TAB
+            text = inputbox(
+                _("Rename tab"),
+                _("Enter new name"),
+                self.popupMenuTab.label.get_text().strip(),
+            )
+            if text != None and text != "":
                 self.popupMenuTab.label.set_text("  %s  " % (text))
                 nb = self.popupMenuTab.label.get_parent().get_parent().get_parent()
-                nb.emit('switch-page', nb.get_nth_page(nb.get_current_page()), nb.get_current_page())
+                nb.emit(
+                    "switch-page",
+                    nb.get_nth_page(nb.get_current_page()),
+                    nb.get_current_page(),
+                )
             return True
-        elif item == 'RS' or item == 'RS2': #RESET CONSOLE
-            if (item == 'RS'):
+        elif item == "RS" or item == "RS2":  # RESET CONSOLE
+            if item == "RS":
                 tab = self.popupMenuTab.label.get_parent().get_parent()
                 term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, False)
             return True
-        elif item == 'RC' or item == 'RC2': #RESET AND CLEAR CONSOLE
-            if (item == 'RC'):
+        elif item == "RC" or item == "RC2":  # RESET AND CLEAR CONSOLE
+            if item == "RC":
                 tab = self.popupMenuTab.label.get_parent().get_parent()
                 term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
             term.reset(True, True)
             return True
-        elif item == 'RO': #REOPEN SESION
+        elif item == "RO":  # REOPEN SESION
             tab = self.popupMenuTab.label.get_parent().get_parent()
             term = tab.widget_.get_children()[0]
             if not hasattr(term, "command"):
-                #term.fork_command(SHELL)
+                # term.fork_command(SHELL)
                 vte_run(term, SHELL)
             else:
-                #term.fork_command(term.command[0], term.command[1])
+                # term.fork_command(term.command[0], term.command[1])
                 vte_run(term, term.command[0], term.command[1])
                 while Gtk.events_pending():
                     Gtk.main_iteration()
 
-                #esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
-                if term.command[2]!=None and term.command[2]!='':
+                # esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
+                if term.command[2] != None and term.command[2] != "":
                     GLib.timeout_add(2000, self.send_data, term, term.command[2])
             tab.mark_tab_as_active()
             return True
-        elif item == 'CC' or item == 'CC2': #CLONE CONSOLE
-            if item == 'CC':
+        elif item == "CC" or item == "CC2":  # CLONE CONSOLE
+            if item == "CC":
                 tab = self.popupMenuTab.label.get_parent().get_parent()
                 term = tab.widget_.get_children()[0]
                 ntbk = tab.get_parent()
@@ -885,364 +3720,1190 @@ class Wmain(SimpleGladeApp):
                 host.log = hasattr(term, "log_handler_id") and term.log_handler_id != 0
                 self.addTab(ntbk, host)
             return True
-        elif item == 'L' or item == 'L2': #ENABLE/DISABLE LOG
-            if item == 'L':
+        elif item == "L" or item == "L2":  # ENABLE/DISABLE LOG
+            if item == "L":
                 tab = self.popupMenuTab.label.get_parent().get_parent()
                 term = tab.widget_.get_children()[0]
             else:
                 term = self.popupMenu.terminal
+            if conf.CONTINUOUS_TAB_LOG and not widget.get_active():
+                msgbox(_("Continuous log mode is active and cannot be disabled per tab."))
+                widget.set_active(True)
+                return True
             if not self.set_terminal_logger(term, widget.get_active()):
                 widget.set_active(False)
             return True
-        elif item == 'SPH':
+        elif item == "SPH":
             self.on_btnHSplit_clicked(widget, args)
-        elif item == 'SPV':
+        elif item == "SPV":
             self.on_btnVSplit_clicked(widget, args)
 
     def createMenu(self):
-        STOCK_COPY_X = "edit-copy"
+        """Construit les menus contextuels de l'application.
+
+        Cree trois menus:
+        - popupMenu: menu contextuel du terminal (clic droit dans le terminal)
+        - popupMenuFolder: menu contextuel du panneau de serveurs (clic droit sur host/groupe)
+        - popupMenuTab: menu contextuel des onglets (clic droit sur un onglet)
+
+        Utilise Gtk.MenuItem (GTK3 moderne, sans icones deprecieees).
+        """
         self.popupMenu = Gtk.Menu()
-        self.popupMenu.mnuCopy = menuItem = Gtk.ImageMenuItem(label=_("Copiar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_COPY_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuCopy = menuItem = Gtk.MenuItem(label=_("Copy"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'C')
+        menuItem.connect("activate", self.on_popupmenu, "C")
         menuItem.show()
 
-        self.popupMenu.mnuPaste = menuItem = Gtk.ImageMenuItem(label=_("Pegar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name("edit-paste", Gtk.IconSize.MENU))
+        self.popupMenu.mnuPaste = menuItem = Gtk.MenuItem(label=_("Paste"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'V')
+        menuItem.connect("activate", self.on_popupmenu, "V")
         menuItem.show()
 
-        self.popupMenu.mnuCopyPaste = menuItem = Gtk.ImageMenuItem(label=_("Copiar y Pegar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_INDEX, Gtk.IconSize.MENU))
+        self.popupMenu.mnuCopyPaste = menuItem = Gtk.MenuItem(label=_("Copy and Paste"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'CV')
+        menuItem.connect("activate", self.on_popupmenu, "CV")
         menuItem.show()
 
-        STOCK_SELECT_ALL_X = "edit-select-all"
-        self.popupMenu.mnuSelect = menuItem = Gtk.ImageMenuItem(label=_("Seleccionar todo"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_SELECT_ALL_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuSelect = menuItem = Gtk.MenuItem(label=_("Select all"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'A')
+        menuItem.connect("activate", self.on_popupmenu, "A")
         menuItem.show()
 
-        self.popupMenu.mnuCopyAll = menuItem = Gtk.ImageMenuItem(label=_("Copiar todo"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_SELECT_ALL_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuCopyAll = menuItem = Gtk.MenuItem(label=_("Copy all"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'CA')
+        menuItem.connect("activate", self.on_popupmenu, "CA")
         menuItem.show()
 
-        STOCK_SAVE_X = "document-save"
-        self.popupMenu.mnuSelect = menuItem = Gtk.ImageMenuItem(label=_("Guardar buffer en archivo"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_SAVE_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuSelect = menuItem = Gtk.MenuItem(label=_("Save buffer to file"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'S')
+        menuItem.connect("activate", self.on_popupmenu, "S")
         menuItem.show()
 
-        STOCK_NEW_X = "document-new"
-        self.popupMenu.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuSplitH = menuItem = Gtk.MenuItem(label=_("Split H"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.connect("activate", self.on_popupmenu, "SPH")
         menuItem.show()
 
-        self.popupMenu.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuSplitV = menuItem = Gtk.MenuItem(label=_("Split V"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'SPV')
+        menuItem.connect("activate", self.on_popupmenu, "SPV")
         menuItem.show()
 
         menuItem = Gtk.MenuItem()
         self.popupMenu.append(menuItem)
         menuItem.show()
 
-        self.popupMenu.mnuReset = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuReset = menuItem = Gtk.MenuItem(label=_("Reset console"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'RS2')
+        menuItem.connect("activate", self.on_popupmenu, "RS2")
         menuItem.show()
 
-        STOCK_CLEAR_X = "edit-clear"
-        self.popupMenu.mnuClear = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar y Limpiar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_CLEAR_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuClear = menuItem = Gtk.MenuItem(label=_("Reset and Clear console"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'RC2')
+        menuItem.connect("activate", self.on_popupmenu, "RC2")
         menuItem.show()
 
-        self.popupMenu.mnuClone = menuItem = Gtk.ImageMenuItem(label=_("Clonar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_COPY_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuClone = menuItem = Gtk.MenuItem(label=_("Clone console"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'CC2')
+        menuItem.connect("activate", self.on_popupmenu, "CC2")
         menuItem.show()
 
-        self.popupMenu.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Habilitar log"))
+        self.popupMenu.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Enable logging"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'L2')
+        menuItem.connect("activate", self.on_popupmenu, "L2")
         menuItem.show()
 
-        STOCK_CLOSE_X = "window-close"
-        self.popupMenu.mnuClose = menuItem = Gtk.ImageMenuItem(label=_("Cerrar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_CLOSE_X, Gtk.IconSize.MENU))
+        self.popupMenu.mnuClose = menuItem = Gtk.MenuItem(label=_("Close console"))
         self.popupMenu.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'X')
+        menuItem.connect("activate", self.on_popupmenu, "X")
         menuItem.show()
 
         menuItem = Gtk.MenuItem()
         self.popupMenu.append(menuItem)
         menuItem.show()
 
-        #Menu de comandos personalizados
+        # Menu de comandos personalizados
         self.popupMenu.mnuCommands = Gtk.Menu()
 
-        self.popupMenu.mnuCmds = menuItem = Gtk.ImageMenuItem(label=_("Comandos personalizados"))
+        self.popupMenu.mnuCmds = menuItem = Gtk.MenuItem(label=_("Custom commands"))
         menuItem.set_submenu(self.popupMenu.mnuCommands)
         self.popupMenu.append(menuItem)
         menuItem.show()
         self.populateCommandsMenu()
 
-        #Menu contextual para panel de servidores
+        # Menu contextual para panel de servidores
         self.popupMenuFolder = Gtk.Menu()
 
-        self.popupMenuFolder.mnuConnect = menuItem = Gtk.ImageMenuItem(label=_("Conectar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EXECUTE, Gtk.IconSize.MENU))
+        self.popupMenuFolder.mnuConnect = menuItem = Gtk.MenuItem(label=_("Connect"))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_btnConnect_clicked)
         menuItem.show()
 
-        self.popupMenuFolder.mnuCopyAddress = menuItem = Gtk.ImageMenuItem(label=_("Copiar Direccion"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_COPY_X, Gtk.IconSize.MENU))
+        self.popupMenuFolder.mnuCopyAddress = menuItem = Gtk.MenuItem(label=_("Copy Address"))
         self.popupMenuFolder.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'H')
+        menuItem.connect("activate", self.on_popupmenu, "H")
         menuItem.show()
 
-        self.popupMenuFolder.mnuAdd = menuItem = Gtk.ImageMenuItem(label=_("Agregar Host"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_ADD, Gtk.IconSize.MENU))
+        self.popupMenuFolder.mnuAdd = menuItem = Gtk.MenuItem(label=_("Add Host"))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", self.on_btnAdd_clicked)
         menuItem.show()
 
-        self.popupMenuFolder.mnuEdit = menuItem = Gtk.ImageMenuItem(label=_("Editar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EDIT, Gtk.IconSize.MENU))
+        self.popupMenuFolder.mnuNewGroup = menuItem = Gtk.MenuItem(label=_("New Group…"))
         self.popupMenuFolder.append(menuItem)
-        menuItem.connect("activate", self.on_bntEdit_clicked)
+        menuItem.connect("activate", self._on_new_group_clicked)
         menuItem.show()
 
-        self.popupMenuFolder.mnuDel = menuItem = Gtk.ImageMenuItem(label=_("Eliminar"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DELETE, Gtk.IconSize.MENU))
+        self.popupMenuFolder.mnuRenameGroup = menuItem = Gtk.MenuItem(label=_("Rename Group…"))
         self.popupMenuFolder.append(menuItem)
-        menuItem.connect("activate", self.on_btnDel_clicked)
-        menuItem.show()
-
-        self.popupMenuFolder.mnuDup = menuItem = Gtk.ImageMenuItem(label=_("Duplicar Host"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DND_MULTIPLE, Gtk.IconSize.MENU))
-        self.popupMenuFolder.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'D')
+        menuItem.connect("activate", self._on_rename_group_clicked)
         menuItem.show()
 
         menuItem = Gtk.SeparatorMenuItem()
         self.popupMenuFolder.append(menuItem)
         menuItem.show()
 
-        self.popupMenuFolder.mnuExpand = menuItem = Gtk.ImageMenuItem(label=_("Expandir todo"))
+        self.popupMenuFolder.mnuMigrateSsh = menuItem = Gtk.MenuItem(
+            label=_("Move to .ssh/config")
+        )
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_migrate_ssh_clicked)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuEdit = menuItem = Gtk.MenuItem(label=_("Edit"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_bntEdit_clicked)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuDel = menuItem = Gtk.MenuItem(label=_("Remove"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_btnDel_clicked)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuDup = menuItem = Gtk.MenuItem(label=_("Duplicate Host"))
+        self.popupMenuFolder.append(menuItem)
+        menuItem.connect("activate", self.on_popupmenu, "D")
+        menuItem.show()
+
+        menuItem = Gtk.SeparatorMenuItem()
+        self.popupMenuFolder.append(menuItem)
+        menuItem.show()
+
+        self.popupMenuFolder.mnuExpand = menuItem = Gtk.MenuItem(label=_("Expand all"))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", lambda *args: self.treeServers.expand_all())
         menuItem.show()
 
-        self.popupMenuFolder.mnuCollapse = menuItem = Gtk.ImageMenuItem(label=_("Contraer todo"))
+        self.popupMenuFolder.mnuCollapse = menuItem = Gtk.MenuItem(label=_("Collapse all"))
         self.popupMenuFolder.append(menuItem)
         menuItem.connect("activate", lambda *args: self.treeServers.collapse_all())
         menuItem.show()
 
-
-        #Menu contextual para tabs
+        # Menu contextual para tabs
         self.popupMenuTab = Gtk.Menu()
 
-        self.popupMenuTab.mnuRename = menuItem = Gtk.ImageMenuItem(label=_("Renombrar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_EDIT, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuRename = menuItem = Gtk.MenuItem(label=_("Rename tab"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'R')
+        menuItem.connect("activate", self.on_popupmenu, "R")
         menuItem.show()
 
-        self.popupMenuTab.mnuReset = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuReset = menuItem = Gtk.MenuItem(label=_("Reset console"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'RS')
+        menuItem.connect("activate", self.on_popupmenu, "RS")
         menuItem.show()
 
-        self.popupMenuTab.mnuClear = menuItem = Gtk.ImageMenuItem(label=_("Reiniciar y Limpiar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_CLEAR_X, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuClear = menuItem = Gtk.MenuItem(label=_("Reset and Clear console"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'RC')
+        menuItem.connect("activate", self.on_popupmenu, "RC")
         menuItem.show()
 
-        self.popupMenuTab.mnuReopen = menuItem = Gtk.ImageMenuItem(label=_("Reconectar al host"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_CONNECT, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuReopen = menuItem = Gtk.MenuItem(label=_("Reconnect to host"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'RO')
-        #menuItem.show()
+        menuItem.connect("activate", self.on_popupmenu, "RO")
+        # menuItem.show()
 
-        self.popupMenuTab.mnuClone = menuItem = Gtk.ImageMenuItem(label=_("Clonar consola"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_COPY_X, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuClone = menuItem = Gtk.MenuItem(label=_("Clone console"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'CC')
+        menuItem.connect("activate", self.on_popupmenu, "CC")
         menuItem.show()
 
-        self.popupMenuTab.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Habilitar log"))
+        self.popupMenuTab.mnuLog = menuItem = Gtk.CheckMenuItem(label=_("Enable logging"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'L')
+        menuItem.connect("activate", self.on_popupmenu, "L")
         menuItem.show()
 
-        self.popupMenuTab.mnuSplitH = menuItem = Gtk.ImageMenuItem(label=_("Split H"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuSplitH = menuItem = Gtk.MenuItem(label=_("Split H"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'SPH')
+        menuItem.connect("activate", self.on_popupmenu, "SPH")
         menuItem.show()
 
-        self.popupMenuTab.mnuSplitV = menuItem = Gtk.ImageMenuItem(label=_("Split V"))
-        menuItem.set_image(Gtk.Image.new_from_icon_name(STOCK_NEW_X, Gtk.IconSize.MENU))
+        self.popupMenuTab.mnuSplitV = menuItem = Gtk.MenuItem(label=_("Split V"))
         self.popupMenuTab.append(menuItem)
-        menuItem.connect("activate", self.on_popupmenu, 'SPV')
+        menuItem.connect("activate", self.on_popupmenu, "SPV")
         menuItem.show()
+
+    def _open_rdp_tab(self, notebook, host):
+        """Ouvre un onglet RDP dans le notebook GCM.
+
+        Tente d'abord XEmbed via Gtk.Socket (RdpEmbeddedTab).
+        Si X11/Gtk.Socket non disponible, bascule sur la fenetre externe (RdpTab).
+
+        Args:
+            notebook (Gtk.Notebook): Notebook cible.
+            host (Host): Hote avec protocol='rdp'.
+
+        Returns:
+            Gtk.ScrolledWindow: Widget ajoute au notebook.
+        """
+
+        # def get_pwd():
+        #     try:
+        #         app_logger.debug(f"Decrypting password for host {host.name} ({decrypt(get_password(), host.password)})")
+        #         return decrypt(get_password(), host.password)
+        #     except Exception as e:
+        #         app_logger.debug(f"Failed to decrypt password for host {host.name}: {e}")
+        #         return ""
+        def get_pwd():
+            try:
+                app_logger.debug(f"Decrypting password for host {host.name} ({host.password})")
+                return host.password
+            except Exception as e:
+                app_logger.debug(f"Failed to decrypt password for host {host.name}: {e}")
+                return ""
+
+        # Etape 6 : XEmbed si Gtk.Socket disponible (X11 / XWayland)
+        # Fallback sur fenetre externe si Wayland pur
+        if _rdp_socket_available():
+            rdp_widget = RdpEmbeddedTab(host, get_pwd)
+            # RdpEmbeddedTab contient deja le socket — pas de ScrolledWindow
+            rdp_widget.show_all()
+            tab_label = NotebookTabLabel(" %s " % host.name, notebook, rdp_widget, self)
+            notebook.append_page(rdp_widget, tab_label)
+            notebook.set_tab_reorderable(rdp_widget, True)
+            notebook.set_current_page(notebook.get_n_pages() - 1)
+            # rdp_widget.connect_rdp()
+            return rdp_widget
+        else:
+            # Fallback etape 5 : fenetre externe + log
+            rdp_widget = RdpTab(host, get_pwd)
+            sw = Gtk.ScrolledWindow()
+            sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+            sw.add(rdp_widget)
+            sw.show_all()
+            tab_label = NotebookTabLabel(" %s " % host.name, notebook, sw, self)
+            notebook.append_page(sw, tab_label)
+            notebook.set_tab_reorderable(sw, True)
+            notebook.set_current_page(notebook.get_n_pages() - 1)
+            rdp_widget.connect_rdp()
+            return sw
+
+    def _open_vnc_tab(self, notebook, host):
+        """Ouvre un onglet VNC (vncviewer externe) dans le notebook GCM.
+
+        Args:
+            notebook (Gtk.Notebook): Notebook cible.
+            host (Host): Hote avec protocol='vnc'.
+
+        Returns:
+            Gtk.ScrolledWindow: Widget ajoute au notebook.
+        """
+
+        def get_pwd():
+            try:
+                app_logger.debug(f"Decrypting password for host {host.name} ({host.password})")
+                return host.password
+            except Exception as e:
+                app_logger.debug(f"Failed to decrypt password for host {host.name}: {e}")
+                return ""
+
+        vnc_widget = VncTab(host, get_pwd)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw.add(vnc_widget)
+        sw.show_all()
+        tab_label = NotebookTabLabel(" %s " % host.name, notebook, sw, self)
+        notebook.append_page(sw, tab_label)
+        notebook.set_tab_reorderable(sw, True)
+        notebook.set_current_page(notebook.get_n_pages() - 1)
+        vnc_widget.connect_vnc()
+        return sw
+
+    def _open_serial_tab(self, notebook, host):
+        """Ouvre un onglet série (picocom/minicom/screen) dans le notebook GCM.
+
+        Args:
+            notebook (Gtk.Notebook): Notebook cible.
+            host (Host): Hôte avec protocol='serial'.
+
+        Returns:
+            Gtk.ScrolledWindow: Widget ajouté au notebook.
+        """
+        serial_widget = SerialTab(host)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw.add(serial_widget)
+        sw.show_all()
+        tab_label = NotebookTabLabel(" %s " % host.name, notebook, sw, self)
+        notebook.append_page(sw, tab_label)
+        notebook.set_tab_reorderable(sw, True)
+        notebook.set_current_page(notebook.get_n_pages() - 1)
+        serial_widget.connect_serial()
+        return sw
+
+    def _open_spice_tab(self, notebook, host):
+        """Ouvre un onglet SPICE (remote-viewer externe) dans le notebook GCM.
+
+        Args:
+            notebook (Gtk.Notebook): Notebook cible.
+            host (Host): Hote avec protocol='spice'.
+
+        Returns:
+            Gtk.ScrolledWindow: Widget ajoute au notebook.
+        """
+
+        # def get_pwd():
+        #     try:
+        #         app_logger.debug(f"Decrypting password for host {host.name} ({decrypt(get_password(), host.password)})")
+        #         return decrypt(get_password(), host.password)
+        #     except Exception as e:
+        #         app_logger.debug(f"Failed to decrypt password for host {host.name}: {e}")
+        #         return ""
+        def get_pwd():
+            try:
+                app_logger.debug(f"Decrypting password for host {host.name} ({host.password})")
+                return host.password
+            except Exception as e:
+                app_logger.debug(f"Failed to decrypt password for host {host.name}: {e}")
+                return ""
+
+        spice_widget = SpiceTab(host, get_pwd)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        sw.add(spice_widget)
+        sw.show_all()
+        tab_label = NotebookTabLabel(" %s " % host.name, notebook, sw, self)
+        notebook.append_page(sw, tab_label)
+        notebook.set_tab_reorderable(sw, True)
+        notebook.set_current_page(notebook.get_n_pages() - 1)
+        spice_widget.connect_spice()
+        return sw
+
+    def on_mnu_import_libvirt_activate(self, widget):
+        """Ouvre le dialogue d'import de VMs depuis libvirt."""
+        default_user = conf.__dict__.get("LIBVIRT_DEFAULT_USER", LIBVIRT_DEFAULT_USER)
+
+        def on_done(host_dicts):
+            if not host_dicts:
+                msgbox(_("No host imported."))
+                return
+            n = self._import_done(host_dicts, default_group="LIBVIRT")
+            if n:
+                msgbox(_(f"{n} connection(s) imported from libvirt."))
+            else:
+                msgbox(_("No new host (duplicates ignored."))
+
+        LibvirtImportDialog(self.window, on_done, default_user)
+
+    def on_mnu_import_proxmox_activate(self, widget):
+        """Ouvre le dialogue d'import de VMs depuis Proxmox."""
+        default_user = conf.__dict__.get("LIBVIRT_DEFAULT_USER", LIBVIRT_DEFAULT_USER)
+
+        def on_done(host_dicts):
+            if not host_dicts:
+                msgbox(_("No host imported."))
+                return
+            n = self._import_done(host_dicts, default_group="PROXMOX")
+            if n:
+                msgbox(_(f"{n} connection(s) imported from Proxmox."))
+            else:
+                msgbox(_("No new host (duplicates ignored)."))
+
+        ProxmoxImportDialog(self.window, on_done, default_user)
+
+    def on_mnu_edit_ssh_config_activate(self, widget: object) -> None:
+        """Ouvre le dialogue d'édition de ~/.ssh/config.
+
+        Args:
+            widget: MenuItem déclencheur (non utilisé directement).
+        """
+        if not _SSH_CONFIG_EDITOR_OK:
+            msgbox(
+                _(
+                    "ssh_config_editor module not found.\n"
+                    "Make sure ssh_config_editor.py and ssh_config_parser.py "
+                    "are in the same directory as gnome_connection_manager.py."
+                )
+            )
+            return
+
+        dlg = SshConfigEditorDialog(parent=self.window)
+        response = dlg.run()
+        if response == Gtk.ResponseType.OK:
+            dlg.save()
+        dlg.destroy()
+
+    def on_mnu_manage_ssh_keys_activate(self, widget: object) -> None:
+        """Ouvre le gestionnaire de clés SSH.
+
+        Args:
+            widget: MenuItem déclencheur (non utilisé directement).
+        """
+        if not _SSH_KEY_MANAGER_OK:
+            msgbox(
+                _(
+                    "ssh_key_manager_dialog module not found.\n"
+                    "Make sure ssh_key_manager_dialog.py is in the same directory "
+                    "as gnome_connection_manager.py."
+                )
+            )
+            return
+
+        dlg = SSHKeyManagerDialog(parent=self.window)
+        dlg.show_all()
+
+    def _import_done(self, host_dicts, default_group="IMPORT"):
+        """Ajoute des hôtes importés dans le groupe fixe (pas de sous-groupe via nom VM).
+
+        Args:
+            host_dicts (list[dict]): Connexions importées.
+            default_group (str): Nom de groupe cible (LIBVIRT, PROXMOX…).
+
+        Returns:
+            int: Nombre d'hôtes ajoutés.
+        """
+        added = 0
+        _proto_icon = {
+            "ssh": "utilities-terminal",
+            "telnet": "utilities-terminal",
+            "rdp": "computer",
+            "vnc": "video-display",
+            "spice": "video-display",
+            "serial": "modem",
+            "local": "user-home",
+        }
+        for d in host_dicts:
+            # Ignorer la ventilation par nom — tout va dans default_group
+            gname = default_group
+            if gname not in groups:
+                groups[gname] = []
+            if d["name"] in [h.name for h in groups[gname]]:
+                continue
+            h = Host()
+            h.group = gname
+            h.name = d["name"]
+            h.host = d.get("host", "")
+            h.user = d.get("user", "root")
+            h.password = ""
+            h.private_key = ""
+            h.description = d.get("description", "")
+            h.log = False
+            h.tunnel = ""
+            h.type = d.get("type", d.get("protocol", "ssh"))
+            h.commands = ""
+            h.keep_alive = 0
+            h.font_color = ""
+            h.back_color = ""
+            h.x11 = False
+            h.agent = True
+            h.compression = False
+            h.compressionLevel = ""
+            h.extra_params = d.get("extra_params", "")
+            h.log = False
+            h.backspace_key = 0
+            h.delete_key = 0
+            h.term = ""
+            h.protocol = d.get("protocol", "ssh")
+            h.port = str(d.get("port", 22))
+            h.serial_databits = "8"
+            h.serial_parity = "n"
+            h.serial_stopbits = "1"
+            h.serial_flow = "n"
+            h.serial_tool = "picocom"
+            h.serial_baud = "9600"
+            # ── RDP : défauts adaptés aux VMs importées ───────────────────────
+            h.rdp_domain = d.get("rdp_domain", "")
+            h.rdp_geometry = d.get("rdp_geometry", "fullscreen")
+            h.rdp_width = d.get("rdp_width", "")
+            h.rdp_height = d.get("rdp_height", "")
+            h.rdp_cert_ignore = d.get(
+                "rdp_cert_ignore",
+                d.get("protocol") == "rdp",
+            )
+            h.rdp_dyn_res = d.get("rdp_dyn_res", False)
+            h.rdp_remote_app = d.get("rdp_remote_app", "")
+            # ── VNC ───────────────────────────────────────────────────────────
+            h.vnc_viewer = d.get("vnc_viewer", "tigervnc")
+            h.vnc_display = d.get("vnc_display", "")
+            h.vnc_view_only = d.get("vnc_view_only", False)
+            h.vnc_fullscreen = d.get("vnc_fullscreen", False)
+            # ── SPICE : décoder extra_params legacy → attributs structurés ────
+            _ep = (d.get("extra_params") or "").strip()
+            if d.get("protocol") == "spice" and _ep.startswith("--connect "):
+                # format libvirt : "--connect qemu+ssh://user@host[:port]/system vm_name"
+                _parts = _ep.split(None, 2)
+                h.spice_mode = "libvirt"
+                h.spice_libvirt_uri = _parts[1] if len(_parts) > 1 else ""
+                h.spice_vm_name = _parts[2] if len(_parts) > 2 else ""
+                h.spice_tls_port = ""
+                h.spice_ca_cert = ""
+                h.spice_px_node = ""
+                h.spice_px_vmid = ""
+                # Vider extra_params : les infos sont maintenant dans les attributs
+                h.extra_params = ""
+            elif d.get("protocol") == "spice" and _ep.startswith("--proxmox "):
+                # format proxmox legacy : "--proxmox NODE VMID"
+                _parts = _ep.split()
+                h.spice_mode = "proxmox"
+                h.spice_px_node = _parts[1] if len(_parts) > 1 else ""
+                h.spice_px_vmid = _parts[2] if len(_parts) > 2 else ""
+                h.spice_libvirt_uri = ""
+                h.spice_vm_name = ""
+                h.spice_tls_port = ""
+                h.spice_ca_cert = ""
+                h.extra_params = ""
+            else:
+                h.spice_mode = d.get("spice_mode", "uri")
+                h.spice_libvirt_uri = d.get("spice_libvirt_uri", "")
+                h.spice_vm_name = d.get("spice_vm_name", "")
+                h.spice_tls_port = d.get("spice_tls_port", "")
+                h.spice_ca_cert = d.get("spice_ca_cert", "")
+                h.spice_px_node = d.get("spice_px_node", "")
+                h.spice_px_vmid = d.get("spice_px_vmid", "")
+            groups[gname].append(h)
+            added += 1
+        self.updateTree()
+        self.writeConfig()
+        return added
+
+    # ── CSV / JSON import/export ──────────────────────────────────────────────
+
+    # Champs exportés (sans mot de passe)
+    _CSV_FIELDS = [
+        "group",
+        "name",
+        "description",
+        "host",
+        "user",
+        "port",
+        "type",
+        "protocol",
+        "extra_params",
+        "commands",
+        "keep_alive",
+        "font_color",
+        "back_color",
+        "x11",
+        "agent",
+        "compression",
+        "compressionLevel",
+        "log",
+        "backspace_key",
+        "delete_key",
+        "term",
+        "serial_databits",
+        "serial_parity",
+        "serial_stopbits",
+        "serial_flow",
+        "serial_tool",
+        "serial_baud",
+        "rdp_domain",
+        "rdp_geometry",
+        "rdp_width",
+        "rdp_height",
+        "rdp_cert_ignore",
+        "rdp_dyn_res",
+        "rdp_remote_app",
+        "vnc_viewer",
+        "vnc_display",
+        "vnc_view_only",
+        "vnc_fullscreen",
+        "spice_mode",
+        "spice_tls_port",
+        "spice_ca_cert",
+        "spice_libvirt_uri",
+        "spice_vm_name",
+        "spice_px_node",
+        "spice_px_vmid",
+    ]
+
+    def _all_hosts(self):
+        """Retourne la liste plate de tous les Host."""
+        return [h for grp in groups.values() for h in grp]
+
+    def _host_to_dict(self, h):
+        """Sérialise un Host en dict sans mot de passe."""
+        return {f: str(getattr(h, f, "") or "") for f in self._CSV_FIELDS}
+
+    def _dict_to_host(self, d):
+        """Désérialise un dict en Host (pas de mot de passe)."""
+        h = Host()
+        h.group = d.get("group", "IMPORT")
+        h.name = d.get("name", "")
+        h.description = d.get("description", "")
+        h.host = d.get("host", "")
+        h.user = d.get("user", "")
+        h.password = ""
+        h.private_key = ""
+        h.port = d.get("port", "22")
+        h.tunnel = ""
+        h.type = d.get("type", "ssh")
+        h.commands = d.get("commands", "")
+        h.keep_alive = int(d.get("keep_alive", 0) or 0)
+        h.font_color = d.get("font_color", "")
+        h.back_color = d.get("back_color", "")
+        h.x11 = str(d.get("x11", "False")).lower() in ("true", "1", "yes")
+        h.agent = str(d.get("agent", "False")).lower() in ("true", "1", "yes")
+        h.compression = str(d.get("compression", "False")).lower() in ("true", "1", "yes")
+        h.compressionLevel = d.get("compressionLevel", "")
+        h.extra_params = d.get("extra_params", "")
+        h.log = str(d.get("log", "False")).lower() in ("true", "1", "yes")
+        h.backspace_key = int(d.get("backspace_key", 0) or 0)
+        h.delete_key = int(d.get("delete_key", 0) or 0)
+        h.term = d.get("term", "")
+        h.protocol = d.get("protocol", d.get("type", "ssh"))
+        h.serial_databits = d.get("serial_databits", "8")
+        h.serial_parity = d.get("serial_parity", "n")
+        h.serial_stopbits = d.get("serial_stopbits", "1")
+        h.serial_flow = d.get("serial_flow", "n")
+        h.serial_tool = d.get("serial_tool", "picocom")
+        h.serial_baud = d.get("serial_baud", "9600")
+        h.rdp_domain = d.get("rdp_domain", "")
+        h.rdp_geometry = d.get("rdp_geometry", "fullscreen")
+        h.rdp_width = d.get("rdp_width", "")
+        h.rdp_height = d.get("rdp_height", "")
+        h.rdp_cert_ignore = str(d.get("rdp_cert_ignore", False)).lower() in ("true", "1", "yes")
+        h.rdp_dyn_res = str(d.get("rdp_dyn_res", False)).lower() in ("true", "1", "yes")
+        h.rdp_remote_app = d.get("rdp_remote_app", "")
+        h.vnc_viewer = d.get("vnc_viewer", "tigervnc")
+        h.vnc_display = d.get("vnc_display", "")
+        h.vnc_view_only = str(d.get("vnc_view_only", False)).lower() in ("true", "1", "yes")
+        h.vnc_fullscreen = str(d.get("vnc_fullscreen", False)).lower() in ("true", "1", "yes")
+        h.spice_mode = d.get("spice_mode", "uri")
+        h.spice_tls_port = d.get("spice_tls_port", "")
+        h.spice_ca_cert = d.get("spice_ca_cert", "")
+        h.spice_libvirt_uri = d.get("spice_libvirt_uri", "")
+        h.spice_vm_name = d.get("spice_vm_name", "")
+        h.spice_px_node = d.get("spice_px_node", "")
+        h.spice_px_vmid = d.get("spice_px_vmid", "")
+        return h
+
+    def _import_hosts_from_list(self, host_list):
+        """Ajoute une liste de Host dans le modèle et écrit la config."""
+        added = 0
+        for h in host_list:
+            gname = h.group or "IMPORT"
+            if gname not in groups:
+                groups[gname] = []
+            # Skip doublons (même nom dans même groupe)
+            if any(x.name == h.name for x in groups[gname]):
+                continue
+            groups[gname].append(h)
+            added += 1
+        self.updateTree()
+        self.writeConfig()
+        return added
+
+    def on_mnu_import_csv_activate(self, widget, *args):
+        """Importe des connexions depuis un fichier CSV (sans mot de passe)."""
+        filename = show_open_dialog(
+            parent=self.wMain, title=_("Import from CSV"), action=Gtk.FileChooserAction.OPEN
+        )
+        if not filename:
+            return
+        import csv as _csv
+
+        try:
+            with open(filename, newline="", encoding="utf-8") as f:
+                reader = _csv.DictReader(f)
+                hosts = [self._dict_to_host(row) for row in reader if row.get("name")]
+        except Exception as e:
+            msgbox(_(f"CSV import error: {e}"))
+            return
+        if not hosts:
+            msgbox(_("No valid entry found in CSV."))
+            return
+        n = self._import_hosts_from_list(hosts)
+        msgbox(_(f"{n} connection(s) imported from CSV."))
+
+    def on_mnu_import_json_activate(self, widget, *args):
+        """Importe des connexions depuis un fichier JSON (sans mot de passe)."""
+        filename = show_open_dialog(
+            parent=self.wMain, title=_("Import from JSON"), action=Gtk.FileChooserAction.OPEN
+        )
+        if not filename:
+            return
+        import json as _json
+
+        try:
+            with open(filename, encoding="utf-8") as f:
+                data = _json.load(f)
+            if isinstance(data, dict):
+                data = list(data.values())
+            hosts = [self._dict_to_host(d) for d in data if isinstance(d, dict) and d.get("name")]
+        except Exception as e:
+            msgbox(_(f"JSON import error: {e}"))
+            return
+        if not hosts:
+            msgbox(_("No valid entry found in JSON."))
+            return
+        n = self._import_hosts_from_list(hosts)
+        msgbox(_(f"{n} connection(s) imported from JSON."))
+
+    def on_mnu_export_csv_activate(self, widget, *args):
+        """Exporte toutes les connexions vers un fichier CSV (sans mot de passe)."""
+        filename = show_open_dialog(
+            parent=self.wMain, title=_("Export to CSV"), action=Gtk.FileChooserAction.SAVE
+        )
+        if not filename:
+            return
+        if not filename.endswith(".csv"):
+            filename += ".csv"
+        import csv as _csv
+
+        try:
+            hosts = self._all_hosts()
+            with open(filename, "w", newline="", encoding="utf-8") as f:
+                writer = _csv.DictWriter(f, fieldnames=self._CSV_FIELDS)
+                writer.writeheader()
+                for h in hosts:
+                    writer.writerow(self._host_to_dict(h))
+        except Exception as e:
+            msgbox(_(f"CSV export error: {e}"))
+            return
+        msgbox(_(f"{len(hosts)} connection(s) exported to {filename}."))
+
+    def on_mnu_export_json_activate(self, widget, *args):
+        """Exporte toutes les connexions vers un fichier JSON (sans mot de passe)."""
+        filename = show_open_dialog(
+            parent=self.wMain, title=_("Export to JSON"), action=Gtk.FileChooserAction.SAVE
+        )
+        if not filename:
+            return
+        if not filename.endswith(".json"):
+            filename += ".json"
+        import json as _json
+
+        try:
+            hosts = self._all_hosts()
+            data = [self._host_to_dict(h) for h in hosts]
+            with open(filename, "w", encoding="utf-8") as f:
+                _json.dump(data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            msgbox(_(f"JSON export error: {e}"))
+            return
+        msgbox(_(f"{len(hosts)} connection(s) exported to {filename}."))
+
+    # ── Dark mode ─────────────────────────────────────────────────────────────
+
+    def _apply_dark_mode(self, enabled):
+        """Active ou désactive le mode sombre GTK."""
+        settings = Gtk.Settings.get_default()
+        settings.set_property("gtk-application-prefer-dark-theme", enabled)
+
+    def on_mnu_dark_mode_toggled(self, widget, *args):
+        """Bascule le mode sombre GTK et persiste l'état."""
+        enabled = widget.get_active()
+        conf.DARK_MODE = enabled
+        conf.THEME_MODE = "dark" if enabled else "light"
+        self._apply_dark_mode(enabled)
+        self.writeConfig()
 
     def createMenuItem(self, shortcut, label):
-        menuItem = Gtk.MenuItem(label='')
+        """Cree un Gtk.MenuItem avec etiquette et action.
+
+        Args:
+            label (str): Texte de l'element.
+            callback (callable): Fonction appelee a l'activation.
+
+        Returns:
+            Gtk.MenuItem: Element de menu cree.
+        """
+        menuItem = Gtk.MenuItem(label="")
         text = "[%s] %s" % (shortcut, label)
-        attrs = Pango.parse_markup("<span foreground='blue'  size='x-small'>[%s]</span> %s" % (GLib.markup_escape_text(shortcut, -1), GLib.markup_escape_text(label, -1)), -1, "0")
+        attrs = Pango.parse_markup(
+            "<span foreground='blue'  size='x-small'>[%s]</span> %s"
+            % (
+                GLib.markup_escape_text(shortcut, -1),
+                GLib.markup_escape_text(label, -1),
+            ),
+            -1,
+            "0",
+        )
         menuItem.get_child().set_attributes(attrs[1])
         menuItem.get_child().set_label(text)
         menuItem.show()
         return menuItem
 
     def populateCommandsMenu(self):
+        """Remplit le sous-menu des commandes personnalisees."""
         self.popupMenu.mnuCommands.foreach(lambda x: self.popupMenu.mnuCommands.remove(x))
         self.menuCustomCommands.foreach(lambda x: self.menuCustomCommands.remove(x))
         for x in shortcuts:
             if type(shortcuts[x]) != list:
                 menuItem = self.createMenuItem(x, shortcuts[x][0:30])
                 self.popupMenu.mnuCommands.append(menuItem)
-                menuItem.connect("activate", self.on_popupmenu, 'CP', shortcuts[x])
+                menuItem.connect("activate", self.on_popupmenu, "CP", shortcuts[x])
 
                 menuItem = self.createMenuItem(x, shortcuts[x][0:30])
                 self.menuCustomCommands.append(menuItem)
                 menuItem.connect("activate", self.on_menuCustomCommands_activate, shortcuts[x])
 
     def on_menuCustomCommands_activate(self, widget, command):
+        """Gestionnaire d'activation d'une commande personnalisee.
+
+        Args:
+            widget (Gtk.MenuItem): Element active.
+            command (str): Commande a envoyer.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             vte_feed(terminal, command)
 
     def terminal_copy(self, terminal):
+        """Copie la selection du terminal dans le presse-papiers.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+        """
         terminal.copy_clipboard_format(Vte.Format.TEXT)
 
     def terminal_paste(self, terminal):
+        """Colle le presse-papiers dans le terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+        """
         terminal.paste_clipboard()
 
     def terminal_copy_paste(self, terminal):
+        """Copie puis colle la selection dans le terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+        """
         terminal.copy_clipboard_format(Vte.Format.TEXT)
         terminal.paste_clipboard()
 
     def terminal_select_all(self, terminal):
+        """Selectionne tout le contenu du terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+        """
         terminal.select_all()
 
     def terminal_copy_all(self, terminal):
+        """Copie tout le contenu du terminal dans le presse-papiers.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+        """
         terminal.select_all()
         terminal.copy_clipboard_format(Vte.Format.TEXT)
         terminal.select_none()
 
     def on_menuCopy_activate(self, widget):
+        """Gestionnaire du menu Copier.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             self.terminal_copy(terminal)
 
     def on_menuPaste_activate(self, widget):
+        """Gestionnaire du menu Coller.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             self.terminal_paste(terminal)
 
     def on_menuCopyPaste_activate(self, widget):
+        """Gestionnaire du menu Copier-Coller.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             self.terminal_copy_paste(terminal)
 
     def on_menuSelectAll_activate(self, widget):
+        """Gestionnaire du menu Tout selectionner.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             self.terminal_select_all(terminal)
 
     def on_menuCopyAll_activate(self, widget):
+        """Gestionnaire du menu Tout copier.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         terminal = self.find_active_terminal(self.hpMain)
         if terminal:
             self.terminal_copy_all(terminal)
 
     def on_menuSettings_activate(self, widget):
+        """Gestionnaire du menu Parametres.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         wConfig = Wconfig()
 
+    def on_output_written(self, terminal, data):
+        """Callback VTE >= 0.60 : capture la sortie brute du terminal pour le logging.
+
+        Remplace le signal 'contents-changed' (obsolete sur VTE >= 0.60 / Ubuntu 24.04+).
+        Le signal 'output-written' fournit les bytes bruts ecrits dans le PTY.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source du signal.
+            data (GLib.Bytes): Bytes bruts recus du processus enfant.
+        """
+        if hasattr(terminal, "log") and terminal.log:
+            try:
+                text = (
+                    data.get_data().decode("utf-8", errors="replace")
+                    if hasattr(data, "get_data")
+                    else bytes(data).decode("utf-8", errors="replace")
+                )
+                terminal.log.write(text)
+                terminal.log.flush()
+            except Exception:
+                pass
+
     def on_contents_changed(self, terminal):
-        col,row = terminal.get_cursor_position()
+        """Callback VTE < 0.60 : capture les changements de contenu pour le logging.
+
+        Fallback utilise quand 'output-written' n'est pas disponible.
+        Lit le texte entre la derniere position loggee et la position courante.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source du signal.
+        """
+        if not hasattr(terminal, "log") or not terminal.log:
+            return
+        col, row = terminal.get_cursor_position()
         if terminal.last_logged_row != row:
-            text,b = terminal.get_text_range(terminal.last_logged_row, terminal.last_logged_col, row, col, None, None)
+            text, b = terminal.get_text_range(
+                terminal.last_logged_row, terminal.last_logged_col, row, col, None, None
+            )
             terminal.last_logged_row = row
             terminal.last_logged_col = col
             terminal.log.write(text[:-1])
+            terminal.log.flush()
 
-    def set_terminal_logger(self, terminal, enable_logging=True):
+    def _sanitize_tab_log_name(self, raw_name):
+        """Nettoie le nom d'onglet pour créer un nom de fichier sûr.
+
+        Args:
+            raw_name (str): Nom d'onglet brut.
+
+        Returns:
+            str: Nom nettoyé sans caractères incompatibles avec le système de fichiers.
+        """
+        cleaned = _re.sub(r"[^A-Za-z0-9._-]+", "_", (raw_name or "terminal").strip())
+        return cleaned.strip("._-") or "terminal"
+
+    def _build_terminal_log_file(self, terminal, continuous_mode=False):
+        """Construit le chemin de fichier log pour un terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+            continuous_mode (bool, optional): True pour le mode continu global.
+                Defaults to False.
+
+        Returns:
+            str: Chemin absolu du fichier log à utiliser.
+        """
+        p = terminal.get_parent()
+        title = p.get_parent().get_tab_label(p).get_text().strip() if p else "terminal"
+        safe_title = self._sanitize_tab_log_name(title)
+        if continuous_mode:
+            log_dir = os.path.expanduser(conf.CONTINUOUS_LOG_PATH)
+            stamp = time.strftime("%Y%m%d-%H%M%S")
+            filename = os.path.join(log_dir, f"{safe_title}+{stamp}+.log")
+            if not os.path.exists(filename):
+                return filename
+            for i in range(1, 1000):
+                candidate = os.path.join(log_dir, f"{safe_title}+{stamp}+{i:03d}.log")
+                if not os.path.exists(candidate):
+                    return candidate
+            return os.path.join(log_dir, f"{safe_title}+{stamp}+999.log")
+
+        log_dir = os.path.expanduser(conf.LOG_PATH)
+        prefix = os.path.join(log_dir, f"{safe_title}-{time.strftime('%Y%m%d')}")
+        for i in range(1, 1000):
+            candidate = f"{prefix}-{i:03d}.log"
+            if not os.path.exists(candidate):
+                return candidate
+        return f"{prefix}-999.log"
+
+    def _close_terminal_log(self, terminal):
+        """Ferme proprement le fichier log associé à un terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+
+        Returns:
+            None: Ferme le flux si ouvert.
+        """
+        try:
+            if hasattr(terminal, "log") and terminal.log and not terminal.log.closed:
+                terminal.log.flush()
+                terminal.log.close()
+        except Exception:
+            pass
+
+    def _on_terminal_child_exited(self, terminal, status, tab):
+        """Gère la fin du processus enfant d'un terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal concerné.
+            status (int): Code de sortie du processus enfant.
+            tab (NotebookTabLabel): Label d'onglet associé.
+
+        Returns:
+            None: Marque l'onglet comme fermé et ferme le log.
+        """
+        tab.mark_tab_as_closed()
+        self._close_terminal_log(terminal)
+
+    def set_terminal_logger(self, terminal, enable_logging=True, continuous_mode=False):
+        """Active ou desactive le logging de session pour un terminal VTE.
+
+        Cree un fichier log horodate dans le dossier configure.
+        Utilise le signal 'output-written' (VTE >= 0.60) ou 'contents-changed' (fallback).
+
+        Args:
+            terminal (Vte.Terminal): Terminal VTE cible.
+            enable_logging (bool, optional): True pour activer, False pour desactiver.
+                Defaults to True.
+            continuous_mode (bool, optional): True pour le mode continu (fichiers dans
+                `~/.gcm/log` au format `nom_onglet+timestamp+.log`). Defaults to False.
+
+        Returns:
+            bool: True si l'operation a reussi, False en cas d'erreur (ex: fichier non writable).
+        """
+        if conf.CONTINUOUS_TAB_LOG:
+            continuous_mode = True
+
         if enable_logging:
             terminal.last_logged_col, terminal.last_logged_row = terminal.get_cursor_position()
             if hasattr(terminal, "log_handler_id"):
                 if terminal.log_handler_id == 0:
-                    terminal.log_handler_id = terminal.connect('contents-changed', self.on_contents_changed)
+                    # fix #88: préférer output-written (VTE >= 0.60) pour un logging fiable
+                    if _HAS_OUTPUT_WRITTEN:
+                        terminal.log_handler_id = terminal.connect(
+                            "output-written", self.on_output_written
+                        )
+                    else:
+                        terminal.log_handler_id = terminal.connect(
+                            "contents-changed", self.on_contents_changed
+                        )
+            else:
+                # fix #88: idem pour la connexion initiale
+                if _HAS_OUTPUT_WRITTEN:
+                    terminal.log_handler_id = terminal.connect(
+                        "output-written", self.on_output_written
+                    )
+                else:
+                    terminal.log_handler_id = terminal.connect(
+                        "contents-changed", self.on_contents_changed
+                    )
+
+            if hasattr(terminal, "log") and terminal.log and not terminal.log.closed:
                 return True
-            terminal.log_handler_id = terminal.connect('contents-changed', self.on_contents_changed)
-            p = terminal.get_parent()
-            title = p.get_parent().get_tab_label(p).get_text().strip()
-            LOG_PATH = os.path.expanduser(conf.LOG_PATH)
-            prefix = "%s/%s-%s" % (LOG_PATH, title, time.strftime("%Y%m%d"))
-            if not os.path.exists(LOG_PATH):
-                os.makedirs(LOG_PATH)
-            filename = ''
-            for i in range(1,1000):
-                if not os.path.exists("%s-%03i.log" % (prefix,i)):
-                    filename = "%s-%03i.log" % (prefix,i)
-                    break
-            if filename == '':
-                # End up appending to the latest log file...
-                filename = "%s-%03i.log" % (prefix,i)
-            filename == "%s-%03i.log" % (prefix,1)
+
+            filename = self._build_terminal_log_file(terminal, continuous_mode=continuous_mode)
+            log_dir = os.path.dirname(filename)
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir)
             try:
-                prepend = ''
-                if os.path.exists(filename):
-                    msgbox("%s\n%s" % (_("Anexar el archivo de log existente"), filename))
-                    prepend = '\n\n===== %s =====\n\n' %(_("Fin del registro de sesión anterior"))
-                terminal.log = open(filename, 'a', 1)
-                terminal.log.write("%sSession '%s' opened at %s\n%s\n" % (prepend, title, time.strftime("%Y-%m-%d %H:%M:%S"), "-"*80))
+                mode_label = "continuous" if continuous_mode else "manual"
+                p = terminal.get_parent()
+                title = p.get_parent().get_tab_label(p).get_text().strip() if p else "terminal"
+                terminal.log = open(filename, "a", 1, encoding="utf-8")
+                terminal.log.write(
+                    "Session '%s' (%s) opened at %s\n%s\n"
+                    % (title, mode_label, time.strftime("%Y-%m-%d %H:%M:%S"), "-" * 80)
+                )
             except Exception as e:
-                print(e)
-                msgbox("%s\n%s" % (_("No se puede abrir el archivo de log para escritura"), filename))
-                terminal.disconnect(terminal.log_handler_id)
-                del terminal.log_handler_id
+                app_logger.exception(f"Impossible d'ouvrir le fichier de log terminal: {e}")
+                msgbox(
+                    "%s\n%s"
+                    % (
+                        _("Can't open log file for writting"),
+                        filename,
+                    )
+                )
+                if hasattr(terminal, "log_handler_id") and terminal.log_handler_id != 0:
+                    terminal.disconnect(terminal.log_handler_id)
+                    terminal.log_handler_id = 0
                 return False
         else:
+            if conf.CONTINUOUS_TAB_LOG:
+                return True
             if hasattr(terminal, "log_handler_id") and terminal.log_handler_id != 0:
                 terminal.disconnect(terminal.log_handler_id)
                 terminal.log_handler_id = 0
+            self._close_terminal_log(terminal)
         return True
 
     def registerUrlRegexes(self, terminal):
+        """Enregistre les expressions regulieres d'URLs dans le terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+        """
         terminal.tag_direct = self.registerUrlRegex(terminal, urlregex.DIRECT)
         terminal.tag_url = self.registerUrlRegex(terminal, urlregex.URL)
         terminal.tag_email = self.registerUrlRegex(terminal, urlregex.EMAIL)
 
     def registerUrlRegex(self, terminal, regex):
+        """Enregistre une expression reguliere d'URL dans le terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal cible.
+            regex (str): Expression reguliere.
+        """
         try:
             new_reg_m = Vte.Regex.new_for_match(regex, len(regex), urlregex.PCRE2_FLAGS)
             tag = terminal.match_add_regex(new_reg_m, 0)
             terminal.match_set_cursor_name(tag, "pointer")
             return tag
-        except Exception as e:
+        except Exception:
             pass
 
     def addTab(self, notebook, host):
+        """Ajoute un nouvel onglet de connexion au notebook.
+
+        Args:
+            nb (Gtk.Notebook): Notebook cible.
+            host (Host): Hote a connecter.
+        """
+        # ── RDP/VNC/SPICE : onglets dédiés selon protocol
+        if isinstance(host, Host):
+            proto = getattr(host, "protocol", "ssh")
+            if proto == "rdp":
+                return self._open_rdp_tab(notebook, host)
+            if proto == "vnc":
+                return self._open_vnc_tab(notebook, host)
+            if proto == "spice":
+                return self._open_spice_tab(notebook, host)
+            if proto == "serial":
+                return self._open_serial_tab(notebook, host)
+
         try:
             v = Vte.Terminal()
             v.set_word_char_exceptions(conf.WORD_SEPARATORS)
@@ -1250,29 +4911,42 @@ class Wmain(SimpleGladeApp):
             if (Vte.MAJOR_VERSION, Vte.MINOR_VERSION) >= (0, 50):
                 v.set_allow_hyperlink(True)
             self.registerUrlRegexes(v)
-
+            fcolor = "#4E9A06"
+            bcolor = "#000000"
             if isinstance(host, str):
-                host = Host('', host)
+                host = Host("", host)
                 # Note: log enablement defaults to host.log except for 'local'
                 # sessions that do not have a saved session to seed the host
                 # configuration, but rather use a global GCM config toggle
-                if host.name == 'local':
-                    #print ("D: Local session logging set to: %s\n" % (conf.LOG_LOCAL))
+                if host.name == "local":
+                    # print ("D: Local session logging set to: %s\n" % (conf.LOG_LOCAL))
                     host.log = conf.LOG_LOCAL
 
-            fcolor = host.font_color
-            bcolor = host.back_color
-            if fcolor == '' or fcolor == None or bcolor == '' or bcolor == None:
-                fcolor = conf.FONT_COLOR
-                bcolor = conf.BACK_COLOR
+                fcolor = host.font_color
+                bcolor = host.back_color
+                if fcolor == "" or fcolor == None or bcolor == "" or bcolor == None:
+                    fcolor = conf.FONT_COLOR
+                    bcolor = conf.BACK_COLOR
 
             palette_components = [
                 # background
-                '#000000', '#CC0000', '#4E9A06', '#C4A000',
-                '#3465A4', '#75507B', '#06989A', '#D3D7CF',
+                "#000000",
+                "#CC0000",
+                "#4E9A06",
+                "#C4A000",
+                "#3465A4",
+                "#75507B",
+                "#06989A",
+                "#D3D7CF",
                 # foreground
-                '#555753', '#EF2929', '#8AE234', '#FCE94F',
-                '#729FCF', '#729FCF', '#34E2E2', '#EEEEEC'
+                "#555753",
+                "#EF2929",
+                "#8AE234",
+                "#FCE94F",
+                "#729FCF",
+                "#729FCF",
+                "#34E2E2",
+                "#EEEEEC",
             ]
 
             palette = []
@@ -1280,32 +4954,34 @@ class Wmain(SimpleGladeApp):
                 color = parse_color_rgba(components)
                 palette.append(color)
 
-            if len(fcolor)>0 and len(bcolor)>0:
+            if len(fcolor) > 0 and len(bcolor) > 0:
                 v.set_colors(parse_color_rgba(fcolor), parse_color_rgba(bcolor), palette)
 
-            if len(conf.FONT)==0:
-                conf.FONT = 'monospace'
+            if len(conf.FONT) == 0:
+                conf.FONT = "monospace"
             else:
                 v.set_font(Pango.FontDescription(conf.FONT))
 
             scrollPane = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
             scrollbar = Gtk.Scrollbar().new(Gtk.Orientation.VERTICAL, v.get_vadjustment())
-            scrollPane.pack_start (v, True, True, 0)
-            scrollPane.pack_start (scrollbar, False, False, 0)
+            scrollPane.pack_start(v, True, True, 0)
+            scrollPane.pack_start(scrollbar, False, False, 0)
 
-            tab = NotebookTabLabel("  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab)
+            tab = NotebookTabLabel(
+                "  %s  " % (host.name), self.nbConsole, scrollPane, self.popupMenuTab
+            )
 
-            v.connect("child-exited", lambda *args: tab.mark_tab_as_closed())
-            v.connect('focus', self.on_tab_focus)
-            v.connect('button_press_event', self.on_terminal_click)
-            v.connect('key_press_event', self.on_terminal_keypress)
-            v.connect('selection-changed', self.on_terminal_selection)
+            v.connect("child-exited", self._on_terminal_child_exited, tab)
+            v.connect("focus", self.on_tab_focus)
+            v.connect("button_press_event", self.on_terminal_click)
+            v.connect("key_press_event", self.on_terminal_keypress)
+            v.connect("selection-changed", self.on_terminal_selection)
 
             if conf.TRANSPARENCY > 0 and self.wMain.transparency:
-                #v.set_opacity(1 - (conf.TRANSPARENCY / 100)) #posibly a bug in gtk3, set_opacity only works if parent is transparent too (worked just fine in gtk2),
-                #the workaround is to set the background color with alpha channel
+                # v.set_opacity(1 - (conf.TRANSPARENCY / 100)) #posibly a bug in gtk3, set_opacity only works if parent is transparent too (worked just fine in gtk2),
+                # the workaround is to set the background color with alpha channel
 
-                #if bcolor is not set, then use default background color
+                # if bcolor is not set, then use default background color
                 c = parse_color_rgba(bcolor if bcolor else DEFAULT_BGCOLOR)
                 c.alpha = 1 - (conf.TRANSPARENCY / 100)
                 v.set_color_background(c)
@@ -1322,34 +4998,41 @@ class Wmain(SimpleGladeApp):
             notebook.set_tab_detachable(scrollPane, True)
             self.wMain.set_focus(v)
             self.on_tab_focus(v)
-            self.set_terminal_logger(v, host.log)
+            self.set_terminal_logger(v, host.log or conf.CONTINUOUS_TAB_LOG)
 
-            GLib.timeout_add(200, lambda : self.wMain.set_focus(v))
+            GLib.timeout_add(200, lambda: self.wMain.set_focus(v))
 
-            #Dar tiempo a la interfaz para que muestre el terminal
+            # Dar tiempo a la interfaz para que muestre el terminal
             while Gtk.events_pending():
                 Gtk.main_iteration()
 
             v.host = host
 
-            if host.host == '' or host.host == None:
+            if host.host == "" or host.host == None:
                 vte_run(v, SHELL)
             else:
                 cmd = SSH_COMMAND
                 password = host.password
-                if host.type == 'ssh':
-                    if len(host.user)==0:
+                if host.type == "ssh":
+                    if len(host.user) == 0:
                         host.user = get_username()
-                    if host.password == '':
+                    if host.password == "":
                         cmd = SSH_BIN
-                        args = [ SSH_BIN, '-l', host.user, '-p', host.port]
+                        args = [SSH_BIN, "-l", host.user, "-p", host.port]
                     else:
-                        args = [SSH_COMMAND, host.type, '-l', host.user, '-p', host.port]
-                    if host.keep_alive!='0' and host.keep_alive!='':
-                        args.append('-o')
-                        args.append('ServerAliveInterval=%s' % (host.keep_alive))
+                        args = [
+                            SSH_COMMAND,
+                            host.type,
+                            "-l",
+                            host.user,
+                            "-p",
+                            host.port,
+                        ]
+                    if host.keep_alive != "0" and host.keep_alive != "":
+                        args.append("-o")
+                        args.append("ServerAliveInterval=%s" % (host.keep_alive))
                     for t in host.tunnel:
-                        if t!="":
+                        if t != "":
                             if t.endswith(":*:*"):
                                 args.append("-D")
                                 args.append(t[:-4])
@@ -1362,38 +5045,38 @@ class Wmain(SimpleGladeApp):
                         args.append("-A")
                     if host.compression:
                         args.append("-C")
-                        if host.compressionLevel!='':
-                            args.append('-o')
-                            args.append('CompressionLevel=%s' % (host.compressionLevel))
-                    if host.private_key != None and host.private_key != '':
+                        if host.compressionLevel != "":
+                            args.append("-o")
+                            args.append("CompressionLevel=%s" % (host.compressionLevel))
+                    if host.private_key != None and host.private_key != "":
                         args.append("-i")
                         args.append(host.private_key)
-                    if host.extra_params != None and host.extra_params != '':
+                    if host.extra_params != None and host.extra_params != "":
                         args += shlex.split(host.extra_params)
                     args.append(host.host)
                 else:
-                    if host.user=='' or host.password=='':
-                        password=''
+                    if host.user == "" or host.password == "":
+                        password = ""
                         cmd = TEL_BIN
                         args = [TEL_BIN]
                     else:
-                        args = [SSH_COMMAND, host.type, '-l', host.user]
-                    if host.extra_params != None and host.extra_params != '':
+                        args = [SSH_COMMAND, host.type, "-l", host.user]
+                    if host.extra_params != None and host.extra_params != "":
                         args += shlex.split(host.extra_params)
                     args += [host.host, host.port]
                 v.command = (cmd, args, password)
-                #v.fork_command(cmd, args)
+                # v.fork_command(cmd, args)
                 vte_run(v, cmd, args)
                 while Gtk.events_pending():
                     Gtk.main_iteration()
 
-                #esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
-                if password!=None and password!='':
+                # esperar 2 seg antes de enviar el pass para dar tiempo a que se levante expect y prevenir que se muestre el pass
+                if password != None and password != "":
                     GLib.timeout_add(2000, self.send_data, v, password)
 
-            #esperar 3 seg antes de enviar comandos
-            if host.commands!=None and host.commands!='':
-                basetime = 700 if len(host.host)==0 else 3000
+            # esperar 3 seg antes de enviar comandos
+            if host.commands != None and host.commands != "":
+                basetime = 700 if len(host.host) == 0 else 3000
                 lines = []
                 for line in host.commands.splitlines():
                     if line.startswith("##D=") and line[4:].isdigit():
@@ -1407,103 +5090,183 @@ class Wmain(SimpleGladeApp):
                     GLib.timeout_add(basetime, self.send_data, v, "\r".join(lines))
             v.queue_draw()
 
-            #guardar datos de consola para clonar consola
+            # guardar datos de consola para clonar consola
             v.host = host
         except Exception as e:
-            print("ERROR", e)
-            traceback.print_exc()
-            msgbox("%s: %s" % (_("Error al conectar con servidor"), sys.exc_info()[1]))
+            app_logger.exception(f"Erreur de connexion serveur: {e}")
+            msgbox("%s: %s" % (_("Error connecting to server"), sys.exc_info()[1]))
 
     def send_data(self, terminal, data):
-        vte_feed(terminal, '%s\r' % data)
+        """Envoie des donnees au terminal actif.
+
+        Args:
+            data (str): Donnees a envoyer.
+        """
+        vte_feed(terminal, "%s\r" % data)
         return False
 
     def initLeftPane(self):
+        """Initialise le panneau gauche avec l'arbre des serveurs."""
         global groups
 
-        self.treeModel = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT, str, str)
+        # col 0=name, 1=host_obj, 2=stock_id(connexion), 3=bg_color, 4=proto_icon_name
+        self.treeModel = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT, str, str, str)
         self.treeServers.set_model(self.treeModel)
 
         self.treeServers.set_level_indentation(5)
-        #self.treeServers.set_grid_lines(Gtk.TreeViewGridLines.HORIZONTAL)
 
         column = Gtk.TreeViewColumn()
-        column.set_title('Servers')
-        self.treeServers.append_column( column )
+        column.set_title("Servers")
+        self.treeServers.append_column(column)
 
+        # Icône connexion (stock gtk-network / gtk-directory)
         renderer = Gtk.CellRendererPixbuf()
         column.pack_start(renderer, expand=False)
-        column.add_attribute(renderer, 'stock_id', 2)
-        column.add_attribute(renderer, 'cell-background', 3)
+        column.add_attribute(renderer, "stock_id", 2)
+        column.add_attribute(renderer, "cell-background", 3)
+
+        # Icône protocole (themed icon freedesktop)
+        renderer_proto = Gtk.CellRendererPixbuf()
+        renderer_proto.set_property("stock-size", Gtk.IconSize.MENU)
+        column.pack_start(renderer_proto, expand=False)
+        column.add_attribute(renderer_proto, "icon-name", 4)
+        column.add_attribute(renderer_proto, "cell-background", 3)
 
         renderer = Gtk.CellRendererText()
         column.pack_start(renderer, expand=True)
-        column.add_attribute(renderer, 'text', 0)
-        column.add_attribute(renderer, 'cell-background', 3)
+        column.add_attribute(renderer, "text", 0)
+        column.add_attribute(renderer, "cell-background", 3)
+
+        # ── Drag & drop ───────────────────────────────────────────────────────
+        _dnd_target = Gtk.TargetEntry.new("GCM_TREE_ROW", Gtk.TargetFlags.SAME_WIDGET, 0)
+        self.treeServers.enable_model_drag_source(
+            Gdk.ModifierType.BUTTON1_MASK,
+            [_dnd_target],
+            Gdk.DragAction.MOVE,
+        )
+        self.treeServers.enable_model_drag_dest(
+            [_dnd_target],
+            Gdk.DragAction.MOVE,
+        )
+        self.treeServers.connect("drag-data-get", self._on_tree_drag_data_get)
+        self.treeServers.connect("drag-data-received", self._on_tree_drag_data_received)
 
         self.treeServers.set_has_tooltip(True)
-        self.treeServers.connect('query-tooltip', self.on_treeServers_tooltip)
+        self.treeServers.connect("query-tooltip", self.on_treeServers_tooltip)
         self.loadConfig()
         self.updateTree()
 
     def on_treeServers_tooltip(self, widget, x, y, keyboard, tooltip):
-        x,y = widget.convert_widget_to_bin_window_coords(x, y)
+        """Gestionnaire d'affichage du tooltip de l'arbre des serveurs.
+
+        Args:
+            widget (Gtk.TreeView): Widget source.
+            x (int): Position X.
+            y (int): Position Y.
+            keyboard_mode (bool): Mode clavier.
+            tooltip (Gtk.Tooltip): Tooltip GTK.
+
+        Returns:
+            bool: True pour afficher le tooltip.
+        """
+        x, y = widget.convert_widget_to_bin_window_coords(x, y)
         pos = widget.get_path_at_pos(x, y)
         if pos:
             host = list(widget.get_model()[pos[0]])[1]
             if host:
-                text = "<span><b>%s</b>\n%s:%s@%s\n</span><span size='smaller'>%s</span>" % (host.name, host.type, host.user, host.host, host.description)
+                text = "<span><b>%s</b>\n%s:%s@%s\n</span><span size='smaller'>%s</span>" % (
+                    host.name,
+                    host.type,
+                    host.user,
+                    host.host,
+                    host.description,
+                )
                 tooltip.set_markup(text)
                 return True
         return False
 
     def add_shortcut(self, cp, scuts, command, name, default):
+        """Ajoute un raccourci clavier a la fenetre principale.
+
+        Args:
+            key (int): Code de touche.
+            mod (Gdk.ModifierType): Modificateurs.
+            callback (callable): Fonction appelee.
+        """
         try:
             scuts[cp.get("shortcuts", command)] = name
         except:
             scuts[default] = name
 
     def loadConfig(self):
+        """Charge la configuration depuis le fichier INI."""
         global groups
 
-        cp= configparser.RawConfigParser(  )
-        cp.read( CONFIG_FILE )
+        cp = configparser.RawConfigParser()
+        cp.read(CONFIG_FILE)
 
-        #Leer configuracion general
-        try:
-            conf.WORD_SEPARATORS = cp.get("options", "word-separators")
-            conf.BUFFER_LINES = cp.getint("options", "buffer-lines")
-            conf.CONFIRM_ON_EXIT = cp.getboolean("options", "confirm-exit")
-            conf.FONT_COLOR = cp.get("options", "font-color")
-            conf.BACK_COLOR = cp.get("options", "back-color")
-            conf.TRANSPARENCY = cp.getint("options", "transparency")
-            conf.PASTE_ON_RIGHT_CLICK = cp.getboolean("options", "paste-right-click")
-            conf.CONFIRM_ON_CLOSE_TAB = cp.getboolean("options", "confirm-close-tab")
-            conf.CHECK_UPDATES = cp.getboolean("options", "check-updates")
-            conf.COLLAPSED_FOLDERS = cp.get("window", "collapsed-folders")
-            conf.LEFT_PANEL_WIDTH = cp.getint("window", "left-panel-width")
-            conf.WINDOW_WIDTH = cp.getint("window", "window-width")
-            conf.WINDOW_HEIGHT = cp.getint("window", "window-height")
-            conf.FONT = cp.get("options", "font")
-            conf.HIDE_DONATE = cp.getboolean("options", "donate")
-            conf.DISABLE_HOSTS_STRIPES = cp.getboolean("options", "disable-hosts-stripes")
-            conf.AUTO_COPY_SELECTION = cp.getboolean("options", "auto-copy-selection")
-            conf.LOG_PATH = cp.get("options", "log-path")
-            conf.VERSION = cp.get("options", "version")
-            conf.AUTO_CLOSE_TAB = cp.getint("options", "auto-close-tab")
-            conf.CYCLE_TABS = cp.getboolean("options", "cycle-tabs")
-            conf.SHOW_PANEL = cp.getboolean("window", "show-panel")
-            conf.SHOW_TOOLBAR = cp.getboolean("window", "show-toolbar")
-            conf.STARTUP_LOCAL = cp.getboolean("options","startup-local")
-            conf.LOG_LOCAL = cp.getboolean("options","log-local")
-            conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = cp.getboolean("options", "confirm-close-tab-middle")
-            conf.TERM = cp.get("options", "term")
-            conf.UPDATE_TITLE = cp.getboolean("options", "update-title")
-            conf.APP_TITLE = cp.get("options", "app-title") or app_name
-        except:
-            print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
+        # Leer configuracion general — lecture option par option avec défaut
+        # pour ne pas bloquer au premier champ manquant (ancien fichier de config)
+        def _gopt(section, key, default, typ=str):
+            try:
+                if typ == bool:
+                    return cp.getboolean(section, key)
+                if typ == int:
+                    return cp.getint(section, key)
+                return cp.get(section, key)
+            except Exception:
+                return default
 
-        #setup shorcuts
+        conf.WORD_SEPARATORS = _gopt("options", "word-separators", conf.WORD_SEPARATORS)
+        conf.BUFFER_LINES = _gopt("options", "buffer-lines", conf.BUFFER_LINES, int)
+        conf.CONFIRM_ON_EXIT = _gopt("options", "confirm-exit", conf.CONFIRM_ON_EXIT, bool)
+        conf.FONT_COLOR = _gopt("options", "font-color", conf.FONT_COLOR)
+        conf.BACK_COLOR = _gopt("options", "back-color", conf.BACK_COLOR)
+        conf.TRANSPARENCY = _gopt("options", "transparency", conf.TRANSPARENCY, int)
+        conf.PASTE_ON_RIGHT_CLICK = _gopt(
+            "options", "paste-right-click", conf.PASTE_ON_RIGHT_CLICK, bool
+        )
+        conf.CONFIRM_ON_CLOSE_TAB = _gopt(
+            "options", "confirm-close-tab", conf.CONFIRM_ON_CLOSE_TAB, bool
+        )
+        conf.CHECK_UPDATES = _gopt("options", "check-updates", conf.CHECK_UPDATES, bool)
+        conf.COLLAPSED_FOLDERS = _gopt("window", "collapsed-folders", conf.COLLAPSED_FOLDERS)
+        conf.LEFT_PANEL_WIDTH = _gopt("window", "left-panel-width", conf.LEFT_PANEL_WIDTH, int)
+        conf.WINDOW_WIDTH = _gopt("window", "window-width", conf.WINDOW_WIDTH, int)
+        conf.WINDOW_HEIGHT = _gopt("window", "window-height", conf.WINDOW_HEIGHT, int)
+        conf.FONT = _gopt("options", "font", conf.FONT)
+        conf.DISABLE_HOSTS_STRIPES = _gopt(
+            "options", "disable-hosts-stripes", conf.DISABLE_HOSTS_STRIPES, bool
+        )
+        conf.AUTO_COPY_SELECTION = _gopt(
+            "options", "auto-copy-selection", conf.AUTO_COPY_SELECTION, bool
+        )
+        conf.LOG_PATH = _gopt("options", "log-path", conf.LOG_PATH)
+        conf.CONTINUOUS_TAB_LOG = _gopt(
+            "options", "continuous-tab-log", conf.CONTINUOUS_TAB_LOG, bool
+        )
+        conf.CONTINUOUS_LOG_PATH = _gopt(
+            "options", "continuous-log-path", conf.CONTINUOUS_LOG_PATH
+        )
+        conf.VERSION = _gopt("options", "version", conf.VERSION)
+        conf.AUTO_CLOSE_TAB = _gopt("options", "auto-close-tab", conf.AUTO_CLOSE_TAB, int)
+        conf.CYCLE_TABS = _gopt("options", "cycle-tabs", conf.CYCLE_TABS, bool)
+        conf.SHOW_PANEL = _gopt("window", "show-panel", conf.SHOW_PANEL, bool)
+        conf.SHOW_TOOLBAR = _gopt("window", "show-toolbar", conf.SHOW_TOOLBAR, bool)
+        conf.DARK_MODE = _gopt("window", "dark-mode", conf.DARK_MODE, bool)
+        conf.THEME_MODE = _gopt("window", "theme-mode", conf.THEME_MODE)
+        conf.STARTUP_LOCAL = _gopt("options", "startup-local", conf.STARTUP_LOCAL, bool)
+        conf.LOG_LOCAL = _gopt("options", "log-local", conf.LOG_LOCAL, bool)
+        conf.CONFIRM_ON_CLOSE_TAB_MIDDLE = _gopt(
+            "options",
+            "confirm-close-tab-middle",
+            conf.CONFIRM_ON_CLOSE_TAB_MIDDLE,
+            bool,
+        )
+        conf.TERM = _gopt("options", "term", conf.TERM)
+        conf.UPDATE_TITLE = _gopt("options", "update-title", conf.UPDATE_TITLE, bool)
+        conf.APP_TITLE = _gopt("options", "app-title", conf.APP_TITLE) or app_name
+        # setup shorcuts
         scuts = {}
         self.add_shortcut(cp, scuts, "copy", _COPY, "CTRL+SHIFT+C")
         self.add_shortcut(cp, scuts, "paste", _PASTE, "CTRL+SHIFT+V")
@@ -1522,25 +5285,38 @@ class Wmain(SimpleGladeApp):
         self.add_shortcut(cp, scuts, "new_local", _NEW_LOCAL, "CTRL+SHIFT+N")
         self.add_shortcut(cp, scuts, "fullscreen", _FULLSCREEN, "F11")
 
-
-        #shortcuts para cambiar consola1-consola9
-        for x in range(1,10):
+        # shortcuts para cambiar consola1-consola9
+        for x in range(1, 10):
             try:
-                scuts[cp.get("shortcuts", "console_%d" % (x) )] = eval("_CONSOLE_%d" % (x))
+                scuts[cp.get("shortcuts", "console_%d" % (x))] = eval("_CONSOLE_%d" % (x))
             except:
                 scuts["ALT+%d" % (x)] = eval("_CONSOLE_%d" % (x))
         try:
             i = 1
             while True:
-                scuts[cp.get("shortcuts", "shortcut%d" % (i))] = cp.get("shortcuts", "command%d" % (i)).replace('\\n','\n')
+                scuts[cp.get("shortcuts", "shortcut%d" % (i))] = cp.get(
+                    "shortcuts", "command%d" % (i)
+                ).replace("\\n", "\n")
                 i = i + 1
         except:
             pass
         global shortcuts
         shortcuts = scuts
 
-        #Leer lista de hosts
-        groups={}
+        # Charger les templates série personnalisés
+        # Si la section est absente (première exécution / mise à jour),
+        # on injecte les défauts dans le fichier de config immédiatement.
+        if not _serial_templates_load(cp):
+            try:
+                _serial_templates_save(cp)
+                with open(CONFIG_FILE + ".tmp", "w") as _f:
+                    cp.write(_f)
+                os.rename(CONFIG_FILE + ".tmp", CONFIG_FILE)
+            except Exception as _e:
+                app_logger.exception(f"Impossible d'écrire les templates série par défaut: {_e}")
+
+        # Leer lista de hosts
+        groups = {}
         for section in cp.sections():
             if not section.startswith("host "):
                 continue
@@ -1548,41 +5324,224 @@ class Wmain(SimpleGladeApp):
             try:
                 host = HostUtils.load_host_from_ini(cp, section)
 
-                if not host.group in groups:
-                    groups[host.group]=[]
+                if host.group not in groups:
+                    groups[host.group] = []
 
-                groups[host.group].append( host )
+                groups[host.group].append(host)
             except:
-                print ("%s: %s" % (_("Entrada invalida en archivo de configuracion"), sys.exc_info()[1]))
+                app_logger.exception(
+                    f"{_('Invalid entry in configuration file')}: {sys.exc_info()[1]}"
+                )
+
+        # Restaurer les groupes vides (dossiers créés sans hôtes)
+        try:
+            empty_names = cp.get("empty_groups", "names")
+            for g in empty_names.split(","):
+                g = g.strip()
+                if g and g not in groups:
+                    groups[g] = []
+        except Exception:
+            pass
 
     def is_node_collapsed(self, model, path, iter, nodes):
-        if self.treeModel.get_value(iter, 1)==None and not self.treeServers.row_expanded(path):
-             nodes.append(self.treeModel.get_string_from_iter(iter))
+        """Indique si un noeud de l'arbre est reduit.
+
+        Args:
+            node (str): Chemin du noeud.
+
+        Returns:
+            bool: True si le noeud est reduit.
+        """
+        if self.treeModel.get_value(iter, 1) == None and not self.treeServers.row_expanded(path):
+            nodes.append(self.treeModel.get_string_from_iter(iter))
 
     def get_collapsed_nodes(self):
-        nodes=[]
+        """Retourne la liste des noeuds reduits de l'arbre.
+
+        Returns:
+            list[str]: Chemins des noeuds reduits.
+        """
+        nodes = []
         self.treeModel.foreach(self.is_node_collapsed, nodes)
         return nodes
 
+    # ── Drag & drop ───────────────────────────────────────────────────────────
+
+    def _on_tree_drag_data_get(self, widget, context, selection, info, time):
+        """Fournit le chemin de la ligne source lors d'un drag."""
+        model, it = self.treeServers.get_selection().get_selected()
+        if it is None:
+            return
+        path = model.get_string_from_iter(it)
+        selection.set(selection.get_target(), 8, path.encode())
+
+    def _on_tree_drag_data_received(self, widget, context, x, y, selection, info, time):
+        """Reçoit les données drop et déplace l'hôte ou le groupe."""
+        src_path_str = selection.get_data().decode()
+        try:
+            src_it = self.treeModel.get_iter_from_string(src_path_str)
+        except (ValueError, RuntimeError):
+            Gdk.drag_status(context, 0, time)
+            return
+
+        src_host = self.treeModel.get_value(src_it, 1)  # None = dossier
+        src_name = self.treeModel.get_value(src_it, 0)
+        src_parent = self.treeModel.iter_parent(src_it)
+
+        # Groupe source
+        def _full_group(it):
+            """Construit le chemin complet group/subgroup depuis un iter."""
+            parts = []
+            cur = it
+            while cur:
+                parts.insert(0, self.treeModel.get_value(cur, 0))
+                cur = self.treeModel.iter_parent(cur)
+            return "/".join(parts)
+
+        drop_info = self.treeServers.get_dest_row_at_pos(x, y)
+        if drop_info is None:
+            Gdk.drag_status(context, 0, time)
+            return
+        dest_path_gtk, drop_pos = drop_info
+        try:
+            dest_it = self.treeModel.get_iter(dest_path_gtk)
+        except Exception:
+            Gdk.drag_status(context, 0, time)
+            return
+
+        dest_host = self.treeModel.get_value(dest_it, 1)
+        dest_parent = self.treeModel.iter_parent(dest_it)
+
+        # ── Hôte vers dossier ou hôte (même niveau ou changement de groupe) ──
+        if src_host is not None:
+            # Groupe source de l'hôte
+            src_grp = _full_group(src_parent) if src_parent else ""
+
+            # Groupe destination
+            if dest_host is None:
+                # Drop sur un dossier → déplace dans ce dossier
+                dest_grp = _full_group(dest_it)
+            elif dest_parent is not None:
+                dest_grp = _full_group(dest_parent)
+            else:
+                dest_grp = src_grp  # même niveau racine
+
+            if src_grp == dest_grp:
+                # Réordonnancement dans le même groupe
+                lst = groups.get(src_grp, [])
+                try:
+                    idx_src = next(i for i, h in enumerate(lst) if h is src_host)
+                except StopIteration:
+                    Gdk.drag_status(context, 0, time)
+                    return
+                lst.pop(idx_src)
+                if dest_host is not None:
+                    try:
+                        idx_dst = next(i for i, h in enumerate(lst) if h is dest_host)
+                    except StopIteration:
+                        idx_dst = len(lst)
+                    if drop_pos in (
+                        Gtk.TreeViewDropPosition.AFTER,
+                        Gtk.TreeViewDropPosition.INTO_OR_AFTER,
+                    ):
+                        idx_dst += 1
+                    lst.insert(idx_dst, src_host)
+                else:
+                    lst.append(src_host)
+                groups[src_grp] = lst
+            else:
+                # Changement de groupe
+                if src_grp in groups and src_host in groups[src_grp]:
+                    groups[src_grp].remove(src_host)
+                    if not groups[src_grp]:
+                        del groups[src_grp]
+                src_host.group = dest_grp
+                if dest_grp not in groups:
+                    groups[dest_grp] = []
+                groups[dest_grp].append(src_host)
+
+            context.finish(True, True, time)
+            self.updateTree()
+            self.writeConfig()
+            return
+
+        # ── Dossier / groupe → autre dossier (devient enfant) ────────────────
+        if src_host is None:
+            src_full = _full_group(src_it)
+
+            # Cible : le dossier sur lequel on dépose
+            if dest_host is None:
+                dest_full = _full_group(dest_it)
+            else:
+                # Drop sur un hôte → prendre le parent du dossier dest
+                if dest_parent is not None:
+                    dest_full = _full_group(dest_parent)
+                else:
+                    Gdk.drag_status(context, 0, time)
+                    return
+
+            # Pas de déplacement sur soi-même ou sur un descendant
+            if dest_full == src_full or dest_full.startswith(src_full + "/"):
+                Gdk.drag_status(context, 0, time)
+                return
+
+            src_leaf = src_full.split("/")[-1]
+            new_full = f"{dest_full}/{src_leaf}"
+
+            # Collision de noms ?
+            if new_full in groups or any(k.startswith(new_full + "/") for k in groups):
+                msgbox(_(f"A group named '{src_leaf}' already exists in '{dest_full}'."))
+                Gdk.drag_status(context, 0, time)
+                return
+
+            # Renommer toutes les clés src_full et src_full/...
+            to_move = {
+                k: v
+                for k, v in list(groups.items())
+                if k == src_full or k.startswith(src_full + "/")
+            }
+            for old_key, hosts in to_move.items():
+                new_key = new_full + old_key[len(src_full) :]
+                del groups[old_key]
+                groups[new_key] = hosts
+                for h in hosts:
+                    h.group = new_key
+
+            context.finish(True, True, time)
+            self.updateTree()
+            self.writeConfig()
+            return
+
+        Gdk.drag_status(context, 0, time)
+
     def set_collapsed_nodes(self):
+        """Applique l'etat reduit/etendu aux noeuds de l'arbre."""
         self.treeServers.expand_all()
         if self.treeModel.get_iter_first():
             for node in conf.COLLAPSED_FOLDERS.split(","):
-                if node!='':
+                if node != "":
                     self.treeServers.collapse_row(Gtk.TreePath.new_from_string(node))
 
     def servers_background_color(self):
+        """Retourne la couleur de fond de la liste des serveurs.
+
+        Returns:
+            Gdk.RGBA: Couleur de fond.
+        """
         self.color_index += 1
         unevenColor = self.color_back1 if conf.DISABLE_HOSTS_STRIPES else self.color_back2
         return self.color_back1 if self.color_index % 2 else unevenColor
 
     def updateTree(self):
-        for grupo in dict(groups):
-            if len(groups[grupo])==0:
+        """Met a jour l'arbre des serveurs depuis la configuration."""
+        # Ne pas supprimer les groupes vides — ils sont des dossiers valides
+        # (on retire seulement les None/clés vides générés par erreur)
+        for grupo in list(groups.keys()):
+            if grupo is None or grupo == "":
                 del groups[grupo]
 
         if conf.COLLAPSED_FOLDERS == None:
-            conf.COLLAPSED_FOLDERS = ','.join(self.get_collapsed_nodes())
+            conf.COLLAPSED_FOLDERS = ",".join(self.get_collapsed_nodes())
 
         self.menuServers.foreach(self.menuServers.remove)
         self.treeModel.clear()
@@ -1590,8 +5549,19 @@ class Wmain(SimpleGladeApp):
         iconHost = "gtk-network"
         iconDir = "gtk-directory"
         grupos = groups.keys()
-        #grupos.sort(lambda x,y: cmp(y,x))
         grupos = sorted(grupos, reverse=True)
+
+        def _proto_icon(proto):
+            """Retourne l'icon-name freedesktop pour un protocole GCM."""
+            return {
+                "ssh": "utilities-terminal",
+                "telnet": "utilities-terminal",
+                "rdp": "computer",
+                "vnc": "video-display",
+                "spice": "video-display",
+                "serial": "modem",
+                "local": "user-home",
+            }.get(proto or "ssh", "network-workstation")
 
         for grupo in grupos:
             group = None
@@ -1599,17 +5569,16 @@ class Wmain(SimpleGladeApp):
             menuNode = self.menuServers
 
             for folder in grupo.split("/"):
-                path = path + '/' + folder
-                row = self.get_folder(self.treeModel, '', path)
+                path = path + "/" + folder
+                row = self.get_folder(self.treeModel, "", path)
                 if row == None:
-                    group = self.treeModel.prepend(group, [folder, None, iconDir, '#fff'])
+                    group = self.treeModel.prepend(group, [folder, None, iconDir, "#fff", ""])
                 else:
                     group = row.iter
 
-                menu = self.get_folder_menu(self.menuServers, '', path)
+                menu = self.get_folder_menu(self.menuServers, "", path)
                 if menu == None:
-                    menu = Gtk.ImageMenuItem(label=folder)
-                    menu.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_DIRECTORY, Gtk.IconSize.MENU))
+                    menu = Gtk.MenuItem(label=folder)
                     menuNode.prepend(menu)
                     menuNode = Gtk.Menu()
                     menu.set_submenu(menuNode)
@@ -1617,13 +5586,20 @@ class Wmain(SimpleGladeApp):
                 else:
                     menuNode = menu
 
-            groups[grupo].sort(key=operator.attrgetter('name'))
+            groups[grupo].sort(key=operator.attrgetter("name"))
             for host in groups[grupo]:
-                self.treeModel.append(group, [host.name, host, iconHost, '#fff'])
-                mnuItem = Gtk.ImageMenuItem(label=host.name)
-                mnuItem.set_image(Gtk.Image.new_from_icon_name(Gtk.STOCK_NETWORK, Gtk.IconSize.MENU))
+                proto = getattr(host, "protocol", "ssh") or "ssh"
+                self.treeModel.append(
+                    group, [host.name, host, iconHost, "#fff", _proto_icon(proto)]
+                )
+                mnuItem = Gtk.MenuItem(label=host.name)
                 mnuItem.show()
-                mnuItem.connect("activate", lambda arg, nb, h: self.addTab(nb, h), self.nbConsole, host)
+                mnuItem.connect(
+                    "activate",
+                    lambda arg, nb, h: self.addTab(nb, h),
+                    self.nbConsole,
+                    host,
+                )
                 menuNode.append(mnuItem)
 
         self.set_collapsed_nodes()
@@ -1631,10 +5607,22 @@ class Wmain(SimpleGladeApp):
         self.update_row_color()
 
     def update_row_color(self, node=None):
-        #custom method to get alternating row colors in treeview, as that is not possible with gtk3
+        # custom method to get alternating row colors in treeview, as that is not possible with gtk3
+        """Met a jour la couleur alternee des lignes de l'arbre.
+
+        Args:
+            node (Gtk.TreeIter, optional): Noeud de depart (None = racine).
+        """
         if not node:
             self.color_index = 0
-            rgba = self.treeServers.get_style_context().get_background_color(Gtk.StateFlags.NORMAL)
+            # fix: get_background_color deprecie — utiliser lookup_color() avec fallback
+            sc = self.treeServers.get_style_context()
+            found, rgba = sc.lookup_color("theme_bg_color")
+            if not found:
+                found, rgba = sc.lookup_color("bg_color")
+            if not found:
+                rgba = Gdk.RGBA()
+                rgba.parse("#ffffff")
             self.color_back1 = color_to_hex(rgba)
             self.color_back2 = color_to_hex(rgba, -14)
             i = self.treeModel.get_iter_first()
@@ -1643,7 +5631,11 @@ class Wmain(SimpleGladeApp):
 
         if i:
             self.treeModel[i][3] = self.servers_background_color()
-            if self.treeModel[i][1]==None and self.treeServers.row_expanded(self.treeModel.get_path(i)) and self.treeModel.iter_has_child(i):
+            if (
+                self.treeModel[i][1] == None
+                and self.treeServers.row_expanded(self.treeModel.get_path(i))
+                and self.treeModel.iter_has_child(i)
+            ):
                 self.update_row_color(i)
 
         i = self.treeModel.iter_next(i) if i else None
@@ -1653,30 +5645,49 @@ class Wmain(SimpleGladeApp):
             i = self.treeModel.iter_next(i)
 
     def get_folder(self, obj, folder, path):
+        """Retourne l'iterateur de l'arbre pour un dossier donne.
+
+        Args:
+            path (str): Chemin du dossier.
+
+        Returns:
+            Gtk.TreeIter or None: Iterateur du dossier.
+        """
         if not obj:
             return None
         for row in obj:
-            if path == folder+'/'+row[0]:
+            if path == folder + "/" + row[0]:
                 return row
-            i = self.get_folder(row.iterchildren(), folder+'/'+row[0], path)
+            i = self.get_folder(row.iterchildren(), folder + "/" + row[0], path)
             if i:
                 return i
 
     def get_folder_menu(self, obj, folder, path):
-        if not obj or not (isinstance(obj,Gtk.Menu) or isinstance(obj,Gtk.MenuItem)):
+        """Retourne l'element de menu correspondant a un dossier.
+
+        Args:
+            menu (Gtk.Menu): Menu parent.
+            label (str): Etiquette du dossier.
+            path (str): Chemin complet.
+
+        Returns:
+            Gtk.MenuItem or None: Element de menu trouve.
+        """
+        if not obj or not (isinstance(obj, Gtk.Menu) or isinstance(obj, Gtk.MenuItem)):
             return None
         for item in obj.get_children():
-            if path == folder+'/'+item.get_label():
+            if path == folder + "/" + item.get_label():
                 return item.get_submenu()
-            i = self.get_folder_menu(item.get_submenu(), folder+'/'+item.get_label(), path)
+            i = self.get_folder_menu(item.get_submenu(), folder + "/" + item.get_label(), path)
             if i:
                 return i
 
     def writeConfig(self):
+        """Sauvegarde la configuration courante dans le fichier INI."""
         global groups
 
-        cp= configparser.RawConfigParser( )
-        cp.read( CONFIG_FILE + ".tmp" )
+        cp = configparser.RawConfigParser()
+        cp.read(CONFIG_FILE + ".tmp")
 
         cp.add_section("options")
         cp.set("options", "word-separators", conf.WORD_SEPARATORS)
@@ -1693,42 +5704,61 @@ class Wmain(SimpleGladeApp):
         cp.set("options", "confirm-close-tab-middle", conf.CONFIRM_ON_CLOSE_TAB_MIDDLE)
         cp.set("options", "check-updates", conf.CHECK_UPDATES)
         cp.set("options", "font", conf.FONT)
-        cp.set("options", "donate", conf.HIDE_DONATE)
         cp.set("options", "disable-hosts-stripes", conf.DISABLE_HOSTS_STRIPES)
         cp.set("options", "auto-copy-selection", conf.AUTO_COPY_SELECTION)
         cp.set("options", "log-path", conf.LOG_PATH)
+        cp.set("options", "continuous-tab-log", conf.CONTINUOUS_TAB_LOG)
+        cp.set("options", "continuous-log-path", conf.CONTINUOUS_LOG_PATH)
         cp.set("options", "version", app_fileversion)
         cp.set("options", "auto-close-tab", conf.AUTO_CLOSE_TAB)
         cp.set("options", "cycle-tabs", conf.CYCLE_TABS)
         cp.set("options", "update-title", conf.UPDATE_TITLE)
         cp.set("options", "app-title", conf.APP_TITLE or app_name)
 
-        collapsed_folders = ','.join(self.get_collapsed_nodes())
+        collapsed_folders = ",".join(self.get_collapsed_nodes())
         cp.add_section("window")
         cp.set("window", "collapsed-folders", collapsed_folders)
         cp.set("window", "left-panel-width", self.hpMain.get_position())
-        cp.set("window", "window-width", -1 if self.wMain.is_maximized() else conf.WINDOW_WIDTH)
-        cp.set("window", "window-height", -1 if self.wMain.is_maximized() else conf.WINDOW_HEIGHT)
+        cp.set(
+            "window",
+            "window-width",
+            -1 if self.wMain.is_maximized() else conf.WINDOW_WIDTH,
+        )
+        cp.set(
+            "window",
+            "window-height",
+            -1 if self.wMain.is_maximized() else conf.WINDOW_HEIGHT,
+        )
         cp.set("window", "show-panel", conf.SHOW_PANEL)
         cp.set("window", "show-toolbar", conf.SHOW_TOOLBAR)
+        cp.set("window", "dark-mode", conf.DARK_MODE)
+        cp.set("window", "theme-mode", conf.THEME_MODE)
 
-        i=1
+        i = 1
         for grupo in groups:
             for host in groups[grupo]:
                 section = "host " + str(i)
                 cp.add_section(section)
                 HostUtils.save_host_to_ini(cp, section, host)
-                i+=1
+                i += 1
+
+        # Persister les groupes vides (dossiers sans hôtes)
+        cp.add_section("empty_groups")
+        empty = [g for g, hosts in groups.items() if len(hosts) == 0]
+        cp.set("empty_groups", "names", ",".join(empty))
 
         cp.add_section("shortcuts")
-        i=1
+        i = 1
         for s in shortcuts:
             if type(shortcuts[s]) == list:
                 cp.set("shortcuts", shortcuts[s][0], s)
             else:
                 cp.set("shortcuts", "shortcut%d" % (i), s)
-                cp.set("shortcuts", "command%d" % (i), shortcuts[s].replace('\n','\\n'))
-                i=i+1
+                cp.set("shortcuts", "command%d" % (i), shortcuts[s].replace("\n", "\\n"))
+                i = i + 1
+
+        # Sauvegarder les templates série personnalisés
+        _serial_templates_save(cp)
 
         f = open(CONFIG_FILE + ".tmp", "w")
         cp.write(f)
@@ -1743,6 +5773,12 @@ class Wmain(SimpleGladeApp):
         # delivered a scroll direction) and an argument where to store that
         # data as an value from enum GdkScrollDirection. Code in the example
         # above uses a different syntax, and code below yet another with tuple.
+        """Gestionnaire de defilement de la molette sur les onglets.
+
+        Args:
+            widget (Gtk.Widget): Widget source.
+            event (Gdk.EventScroll): Evenement molette.
+        """
         gsdir = event.get_scroll_direction()
 
         # Note: https://api.gtkd.org/gdk.Event.Event.getScrollDeltas.html
@@ -1751,8 +5787,8 @@ class Wmain(SimpleGladeApp):
         # the X/Y deltas of that scroll; the code below uses another syntax
         # that returns a tuple of that bool and X/Y deltas:
         gsdelta = event.get_scroll_deltas()
-        #sys.stderr.write("[D] on_tab_scroll: event.get_scroll_direction(): [%s] [%s]\n" % (gsdir[0], gsdir[1]) )
-        #sys.stderr.write("[D] on_tab_scroll: event.get_scroll_deltas(): [%s] [%s] [%s]\n" % (gsdelta[0], gsdelta[1], gsdelta[2]) )
+        # sys.stderr.write("[D] on_tab_scroll: event.get_scroll_direction(): [%s] [%s]\n" % (gsdir[0], gsdir[1]) )
+        # sys.stderr.write("[D] on_tab_scroll: event.get_scroll_deltas(): [%s] [%s] [%s]\n" % (gsdelta[0], gsdelta[1], gsdelta[2]) )
 
         scrollPrev = False
         if gsdelta[0]:
@@ -1764,60 +5800,82 @@ class Wmain(SimpleGladeApp):
             elif gsdir[1] == Gdk.ScrollDirection.DOWN:
                 scrollPrev = False
             else:
-                #raise ValueError("Unrecognized scroll direction")
-                sys.stderr.write("[D] on_tab_scroll: event.get_scroll_direction(): Unrecognized scroll direction\n")
+                # raise ValueError("Unrecognized scroll direction")
+                sys.stderr.write(
+                    "[D] on_tab_scroll: event.get_scroll_direction(): Unrecognized scroll direction\n"
+                )
 
         if scrollPrev:
             if notebook.get_current_page() == 0 and conf.CYCLE_TABS:
-                notebook.set_current_page(notebook.get_n_pages()-1)
+                notebook.set_current_page(notebook.get_n_pages() - 1)
             else:
                 notebook.prev_page()
         else:
-            if notebook.get_current_page() == notebook.get_n_pages()-1 and conf.CYCLE_TABS:
+            if notebook.get_current_page() == notebook.get_n_pages() - 1 and conf.CYCLE_TABS:
                 notebook.set_current_page(0)
             else:
                 notebook.next_page()
 
     def on_tab_focus(self, widget, tab=None, *args):
+        """Gestionnaire de prise de focus d'un onglet.
+
+        Args:
+            nb (Gtk.Notebook): Notebook source.
+            page (Gtk.Widget): Page activee.
+            page_num (int): Numero de page.
+        """
         if isinstance(widget, Vte.Terminal):
             self.current = widget
         if conf.UPDATE_TITLE and widget != None:
             if isinstance(widget, Vte.Terminal):
-                tab_text = widget.get_parent().get_parent().get_tab_label(widget.get_parent()).get_text()
-            elif tab != None: #notebok page switched
-                tab_text = widget.get_tab_label(tab).get_text() if widget.get_tab_label(tab) else ''
+                tab_text = (
+                    widget.get_parent().get_parent().get_tab_label(widget.get_parent()).get_text()
+                )
+            elif tab != None:  # notebok page switched
+                tab_text = (
+                    widget.get_tab_label(tab).get_text() if widget.get_tab_label(tab) else ""
+                )
             else:
-                tab_text = ''
+                tab_text = ""
             if tab_text:
                 self.wMain.set_title("%s - %s" % (conf.APP_TITLE or app_name, tab_text.strip()))
             else:
                 self.wMain.set_title(conf.APP_TITLE or app_name)
 
     def split_notebook(self, direction):
-        csp = self.current.get_parent() if self.current!=None else None
-        cnb = csp.get_parent() if csp!=None else None
+        """Divise le notebook courant en deux panneaux.
 
-        #Separar solo si hay mas de 2 tabs en el notebook actual
-        if csp!=None and cnb.get_n_pages()>1:
-            #Crear un hpaned, en el hijo 0 dejar el notebook y en el hijo 1 el nuevo notebook
-            #El nuevo hpaned dejarlo como hijo del actual parent
-            hp = Gtk.HPaned() if direction==HSPLIT else Gtk.VPaned()
+        Args:
+            orientation (Gtk.Orientation): Orientation de la division.
+        """
+        csp = self.current.get_parent() if self.current != None else None
+        cnb = csp.get_parent() if csp != None else None
+
+        # Separar solo si hay mas de 2 tabs en el notebook actual
+        if csp != None and cnb.get_n_pages() > 1:
+            # Crear un hpaned, en el hijo 0 dejar el notebook y en el hijo 1 el nuevo notebook
+            # El nuevo hpaned dejarlo como hijo del actual parent
+            hp = (
+                Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
+                if direction == HSPLIT
+                else Gtk.Paned(orientation=Gtk.Orientation.VERTICAL)
+            )
             nb = Gtk.Notebook()
             nb.set_group_name("11")
             nb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK)
-            nb.connect('button_press_event', self.on_double_click, None)
-            nb.connect('page_removed', self.on_page_removed)
+            nb.connect("button_press_event", self.on_double_click, None)
+            nb.connect("page_removed", self.on_page_removed)
             nb.connect("page-added", self.on_page_added)
-            nb.connect('switch-page', self.on_tab_focus)
-            nb.connect('scroll-event', self.on_tab_scroll)
+            nb.connect("switch-page", self.on_tab_focus)
+            nb.connect("scroll-event", self.on_tab_scroll)
 
             nb.set_property("scrollable", True)
-            cp  = cnb.get_parent()
+            cp = cnb.get_parent()
 
-            if direction==HSPLIT:
-                p = cnb.get_allocated_width()/2
+            if direction == HSPLIT:
+                p = cnb.get_allocated_width() / 2
             else:
-                p = cnb.get_allocated_height()/2
+                p = cnb.get_allocated_height() / 2
             hp.set_position(p)
             hp.set_wide_handle(True)
 
@@ -1844,18 +5902,34 @@ class Wmain(SimpleGladeApp):
             self.on_tab_focus(cnb, cnb.get_nth_page(cnb.get_current_page()))
 
     def find_notebook(self, widget, exclude=None):
-        if widget!=exclude and isinstance(widget, Gtk.Notebook):
+        """Recherche le notebook contenant un terminal donne.
+
+        Args:
+            terminal (Vte.Terminal): Terminal a localiser.
+
+        Returns:
+            Gtk.Notebook or None: Notebook parent.
+        """
+        if widget != exclude and isinstance(widget, Gtk.Notebook):
             return widget
         else:
             if not hasattr(widget, "get_children"):
                 return None
             for w in widget.get_children():
                 wid = self.find_notebook(w, exclude)
-                if wid!=exclude and isinstance(wid, Gtk.Notebook):
+                if wid != exclude and isinstance(wid, Gtk.Notebook):
                     return wid
             return None
 
     def find_active_terminal(self, widget):
+        """Retourne le terminal actif dans le notebook courant.
+
+        Args:
+            widget: Parametre widget.
+
+        Returns:
+            Vte.Terminal or None: Terminal actif.
+        """
         if isinstance(widget, Vte.Terminal) and widget.is_focus():
             return widget
         else:
@@ -1869,13 +5943,18 @@ class Wmain(SimpleGladeApp):
             return None
 
     def check_notebook_pages(self, widget):
-        if widget.get_n_pages()==0:
-            #eliminar el notebook solo si queda otro notebook y no quedan tabs en el actual
+        """Verifie et ajuste l'etat des onglets du notebook.
+
+        Args:
+            widget: Parametre widget.
+        """
+        if widget.get_n_pages() == 0:
+            # eliminar el notebook solo si queda otro notebook y no quedan tabs en el actual
             paned = widget.get_parent()
-            if paned==None or paned==self.hpMain:
+            if paned == None or paned == self.hpMain:
                 return
             container = paned.get_parent()
-            save = paned.get_child2() if paned.get_child1()==widget else paned.get_child1()
+            save = paned.get_child2() if paned.get_child1() == widget else paned.get_child1()
             container.remove(paned)
             paned.remove(save)
             container.add(save)
@@ -1888,61 +5967,108 @@ class Wmain(SimpleGladeApp):
             self.on_tab_focus(self.nbConsole, self.nbConsole.get_nth_page(p), p)
 
     def on_page_removed(self, widget, *args):
-        self.count-=1
+        """Gestionnaire de suppression d'une page du notebook.
+
+        Args:
+            nb (Gtk.Notebook): Notebook source.
+            child (Gtk.Widget): Page supprimee.
+            page_num (int): Numero de page.
+        """
+        self.count -= 1
         if widget.get_current_page() == -1:
             self.on_tab_focus(widget, None)
 
         if hasattr(widget, "is_closed") and widget.is_closed:
-            #tab has been closed
+            # tab has been closed
             self.check_notebook_pages(widget)
         else:
-            #tab has been moved to another notebook
-            #save a reference to this notebook, on_page_added check if the notebook must be removed
+            # tab has been moved to another notebook
+            # save a reference to this notebook, on_page_added check if the notebook must be removed
             self.check_notebook = widget
 
     def on_page_added(self, widget, *args):
-        self.count+=1
+        """Gestionnaire d'ajout d'une page au notebook.
+
+        Args:
+            nb (Gtk.Notebook): Notebook source.
+            child (Gtk.Widget): Page ajoutee.
+            page_num (int): Numero de page.
+        """
+        self.count += 1
         if hasattr(self, "check_notebook"):
             self.check_notebook_pages(self.check_notebook)
             delattr(self, "check_notebook")
 
     def show_save_buffer(self, terminal):
-        dlg = Gtk.FileChooserDialog(title=_("Guardar como"), parent=self.wMain, action=Gtk.FileChooserAction.SAVE)
-        dlg.add_button(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
-        dlg.add_button(Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        """Affiche une boite de dialogue pour sauvegarder le buffer du terminal.
+
+        Args:
+            terminal (Vte.Terminal): Terminal source.
+        """
+        dlg = Gtk.FileChooserDialog(
+            title=_("Save as"),
+            parent=self.wMain,
+            action=Gtk.FileChooserAction.SAVE,
+        )
+        dlg.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+        dlg.add_button(_("Save"), Gtk.ResponseType.OK)
         dlg.set_do_overwrite_confirmation(True)
-        dlg.set_current_name( os.path.basename("gcm-buffer-%s.txt" % (time.strftime("%Y%m%d%H%M%S")) ))
-        if not hasattr(self,'lastPath'):
+        dlg.set_current_name(
+            os.path.basename("gcm-buffer-%s.txt" % (time.strftime("%Y%m%d%H%M%S")))
+        )
+        if not hasattr(self, "lastPath"):
             self.lastPath = USERHOME_DIR
-        dlg.set_current_folder( self.lastPath )
+        dlg.set_current_folder(self.lastPath)
 
         if dlg.run() == Gtk.ResponseType.OK:
             filename = dlg.get_filename()
             self.lastPath = os.path.dirname(filename)
 
             try:
-                buff,b = terminal.get_text_range(0, 0, terminal.get_property('scrollback-lines')-1, terminal.get_column_count()-1, None, None )
+                buff, b = terminal.get_text_range(
+                    0,
+                    0,
+                    terminal.get_property("scrollback-lines") - 1,
+                    terminal.get_column_count() - 1,
+                    None,
+                    None,
+                )
                 f = open(filename, "w")
                 f.write(buff.strip())
                 f.close()
             except:
                 dlg.destroy()
-                msgbox("%s: %s" % (_("No se puede abrir archivo para escritura"), filename) )
+                msgbox("%s: %s" % (_("Can't open file for writting"), filename))
                 return
 
         dlg.destroy()
 
     def set_panel_visible(self, visibility):
+        """Affiche ou masque le panneau lateral.
+
+        Args:
+            visible (bool): True pour afficher.
+        """
         if visibility:
-            GLib.timeout_add(200, lambda : self.hpMain.set_position(self.hpMain.previous_position if self.hpMain.previous_position>10 else 150))
+            GLib.timeout_add(
+                200,
+                lambda: self.hpMain.set_position(
+                    self.hpMain.previous_position if self.hpMain.previous_position > 10 else 150
+                ),
+            )
         else:
             self.hpMain.previous_position = self.hpMain.get_position()
-            GLib.timeout_add(200, lambda : self.hpMain.set_position(0))
+            GLib.timeout_add(200, lambda: self.hpMain.set_position(0))
         self.get_widget("show_panel").set_active(visibility)
         conf.SHOW_PANEL = visibility
 
     def set_toolbar_visible(self, visibility):
-        #self.get_widget("toolbar1").set_visible(visibility)
+        # self.get_widget("toolbar1").set_visible(visibility)
+        """Affiche ou masque la barre d'outils.
+
+        Args:
+            visible (bool): True pour afficher.
+        """
         if visibility:
             self.get_widget("toolbar1").show()
         else:
@@ -1950,85 +6076,135 @@ class Wmain(SimpleGladeApp):
         self.get_widget("show_toolbar").set_active(visibility)
         conf.SHOW_TOOLBAR = visibility
 
-    #-- Wmain custom methods }
+    # -- Wmain custom methods }
 
-    #-- Wmain.on_wMain_destroy {
+    # -- Wmain.on_wMain_destroy {
     def on_wMain_destroy(self, widget, *args):
+        """Gestionnaire de destruction de la fenetre principale.
+
+        Args:
+            widget (Gtk.Window): Fenetre detruite.
+        """
         self.writeConfig()
         Gtk.main_quit()
-    #-- Wmain.on_wMain_destroy }
 
-    #-- Wmain.on_wMain_delete_event {
+    # -- Wmain.on_wMain_destroy }
+
+    # -- Wmain.on_wMain_delete_event {
     def on_wMain_delete_event(self, widget, *args):
-        (conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT) = self.get_widget("wMain").get_size()
-        if conf.CONFIRM_ON_EXIT and self.count>0 and msgconfirm("%s %d %s" % (_("Hay"), self.count, _("consolas abiertas, confirma que desea salir?")) ) != Gtk.ResponseType.OK:
-            return True
-    #-- Wmain.on_wMain_delete_event }
+        """Gestionnaire d'evenement de fermeture de la fenetre principale.
 
-    #-- Wmain.on_guardar_como1_activate {
+        Args:
+            widget (Gtk.Window): Fenetre source.
+            event (Gdk.Event): Evenement.
+        """
+        conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT = self.get_widget("wMain").get_size()
+        if (
+            conf.CONFIRM_ON_EXIT
+            and self.count > 0
+            and msgconfirm(
+                "%s %d %s"
+                % (
+                    _("There are"),
+                    self.count,
+                    _("open consoles, exit anyway?"),
+                )
+            )
+            != Gtk.ResponseType.OK
+        ):
+            return True
+
+    # -- Wmain.on_wMain_delete_event }
+
+    # -- Wmain.on_guardar_como1_activate {
     def on_guardar_como1_activate(self, widget, *args):
+        """Gestionnaire du menu Enregistrer sous.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
         term = self.find_active_terminal(self.hpMain)
         if term == None:
             term = self.current
         if term != None:
             self.show_save_buffer(term)
 
-    #-- Wmain.on_guardar_como1_activate }
+    # -- Wmain.on_guardar_como1_activate }
 
-    #-- Wmain.on_importar_servidores1_activate {
+    # -- Wmain.on_importar_servidores1_activate {
     def on_importar_servidores1_activate(self, widget, *args):
-        filename = show_open_dialog(parent=self.wMain, title=_("Abrir"), action=Gtk.FileChooserAction.OPEN)
+        """Gestionnaire du menu Importer des serveurs.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
+        filename = show_open_dialog(
+            parent=self.wMain, title=_("Open"), action=Gtk.FileChooserAction.OPEN
+        )
         if filename != None:
-            password = inputbox(_('Importar Servidores'), _('Ingrese clave: '), password=True)
+            password = inputbox(_("Import Servers"), _("Enter password"), password=True)
             if password == None:
                 return
 
-            #abrir archivo con lista de servers y cargarlos en el arbol
+            # abrir archivo con lista de servers y cargarlos en el arbol
             try:
-                cp= configparser.RawConfigParser( )
-                cp.read( filename )
+                cp = configparser.RawConfigParser()
+                cp.read(filename)
 
-                #validar el pass
+                # validar el pass
                 s = decrypt(password, cp.get("gcm", "gcm"))
-                if (s != password[::-1]):
-                    msgbox(_("Clave invalida"))
+                if s != password[::-1]:
+                    msgbox(_("Invalid password"))
                     return
 
-                if msgconfirm(_(u'Se sobreescribirá la lista de servidores, continuar?')) != Gtk.ResponseType.OK:
+                if (
+                    msgconfirm(_("Server list will be overwritten, continue?"))
+                    != Gtk.ResponseType.OK
+                ):
                     return
 
-                grupos={}
+                grupos = {}
                 for section in cp.sections():
                     if not section.startswith("host "):
                         continue
                     host = HostUtils.load_host_from_ini(cp, section, password)
 
-                    if not host.group in grupos:
-                        grupos[host.group]=[]
+                    if host.group not in grupos:
+                        grupos[host.group] = []
 
-                    grupos[host.group].append( host )
+                    grupos[host.group].append(host)
             except:
-                msgbox(_("Archivo invalido"))
+                msgbox(_("Invalid file"))
                 return
-            #sobreescribir lista de hosts
+            # sobreescribir lista de hosts
             global groups
-            groups=grupos
+            groups = grupos
 
             self.updateTree()
-    #-- Wmain.on_importar_servidores1_activate }
 
-    #-- Wmain.on_exportar_servidores1_activate {
+    # -- Wmain.on_importar_servidores1_activate }
+
+    # -- Wmain.on_exportar_servidores1_activate {
     def on_exportar_servidores1_activate(self, widget, *args):
-        filename = show_open_dialog(parent=self.wMain, title=_("Guardar como"), action=Gtk.FileChooserAction.SAVE)
+        """Gestionnaire du menu Exporter des serveurs.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
+        filename = show_open_dialog(
+            parent=self.wMain,
+            title=_("Save as"),
+            action=Gtk.FileChooserAction.SAVE,
+        )
         if filename != None:
-            password = inputbox(_('Exportar Servidores'), _('Ingrese clave: '), password=True)
+            password = inputbox(_("Export Servers"), _("Enter password"), password=True)
             if password == None:
                 return
 
             try:
-                cp= configparser.RawConfigParser( )
-                cp.read( filename + ".tmp" )
-                i=1
+                cp = configparser.RawConfigParser()
+                cp.read(filename + ".tmp")
+                i = 1
                 cp.add_section("gcm")
                 cp.set("gcm", "gcm", encrypt(password, password[::-1]))
                 global groups
@@ -2037,217 +6213,498 @@ class Wmain(SimpleGladeApp):
                         section = "host " + str(i)
                         cp.add_section(section)
                         HostUtils.save_host_to_ini(cp, section, host, password)
-                        i+=1
+                        i += 1
                 f = open(filename + ".tmp", "w")
                 cp.write(f)
                 f.close()
                 os.rename(filename + ".tmp", filename)
             except:
-                msgbox(_("Archivo invalido"))
-    #-- Wmain.on_exportar_servidores1_activate }
+                msgbox(_("Invalid file"))
 
-    #-- Wmain.on_salir1_activate {
+    # -- Wmain.on_exportar_servidores1_activate }
+
+    # -- Wmain.on_salir1_activate {
     def on_salir1_activate(self, widget, *args):
-        (conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT) = self.get_widget("wMain").get_size()
+        """Gestionnaire du menu Quitter.
+
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
+        conf.WINDOW_WIDTH, conf.WINDOW_HEIGHT = self.get_widget("wMain").get_size()
         self.writeConfig()
         Gtk.main_quit()
-    #-- Wmain.on_salir1_activate }
 
-    #-- Wmain.on_show_toolbar_activate {
+    # -- Wmain.on_salir1_activate }
+
+    # -- Wmain.on_show_toolbar_activate {
     def on_show_toolbar_toggled(self, widget, *args):
+        """Gestionnaire du menu Afficher/Masquer la barre d'outils.
+
+        Args:
+            widget (Gtk.CheckMenuItem): Widget declencheur.
+        """
         self.set_toolbar_visible(widget.get_active())
-    #-- Wmain.on_show_toolbar_activate }
 
-    #-- Wmain.on_show_panel_activate {
+    # -- Wmain.on_show_toolbar_activate }
+
+    # -- Wmain.on_show_panel_activate {
     def on_show_panel_toggled(self, widget, *args):
+        """Gestionnaire du menu Afficher/Masquer le panneau.
+
+        Args:
+            widget (Gtk.CheckMenuItem): Widget declencheur.
+        """
         self.set_panel_visible(widget.get_active())
-    #-- Wmain.on_show_panel_activate }
 
-    #-- Wmain.on_acerca_de1_activate {
+    # -- Wmain.on_show_panel_activate }
+
+    # -- Wmain.on_acerca_de1_activate {
     def on_acerca_de1_activate(self, widget, *args):
-        w_about = Wabout()
-    #-- Wmain.on_acerca_de1_activate }
+        """Gestionnaire du menu A propos.
 
-    #-- Wmain.on_double_click {
+        Args:
+            widget (Gtk.MenuItem): Widget declencheur.
+        """
+        w_about = Wabout()
+
+    # -- Wmain.on_acerca_de1_activate }
+
+    # -- Wmain.on_double_click {
     def on_double_click(self, widget, event, *args):
-        if event.type in [Gdk.EventType._2BUTTON_PRESS, Gdk.EventType._3BUTTON_PRESS] and event.button == 1:
+        """Gestionnaire de double-clic sur l'arbre des serveurs.
+
+        Args:
+            widget (Gtk.TreeView): Widget source.
+            path (Gtk.TreePath): Chemin clique.
+            column (Gtk.TreeViewColumn): Colonne cliquee.
+        """
+        if (
+            event.type in [Gdk.EventType._2BUTTON_PRESS, Gdk.EventType._3BUTTON_PRESS]
+            and event.button == 1
+        ):
             if isinstance(widget, Gtk.Notebook):
                 pos = event.x + widget.get_allocation().x
-                size = widget.get_tab_label(widget.get_nth_page(widget.get_n_pages()-1)).get_allocation()
-                if pos <= size.x + size.width + 8 or event.x >= widget.get_allocation().width - widget.style_get_property("scroll-arrow-hlength"):
+                size = widget.get_tab_label(
+                    widget.get_nth_page(widget.get_n_pages() - 1)
+                ).get_allocation()
+                # fix #64: vérifier aussi Y — si clic sous la barre d'onglets, c'est dans le terminal (MC, etc.)
+                if event.y > size.height + 8:
+                    return False
+                if (
+                    pos <= size.x + size.width + 8
+                    or event.x
+                    >= widget.get_allocation().width
+                    - widget.style_get_property("scroll-arrow-hlength")
+                ):
                     return True
-            if isinstance(widget, Gtk.Toolbar) and widget.get_drop_index(event.x,event.y) < widget.get_n_items():
+            if (
+                isinstance(widget, Gtk.Toolbar)
+                and widget.get_drop_index(event.x, event.y) < widget.get_n_items()
+            ):
                 return True
-            self.addTab(widget if isinstance(widget, Gtk.Notebook) else self.nbConsole, 'local')
+            self.addTab(widget if isinstance(widget, Gtk.Notebook) else self.nbConsole, "local")
             return True
-    #-- Wmain.on_double_click }
 
-    #-- Wmain.on_btnLocal_clicked {
+    # -- Wmain.on_double_click }
+
+    # -- Wmain.on_btnLocal_clicked {
     def on_btnLocal_clicked(self, widget, *args):
-        if self.current != None and self.current.get_parent()!=None and isinstance(self.current.get_parent().get_parent(), Gtk.Notebook):
+        """Gestionnaire du bouton Ouvrir un terminal local.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        if (
+            self.current != None
+            and self.current.get_parent() != None
+            and isinstance(self.current.get_parent().get_parent(), Gtk.Notebook)
+        ):
             ntbk = self.current.get_parent().get_parent()
         else:
             ntbk = self.nbConsole
-        self.addTab(ntbk, 'local')
-    #-- Wmain.on_btnLocal_clicked }
+        self.addTab(ntbk, "local")
 
-    #-- Wmain.on_btnConnect_clicked {
+    # -- Wmain.on_btnLocal_clicked }
+
+    # -- Wmain.on_btnConnect_clicked {
     def on_btnConnect_clicked(self, widget, *args):
-        if self.treeServers.get_selection().get_selected()[1]!=None:
-            if not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
+        """Gestionnaire du bouton Se connecter.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        if self.treeServers.get_selection().get_selected()[1] != None:
+            if not self.treeModel.iter_has_child(
+                self.treeServers.get_selection().get_selected()[1]
+            ):
                 self.on_tvServers_row_activated(self.treeServers)
             else:
                 selected = self.treeServers.get_selection().get_selected()[1]
-                group = self.treeModel.get_value(selected,0)
+                group = self.treeModel.get_value(selected, 0)
                 parent_group = self.get_group(selected)
-                if parent_group != '':
-                    group = parent_group + '/' + group
+                if parent_group != "":
+                    group = parent_group + "/" + group
 
                 for g in groups:
-                    if g == group or g.startswith(group+'/'):
+                    if g == group or g.startswith(group + "/"):
                         for host in groups[g]:
                             self.addTab(self.nbConsole, host)
-    #-- Wmain.on_btnConnect_clicked }
 
-    #-- Wmain.on_btnAdd_clicked {
+    # -- Wmain.on_btnConnect_clicked }
+
+    # -- Wmain.on_btnAdd_clicked {
     def on_btnAdd_clicked(self, widget, *args):
-        group=""
-        if self.treeServers.get_selection().get_selected()[1]!=None:
+        """Gestionnaire du bouton Ajouter un hote."""
+        group = ""
+        if self.treeServers.get_selection().get_selected()[1] is not None:
             selected = self.treeServers.get_selection().get_selected()[1]
-            group = self.get_group(selected)
-            if self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
-                selected = self.treeServers.get_selection().get_selected()[1]
-                group = self.treeModel.get_value(selected,0)
-                parent_group = self.get_group(selected)
-                if parent_group != '':
-                    group = parent_group + '/' + group
+            if self.treeModel.iter_has_child(selected):
+                # Nœud dossier sélectionné → groupe = chemin complet du dossier
+                group = self._iter_full_path(selected)
+            else:
+                # Nœud hôte sélectionné → groupe = parent
+                group = self.get_group(selected)
+                parent_it = self.treeModel.iter_parent(selected)
+                if parent_it is not None:
+                    group = self._iter_full_path(parent_it)
+        if not group:
+            # Aucune sélection — demander le groupe
+            existing = sorted(groups.keys())
+            if existing:
+                group = existing[0]
+            else:
+                group = inputbox(_("Add Host"), _("Group name:"), "HOSTS")
+                if not group:
+                    return
+                group = group.strip()
         wHost = Whost()
         wHost.init(group)
         self.updateTree()
-    #-- Wmain.on_btnAdd_clicked }
+
+    # -- Wmain.on_btnAdd_clicked }
 
     def get_group(self, i):
+        """Retourne le groupe (dossier) actuellement selectionne dans l'arbre.
+
+        Args:
+            i: Parametre i.
+
+        Returns:
+            str: Nom du groupe selectionne ou chaine vide.
+        """
         if self.treeModel.iter_parent(i):
             p = self.get_group(self.treeModel.iter_parent(i))
-            return (p+'/' if p!='' else '') + self.treeModel.get_value(self.treeModel.iter_parent(i),0)
+            return (p + "/" if p != "" else "") + self.treeModel.get_value(
+                self.treeModel.iter_parent(i), 0
+            )
         else:
-            return ''
+            return ""
 
-    #-- Wmain.on_bntEdit_clicked {
+    # -- Wmain.on_bntEdit_clicked {
     def on_bntEdit_clicked(self, widget, *args):
-        if self.treeServers.get_selection().get_selected()[1]!=None and not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
+        """Gestionnaire du bouton Editer un hote.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        if self.treeServers.get_selection().get_selected()[
+            1
+        ] != None and not self.treeModel.iter_has_child(
+            self.treeServers.get_selection().get_selected()[1]
+        ):
             selected = self.treeServers.get_selection().get_selected()[1]
-            host = self.treeModel.get_value(selected,1)
+            host = self.treeModel.get_value(selected, 1)
             wHost = Whost()
             wHost.init(host.group, host)
-            #self.updateTree()
-    #-- Wmain.on_bntEdit_clicked }
+            # self.updateTree()
 
-    #-- Wmain.on_btnDel_clicked {
+    # -- Wmain.on_bntEdit_clicked }
+
+    def on_migrate_ssh_clicked(self, widget, *args):
+        """Deplace tous les hotes SSH de gcm.conf vers ~/.ssh/config.
+
+        Args:
+            widget (Gtk.MenuItem): Element de menu clique.
+        """
+        if (
+            msgconfirm(
+                _(
+                    "Move all SSH hosts from gcm.conf to ~/.ssh/config?\n"
+                    "A backup of both files will be created."
+                )
+            )
+            != Gtk.ResponseType.OK
+        ):
+            return
+        try:
+            result = migrate_ssh_hosts()
+        except Exception as exc:
+            app_logger.error("on_migrate_ssh_clicked | migration failed | exc=%s", exc)
+            msginfo(_("Migration failed: %s") % exc)
+            return
+        msginfo(
+            _("Migration done — moved: %d, skipped: %d, already managed: %d, errors: %d")
+            % (
+                len(result["migrated"]),
+                len(result["skipped"]),
+                len(result["already"]),
+                len(result["errors"]),
+            )
+        )
+
+    # -- Wmain.on_btnDel_clicked {
     def on_btnDel_clicked(self, widget, *args):
-        if self.treeServers.get_selection().get_selected()[1]!=None:
-            if not self.treeModel.iter_has_child(self.treeServers.get_selection().get_selected()[1]):
-                #Eliminar solo el nodo
-                name = self.treeModel.get_value(self.treeServers.get_selection().get_selected()[1],0)
-                if msgconfirm("%s [%s]?" % (_("Confirma que desea eliminar el host"), name) ) == Gtk.ResponseType.OK:
-                    host = self.treeModel.get_value(self.treeServers.get_selection().get_selected()[1],1)
+        """Gestionnaire du bouton Supprimer un hote.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        if self.treeServers.get_selection().get_selected()[1] != None:
+            if not self.treeModel.iter_has_child(
+                self.treeServers.get_selection().get_selected()[1]
+            ):
+                # Eliminar solo el nodo
+                name = self.treeModel.get_value(
+                    self.treeServers.get_selection().get_selected()[1], 0
+                )
+                if (
+                    msgconfirm("%s [%s]?" % (_("Do you really want to remove host"), name))
+                    == Gtk.ResponseType.OK
+                ):
+                    host = self.treeModel.get_value(
+                        self.treeServers.get_selection().get_selected()[1], 1
+                    )
                     groups[host.group].remove(host)
                     self.updateTree()
             else:
-                #Eliminar todo el grupo
-                group = self.get_group(self.treeModel.iter_children(self.treeServers.get_selection().get_selected()[1]))
-                if msgconfirm("%s [%s]?" % (_("Confirma que desea eliminar todos los hosts del grupo"), group) ) == Gtk.ResponseType.OK:
+                # Eliminar todo el grupo
+                group = self.get_group(
+                    self.treeModel.iter_children(
+                        self.treeServers.get_selection().get_selected()[1]
+                    )
+                )
+                if (
+                    msgconfirm(
+                        "%s [%s]?"
+                        % (
+                            _("Do you really want to remove all hosts in group"),
+                            group,
+                        )
+                    )
+                    == Gtk.ResponseType.OK
+                ):
                     try:
                         del groups[group]
                     except:
                         pass
                     for h in dict(groups):
-                        if h.startswith(group+'/'):
+                        if h.startswith(group + "/"):
                             del groups[h]
                     self.updateTree()
         self.writeConfig()
-    #-- Wmain.on_btnDel_clicked }
 
-    #-- Wmain.on_btnHSplit_clicked {
+    # -- Wmain.on_btnDel_clicked }
+
+    # ── Gestion des groupes ───────────────────────────────────────────────────
+
+    def _selected_folder_path(self):
+        """Retourne le chemin complet du dossier sélectionné (ou None si hôte/rien)."""
+        sel = self.treeServers.get_selection().get_selected()[1]
+        if sel is None:
+            return None
+        if not self.treeModel.iter_has_child(sel):
+            # hôte sélectionné → on prend son groupe parent
+            sel = self.treeModel.iter_parent(sel)
+            if sel is None:
+                return None
+        return self._iter_full_path(sel)
+
+    def _iter_full_path(self, it):
+        """Construit le chemin complet d'un iter (ex: LINUX/debian)."""
+        parts = []
+        cur = it
+        while cur:
+            parts.insert(0, self.treeModel.get_value(cur, 0))
+            cur = self.treeModel.iter_parent(cur)
+        return "/".join(parts)
+
+    def _on_new_group_clicked(self, widget, *args):
+        """Crée un nouveau groupe, enfant du groupe sélectionné si applicable."""
+        name = inputbox(_("New Group"), _("Group name:"))
+        if not name:
+            return
+        name = name.strip().strip("/")
+        if not name:
+            return
+
+        # Déterminer le parent
+        sel = self.treeServers.get_selection().get_selected()[1]
+        parent_path = None
+        if sel is not None:
+            if self.treeModel.iter_has_child(sel):
+                parent_path = self._iter_full_path(sel)
+            else:
+                parent_it = self.treeModel.iter_parent(sel)
+                if parent_it is not None:
+                    parent_path = self._iter_full_path(parent_it)
+
+        full_name = f"{parent_path}/{name}" if parent_path else name
+
+        if full_name in groups:
+            msgbox(_(f"Group '{full_name}' already exists."))
+            return
+
+        groups[full_name] = []
+        self.updateTree()
+        self.writeConfig()
+
+    def _on_rename_group_clicked(self, widget, *args):
+        """Renomme le groupe sélectionné (et tous ses sous-groupes et hôtes enfants)."""
+        sel = self.treeServers.get_selection().get_selected()[1]
+        if sel is None or not self.treeModel.iter_has_child(sel):
+            return
+
+        old_full = self._iter_full_path(sel)
+        # Juste le dernier composant comme valeur initiale
+        old_leaf = self.treeModel.get_value(sel, 0)
+        new_leaf = inputbox(_("Rename Group"), _("New name:"), old_leaf)
+        if not new_leaf or new_leaf.strip() == old_leaf:
+            return
+        new_leaf = new_leaf.strip().strip("/")
+
+        # Calculer le nouveau chemin complet
+        parent_it = self.treeModel.iter_parent(sel)
+        parent_path = self._iter_full_path(parent_it) if parent_it else None
+        new_full = f"{parent_path}/{new_leaf}" if parent_path else new_leaf
+
+        if new_full in groups and new_full != old_full:
+            msgbox(_(f"Group '{new_full}' already exists."))
+            return
+
+        # Renommer dans groups : clé principale + tous les sous-groupes
+        to_rename = {
+            k: v for k, v in groups.items() if k == old_full or k.startswith(old_full + "/")
+        }
+        for old_key, hosts in to_rename.items():
+            new_key = new_full + old_key[len(old_full) :]
+            del groups[old_key]
+            groups[new_key] = hosts
+            for h in hosts:
+                h.group = new_key
+
+        self.updateTree()
+        self.writeConfig()
+
+    # -- Wmain.on_btnHSplit_clicked {
     def on_btnHSplit_clicked(self, widget, *args):
+        """Gestionnaire du bouton Division horizontale.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         self.split_notebook(HSPLIT)
-    #-- Wmain.on_btnHSplit_clicked }
 
-    #-- Wmain.on_btnVSplit_clicked {
+    # -- Wmain.on_btnHSplit_clicked }
+
+    # -- Wmain.on_btnVSplit_clicked {
     def on_btnVSplit_clicked(self, widget, *args):
-        self.split_notebook(VSPLIT)
-    #-- Wmain.on_btnVSplit_clicked }
+        """Gestionnaire du bouton Division verticale.
 
-    #-- Wmain.on_btnUnsplit_clicked {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        self.split_notebook(VSPLIT)
+
+    # -- Wmain.on_btnVSplit_clicked }
+
+    # -- Wmain.on_btnUnsplit_clicked {
     def on_btnUnsplit_clicked(self, widget, *args):
+        """Gestionnaire du bouton Annuler la division.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         wid = self.find_notebook(self.hpMain, self.nbConsole)
-        while wid!=None:
-            #Mover los tabs al notebook principal
-            while wid.get_n_pages()!=0:
+        while wid != None:
+            # Mover los tabs al notebook principal
+            while wid.get_n_pages() != 0:
                 csp = wid.get_nth_page(0)
                 text = wid.get_tab_label(csp).get_text()
                 csp.get_parent().remove(csp)
                 self.nbConsole.add(csp)
-                csp = self.nbConsole.get_nth_page(self.nbConsole.get_n_pages()-1)
-                tab = NotebookTabLabel(text, self.nbConsole, csp, self.popupMenuTab )
+                csp = self.nbConsole.get_nth_page(self.nbConsole.get_n_pages() - 1)
+                tab = NotebookTabLabel(text, self.nbConsole, csp, self.popupMenuTab)
                 self.nbConsole.set_tab_label(csp, tab_label=tab)
                 self.nbConsole.set_tab_reorderable(csp, True)
                 self.nbConsole.set_tab_detachable(csp, True)
             wid = self.find_notebook(self.hpMain, self.nbConsole)
-        self.on_tab_focus(self.nbConsole, self.nbConsole.get_nth_page(self.nbConsole.get_current_page()))
-    #-- Wmain.on_btnUnsplit_clicked }
+        self.on_tab_focus(
+            self.nbConsole,
+            self.nbConsole.get_nth_page(self.nbConsole.get_current_page()),
+        )
 
-    #-- Wmain.on_btnConfig_clicked {
+    # -- Wmain.on_btnUnsplit_clicked }
+
+    # -- Wmain.on_btnConfig_clicked {
     def on_btnConfig_clicked(self, widget, *args):
+        """Gestionnaire du bouton Configuration.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         wConfig = Wconfig()
-    #-- Wmain.on_btnConfig_clicked }
 
-    #-- Wmain.on_btnDonate_clicked {
-    def on_btnDonate_clicked(self, widget, *args):
-        with tempfile.NamedTemporaryFile(suffix='.html', delete=False) as f:
-            f.write(b'<html> \
-                     <body onload="document.forms[0].submit()"> \
-                     <form action="https://www.paypal.com/cgi-bin/webscr" method="post"> \
-                     <input type="hidden" name="cmd" value="_s-xclick"> \
-                     <input type="hidden" name="hosted_button_id" value="10257762"> \
-                     </form> \
-                     </body> \
-                     </html>')
-            f.flush()
-            if os.name == "nt":
-                os.filestart(f.name)
-            elif os.name == "posix":
-                os.system("/usr/bin/xdg-open %s" % (f.name))
+    # -- Wmain.on_btnConfig_clicked }
 
-    #-- Wmain.on_btnDonate_clicked }
-
-
-    #-- Wmain.on_btnSearchBack_clicked {
+    # -- Wmain.on_btnSearchBack_clicked {
     def on_btnSearchBack_clicked(self, widget, *args):
+        """Gestionnaire du bouton Recherche precedente.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         if self.init_search():
             self.find_word(backwards=True)
-    #-- Wmain.on_btnSearchBack_clicked }
 
-    #-- Wmain.on_btnSearch_clicked {
+    # -- Wmain.on_btnSearchBack_clicked }
+
+    # -- Wmain.on_btnSearch_clicked {
     def on_btnSearch_clicked(self, widget, *args):
+        """Gestionnaire du bouton Recherche.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         if self.init_search():
             self.find_word()
-    #-- Wmain.on_btnSearch_clicked }
+
+    # -- Wmain.on_btnSearch_clicked }
 
     def on_btnSearch_key_press(self, widget, event, *args):
-        if event.state & (Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.CONTROL_MASK): return
+        """Gestionnaire de touche dans la zone de recherche.
+
+        Args:
+            widget (Gtk.Entry): Champ de saisie.
+            event (Gdk.EventKey): Evenement clavier.
+        """
+        if event.state & (Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.CONTROL_MASK):
+            return
         if event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
             if self.init_search():
                 self.find_word()
         elif event.keyval == Gdk.KEY_Escape:
-            widget.set_text('')
+            widget.set_text("")
             self.init_search()
 
-
-    #-- Wmain.on_btnCluster_clicked {
+    # -- Wmain.on_btnCluster_clicked {
     def on_btnCluster_clicked(self, widget, *args):
+        """Gestionnaire du bouton Cluster.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         create = False
-        if hasattr(self, 'wCluster'):
+        if hasattr(self, "wCluster"):
             if not self.wCluster.get_property("visible"):
                 self.wCluster.destroy()
                 create = True
@@ -2257,7 +6714,7 @@ class Wmain(SimpleGladeApp):
         if not create:
             return True
 
-        #obtener lista de consolas abiertas
+        # obtener lista de consolas abiertas
         consoles = []
         global wMain
         obj = wMain.hpMain
@@ -2265,7 +6722,7 @@ class Wmain(SimpleGladeApp):
         s.append(obj)
         while len(s) > 0:
             obj = s.pop()
-            #agregar hijos de p a s
+            # agregar hijos de p a s
             if hasattr(obj, "get_children"):
                 for w in obj.get_children():
                     if isinstance(w, Gtk.Notebook) or hasattr(w, "get_children"):
@@ -2273,211 +6730,177 @@ class Wmain(SimpleGladeApp):
 
             if isinstance(obj, Gtk.Notebook):
                 n = obj.get_n_pages()
-                for i in range(0,n):
+                for i in range(0, n):
                     terminal = obj.get_nth_page(i).get_children()[0]
                     title = obj.get_tab_label(obj.get_nth_page(i)).get_text()
-                    consoles.append( (title, terminal) )
+                    consoles.append((title, terminal))
 
-        if len(consoles)==0:
-            msgbox(_("No hay consolas abiertas"))
+        if len(consoles) == 0:
+            msgbox(_("No open consoles"))
             return True
 
-        self.wCluster = Wcluster(terms=consoles).get_widget('wCluster')
+        self.wCluster = Wcluster(terms=consoles).get_widget("wCluster")
         return True
-    #-- Wmain.on_btnCluster_clicked }
 
-    #-- Wmain.on_hpMain_button_press_event {
+    # -- Wmain.on_btnCluster_clicked }
+
+    # -- Wmain.on_hpMain_button_press_event {
     def on_hpMain_button_press_event(self, widget, event, *args):
+        """Gestionnaire de clic sur le separateur principal.
+
+        Args:
+            widget (Gtk.Paned): Widget source.
+            event (Gdk.EventButton): Evenement souris.
+        """
         if event.type in [Gdk.EventType._2BUTTON_PRESS] and not self.row_activated:
             p = self.hpMain.get_position()
-            self.set_panel_visible(p==0)
+            self.set_panel_visible(p == 0)
         self.row_activated = False
-    #-- Wmain.on_hpMain_button_press_event }
 
-    #-- Wmain.on_tvServers_row_activated {
+    # -- Wmain.on_hpMain_button_press_event }
+
+    # -- Wmain.on_tvServers_row_activated {
     def on_tvServers_row_activated(self, widget, *args):
+        """Gestionnaire d'activation d'une ligne de l'arbre.
+
+        Args:
+            treeview (Gtk.TreeView): TreeView source.
+            path (Gtk.TreePath): Chemin active.
+            column (Gtk.TreeViewColumn): Colonne activee.
+        """
         self.row_activated = True
         if not self.treeModel.iter_has_child(widget.get_selection().get_selected()[1]):
             selected = widget.get_selection().get_selected()[1]
-            host = self.treeModel.get_value(selected,1)
+            host = self.treeModel.get_value(selected, 1)
             self.addTab(self.nbConsole, host)
 
-    #-- Wmain.on_tvServers_row_activated }
+    # -- Wmain.on_tvServers_row_activated }
 
     def on_tvServers_row_collapsed(self, widget, *args):
+        """Gestionnaire de reduction d'un noeud de l'arbre.
+
+        Args:
+            treeview (Gtk.TreeView): TreeView source.
+            iter (Gtk.TreeIter): Noeud reduit.
+            path (Gtk.TreePath): Chemin du noeud.
+        """
         self.update_row_color()
 
     def on_tvServers_row_expanded(self, widget, *args):
+        """Gestionnaire d'expansion d'un noeud de l'arbre.
+
+        Args:
+            treeview (Gtk.TreeView): TreeView source.
+            iter (Gtk.TreeIter): Noeud etendu.
+            path (Gtk.TreePath): Chemin du noeud.
+        """
         self.update_row_color()
 
     def on_tvServers_style_updated(self, widget, *args):
+        """Gestionnaire de mise a jour du style de l'arbre des serveurs.
+
+        Args:
+            widget (Gtk.TreeView): Widget source.
+        """
         self.update_row_color()
 
-    #-- Wmain.on_tvServers_button_press_event {
+    # -- Wmain.on_tvServers_button_press_event {
     def on_tvServers_button_press_event(self, widget, event, *args):
+        """Gestionnaire de clic souris sur l'arbre des serveurs.
+
+        Args:
+            widget (Gtk.TreeView): Widget source.
+            event (Gdk.EventButton): Evenement souris.
+        """
         if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
             x = int(event.x)
             y = int(event.y)
             pthinfo = self.treeServers.get_path_at_pos(x, y)
             if pthinfo is None:
+                # Clic dans le vide — seules les actions globales restent
                 self.popupMenuFolder.mnuDel.hide()
                 self.popupMenuFolder.mnuEdit.hide()
                 self.popupMenuFolder.mnuCopyAddress.hide()
                 self.popupMenuFolder.mnuDup.hide()
+                self.popupMenuFolder.mnuRenameGroup.hide()
             else:
                 path, col, cellx, celly = pthinfo
-                if self.treeModel.iter_children(self.treeModel.get_iter(path)):
+                self.treeServers.grab_focus()
+                self.treeServers.set_cursor(path, col, 0)
+                it = self.treeModel.get_iter(path)
+                is_folder = self.treeModel.iter_has_child(it)
+                if is_folder:
+                    # Nœud dossier/groupe
                     self.popupMenuFolder.mnuEdit.hide()
                     self.popupMenuFolder.mnuCopyAddress.hide()
                     self.popupMenuFolder.mnuDup.hide()
+                    self.popupMenuFolder.mnuRenameGroup.show()
                 else:
+                    # Nœud hôte
                     self.popupMenuFolder.mnuEdit.show()
                     self.popupMenuFolder.mnuCopyAddress.show()
                     self.popupMenuFolder.mnuDup.show()
+                    self.popupMenuFolder.mnuRenameGroup.hide()
                 self.popupMenuFolder.mnuDel.show()
-                self.treeServers.grab_focus()
-                self.treeServers.set_cursor( path, col, 0)
-            self.popupMenuFolder.popup( None, None, None, None, event.button, event.time)
+            self.popupMenuFolder.popup(None, None, None, None, event.button, event.time)
             return True
         else:
-            return event.type == Gdk.EventType._2BUTTON_PRESS or event.type == Gdk.EventType._3BUTTON_PRESS
-    #-- Wmain.on_tvServers_button_press_event }
+            return (
+                event.type == Gdk.EventType._2BUTTON_PRESS
+                or event.type == Gdk.EventType._3BUTTON_PRESS
+            )
 
-class Host():
-    def __init__(self, *args):
-        try:
-            self.i = 0
-            self.group = self.get_arg(args, None)
-            self.name =  self.get_arg(args, None)
-            self.description =  self.get_arg(args, None)
-            self.host =  self.get_arg(args, None)
-            self.user =   self.get_arg(args, None)
-            self.password = self.get_arg(args, None)
-            self.private_key = self.get_arg(args, None)
-            self.port = self.get_arg(args, 22)
-            self.tunnel = self.get_arg(args, '').split(",")
-            self.type = self.get_arg(args, 'ssh')
-            self.commands = self.get_arg(args, None)
-            self.keep_alive = self.get_arg(args, 0)
-            self.font_color = self.get_arg(args, '')
-            self.back_color = self.get_arg(args, '')
-            self.x11 = self.get_arg(args, False)
-            self.agent = self.get_arg(args, False)
-            self.compression = self.get_arg(args,False)
-            self.compressionLevel = self.get_arg(args,'')
-            self.extra_params = self.get_arg(args, '')
-            self.log = self.get_arg(args, False)
-            self.backspace_key = self.get_arg(args, int(Vte.EraseBinding.AUTO))
-            self.delete_key = self.get_arg(args, int(Vte.EraseBinding.AUTO))
-            self.term = self.get_arg(args, '')
-        except:
-            pass
+    # -- Wmain.on_tvServers_button_press_event }
 
 
-    def get_arg(self, args, default):
-        arg = args[self.i] if len(args)>self.i else default
-        self.i +=1
-        return arg
+class Whost(GCMBase):
+    def __init__(
+        self,
+        path="gnome-connection-manager.glade",
+        root="wHost",
+        domain=domain_name,
+        **kwargs,
+    ):
+        """Initialise l'instance.
 
-    def __repr__(self):
-        return "group=[%s],\t name=[%s],\t host=[%s],\t type=[%s]" % (self.group, self.name, self.host, self.type)
-
-    def tunnel_as_string(self):
-        return ",".join(self.tunnel)
-
-    def clone(self):
-        return Host(self.group, self.name, self.description, self.host, self.user, self.password, self.private_key, self.port, self.tunnel_as_string(), self.type, self.commands, self.keep_alive, self.font_color, self.back_color, self.x11, self.agent, self.compression, self.compressionLevel, self.extra_params, self.log, self.backspace_key, self.delete_key, self.term)
-
-class HostUtils:
-    @staticmethod
-    def get_val(cp, section, name, default):
-        try:
-            return cp.get(section, name) if type(default)!=type(True) else cp.getboolean(section, name)
-        except:
-            return default
-
-    @staticmethod
-    def load_host_from_ini(cp, section, pwd=''):
-        if pwd=='':
-            pwd = get_password()
-        group = cp.get(section, "group")
-        name = cp.get(section, "name")
-        host = cp.get(section, "host")
-        user = cp.get(section, "user")
-        password = decrypt(pwd, cp.get(section, "pass"))
-        description = HostUtils.get_val(cp, section, "description", "")
-        private_key = HostUtils.get_val(cp, section, "private_key", "")
-        port = HostUtils.get_val(cp, section, "port", "22")
-        tunnel = HostUtils.get_val(cp, section, "tunnel", "")
-        ctype = HostUtils.get_val(cp, section, "type", "ssh")
-        commands = HostUtils.get_val(cp, section, "commands", "").replace('\x00', '\n').replace('\\n', '\n')
-        keepalive = HostUtils.get_val(cp, section, "keepalive", "")
-        fcolor = HostUtils.get_val(cp, section, "font-color", "")
-        bcolor = HostUtils.get_val(cp, section, "back-color", "")
-        x11 = HostUtils.get_val(cp, section, "x11", False)
-        agent = HostUtils.get_val(cp, section, "agent", False)
-        compression = HostUtils.get_val(cp, section, "compression", False)
-        compressionLevel = HostUtils.get_val(cp, section, "compression-level", "")
-        extra_params = HostUtils.get_val(cp, section, "extra_params", "")
-        log = HostUtils.get_val(cp, section, "log", False)
-        backspace_key = int(HostUtils.get_val(cp, section, "backspace-key", int(Vte.EraseBinding.AUTO)))
-        delete_key = int(HostUtils.get_val(cp, section, "delete-key", int(Vte.EraseBinding.AUTO)))
-        term = HostUtils.get_val(cp, section, "term", "")
-        h = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key, term)
-        return h
-
-    @staticmethod
-    def save_host_to_ini(cp, section, host, pwd=''):
-        if pwd=='':
-            pwd = get_password()
-        cp.set(section, "group", host.group)
-        cp.set(section, "name", host.name)
-        cp.set(section, "description", host.description)
-        cp.set(section, "host", host.host)
-        cp.set(section, "user", host.user)
-        cp.set(section, "pass", encrypt(pwd, host.password))
-        cp.set(section, "private_key", host.private_key)
-        cp.set(section, "port", host.port)
-        cp.set(section, "tunnel", host.tunnel_as_string())
-        cp.set(section, "type", host.type)
-        cp.set(section, "commands", host.commands.replace('\n', '\\n'))
-        cp.set(section, "keepalive", host.keep_alive)
-        cp.set(section, "font-color", host.font_color)
-        cp.set(section, "back-color", host.back_color)
-        cp.set(section, "x11", host.x11)
-        cp.set(section, "agent", host.agent)
-        cp.set(section, "compression", host.compression)
-        cp.set(section, "compression-level", host.compressionLevel)
-        cp.set(section, "extra_params", host.extra_params)
-        cp.set(section, "log", host.log)
-        cp.set(section, "backspace-key", host.backspace_key)
-        cp.set(section, "delete-key", host.delete_key)
-        cp.set(section, "term", host.term)
-
-class Whost(SimpleGladeApp):
-
-    def __init__(self, path="gnome-connection-manager.glade",
-                 root="wHost",
-                 domain=domain_name, **kwargs):
+        Args:
+            path: Parametre path.
+            root: Parametre root.
+            domain: Parametre domain.
+        """
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
+        GCMBase.__init__(self, path, root, domain, parent=wMain.window)
 
-        self.treeModel = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING, GObject.TYPE_STRING, GObject.TYPE_STRING)
+        self.treeModel = Gtk.ListStore(
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
+            GObject.TYPE_STRING,
+        )
         self.treeTunel.set_model(self.treeModel)
         column = Gtk.TreeViewColumn(_("Local"), Gtk.CellRendererText(), text=0)
-        self.treeTunel.append_column( column )
+        self.treeTunel.append_column(column)
         column = Gtk.TreeViewColumn(_("Host"), Gtk.CellRendererText(), text=1)
-        self.treeTunel.append_column( column )
-        column = Gtk.TreeViewColumn(_("Remoto"), Gtk.CellRendererText(), text=2)
-        self.treeTunel.append_column( column )
+        self.treeTunel.append_column(column)
+        column = Gtk.TreeViewColumn(_("Remote"), Gtk.CellRendererText(), text=2)
+        self.treeTunel.append_column(column)
 
-
-    #-- Whost.new {
+    # -- Whost.new {
     def new(self):
+        """Cree et retourne une nouvelle instance depuis le fichier Glade.
+
+        Returns:
+            instance: Nouvelle instance de la classe.
+        """
         global groups
 
         self.cmbGroup = self.get_widget("cmbGroup")
-        #self.cmbGroup.set_model(Gtk.ListStore(str))
+        # Le groupe est géré via l'arborescence — lecture seule dans le dialogue
+        # On stocke la valeur dans un attribut dédié pour la récupérer à la validation
+        self._group_value = ""
+        self.cmbGroup.set_sensitive(False)
+        if self.cmbGroup.get_has_entry() and self.cmbGroup.get_child():
+            self.cmbGroup.get_child().set_editable(False)
         self.txtName = self.get_widget("txtName")
         self.txtDescription = self.get_widget("txtDescription")
         self.txtHost = self.get_widget("txtHost")
@@ -2488,7 +6911,9 @@ class Whost(SimpleGladeApp):
         self.btnBrowse = self.get_widget("btnBrowse")
         self.txtPort = self.get_widget("txtPort")
         # Done programaticaly because engine does not see top-level abjustment object
-        txtPortAdjustment = Gtk.Adjustment(value=22, lower=1, upper=65535, step_increment=1, page_increment=10)
+        txtPortAdjustment = Gtk.Adjustment(
+            value=22, lower=1, upper=65535, step_increment=1, page_increment=10
+        )
         self.txtPort.set_adjustment(txtPortAdjustment)
         self.cmbGroup.remove_all()
         for group in groups:
@@ -2498,26 +6923,32 @@ class Whost(SimpleGladeApp):
         self.chkDynamic = self.get_widget("chkDynamic")
         self.txtLocalPort = self.get_widget("txtLocalPort")
         # Done programaticaly because engine does not see top-level abjustment object
-        txtLocalPortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        txtLocalPortAdjustment = Gtk.Adjustment(
+            value=8080, lower=1, upper=65535, step_increment=1, page_increment=10
+        )
         self.txtLocalPort.set_adjustment(txtLocalPortAdjustment)
         self.txtRemoteHost = self.get_widget("txtRemoteHost")
         self.txtRemotePort = self.get_widget("txtRemotePort")
         # Done programaticaly because engine does not see top-level abjustment object
         # Local and remote port adjustments cannot be merged into one adjustment,
         # because their vaues becomes dependent
-        txtRemotePortAdjustment = Gtk.Adjustment(value=8080, lower=1, upper=65535, step_increment=1, page_increment=10)
+        txtRemotePortAdjustment = Gtk.Adjustment(
+            value=8080, lower=1, upper=65535, step_increment=1, page_increment=10
+        )
         self.txtRemotePort.set_adjustment(txtRemotePortAdjustment)
         self.treeTunel = self.get_widget("treeTunel")
         self.txtComamnds = self.get_widget("txtCommands")
         self.chkComamnds = self.get_widget("chkCommands")
         buf = self.txtComamnds.get_buffer()
-        buf.create_tag('DELAY1', style=Pango.Style.ITALIC, foreground='darkgray')
-        buf.create_tag('DELAY2', style=Pango.Style.ITALIC, foreground='cadetblue')
+        buf.create_tag("DELAY1", style=Pango.Style.ITALIC, foreground="darkgray")
+        buf.create_tag("DELAY2", style=Pango.Style.ITALIC, foreground="cadetblue")
         buf.connect("changed", self.update_texttags)
         self.chkKeepAlive = self.get_widget("chkKeepAlive")
         self.txtKeepAlive = self.get_widget("txtKeepAlive")
         # Done programaticaly because engine does not see top-level abjustment object
-        txtKeepaliveAdjustment = Gtk.Adjustment(value=0, lower=0, upper=3600, step_increment=1, page_increment=10)
+        txtKeepaliveAdjustment = Gtk.Adjustment(
+            value=0, lower=0, upper=3600, step_increment=1, page_increment=10
+        )
         self.txtKeepAlive.set_adjustment(txtKeepaliveAdjustment)
         self.btnFColor = self.get_widget("btnFColor")
         self.btnBColor = self.get_widget("btnBColor")
@@ -2526,7 +6957,9 @@ class Whost(SimpleGladeApp):
         self.chkCompression = self.get_widget("chkCompression")
         self.txtCompressionLevel = self.get_widget("txtCompressionLevel")
         # Done programaticaly because engine does not see top-level abjustment object
-        txtCompressionLevelAdjustment = Gtk.Adjustment(value=6, lower=1, upper=9, step_increment=1, page_increment=3)
+        txtCompressionLevelAdjustment = Gtk.Adjustment(
+            value=6, lower=1, upper=9, step_increment=1, page_increment=3
+        )
         self.txtCompressionLevel.set_adjustment(txtCompressionLevelAdjustment)
         self.txtExtraParams = self.get_widget("txtExtraParams")
         self.chkLogging = self.get_widget("chkLogging")
@@ -2536,10 +6969,368 @@ class Whost(SimpleGladeApp):
         self.cmbType.set_active(0)
         self.cmbBackspace.set_active(0)
         self.cmbDelete.set_active(0)
-    #-- Whost.new }
 
-    #-- Whost custom methods {
+        # cmbProtocol = alias vers cmbType (le widget glade affiché à l'utilisateur)
+        self.cmbProtocol = self.cmbType
+
+        # ── Widgets onglet RDP ──────────────────────────────────────────────
+        self.rdpTxtDomain = self.get_widget("rdpTxtDomain")
+        self.rdpCmbGeometry = self.get_widget("rdpCmbGeometry")
+        self.rdpBoxCustomGeo = self.get_widget("rdpBoxCustomGeo")
+        self.rdpTxtWidth = self.get_widget("rdpTxtWidth")
+        self.rdpTxtHeight = self.get_widget("rdpTxtHeight")
+        self.rdpChkCertIgnore = self.get_widget("rdpChkCertIgnore")
+        self.rdpChkDynRes = self.get_widget("rdpChkDynRes")
+        self.rdpTxtRemoteApp = self.get_widget("rdpTxtRemoteApp")
+        if self.rdpCmbGeometry:
+            self.rdpCmbGeometry.connect("changed", self._on_rdp_geometry_changed)
+
+        # ── Widgets onglet VNC ──────────────────────────────────────────────
+        self.vncCmbViewer = self.get_widget("vncCmbViewer")
+        self.vncTxtDisplay = self.get_widget("vncTxtDisplay")
+        self.vncChkViewOnly = self.get_widget("vncChkViewOnly")
+        self.vncChkFullscreen = self.get_widget("vncChkFullscreen")
+
+        # ── Widgets onglet SPICE ────────────────────────────────────────────
+        self.spiceRadioUri = self.get_widget("spiceRadioUri")
+        self.spiceRadioLibvirt = self.get_widget("spiceRadioLibvirt")
+        self.spiceRadioProxmox = self.get_widget("spiceRadioProxmox")
+        self.spiceGridUri = self.get_widget("spiceGridUri")
+        self.spiceGridLibvirt = self.get_widget("spiceGridLibvirt")
+        self.spiceGridProxmox = self.get_widget("spiceGridProxmox")
+        self.spiceTxtTlsPort = self.get_widget("spiceTxtTlsPort")
+        self.spiceTxtCaCert = self.get_widget("spiceTxtCaCert")
+        self.spiceTxtLibvirtUri = self.get_widget("spiceTxtLibvirtUri")
+        self.spiceTxtVmName = self.get_widget("spiceTxtVmName")
+        self.spiceTxtPxNode = self.get_widget("spiceTxtPxNode")
+        self.spiceTxtPxVmid = self.get_widget("spiceTxtPxVmid")
+
+        # ── Widgets onglet Serial ───────────────────────────────────────────
+        self.serialCmbTemplate = self.get_widget("serialCmbTemplate")
+        self.serialCmbBaud = self.get_widget("serialCmbBaud")
+        self.serialCmbDatabits = self.get_widget("serialCmbDatabits")
+        self.serialCmbParity = self.get_widget("serialCmbParity")
+        self.serialCmbStopbits = self.get_widget("serialCmbStopbits")
+        self.serialCmbFlow = self.get_widget("serialCmbFlow")
+        self.serialCmbTool = self.get_widget("serialCmbTool")
+
+        # Valeurs par défaut Serial
+        self._cmb_set_id(self.serialCmbBaud, "9600")
+        self._cmb_set_id(self.serialCmbDatabits, "8")
+        self._cmb_set_id(self.serialCmbParity, "n")
+        self._cmb_set_id(self.serialCmbStopbits, "1")
+        self._cmb_set_id(self.serialCmbFlow, "n")
+        self._cmb_set_id(self.serialCmbTool, "picocom")
+        self._cmb_set_id(self.serialCmbTemplate, "custom")
+        # Valeur par défaut RDP geometry
+        self._cmb_set_id(self.rdpCmbGeometry, "fullscreen")
+
+    # -- Whost.new }
+
+    # ── helpers ComboBoxText ────────────────────────────────────────────────
+
+    def _cmb_set_id(self, cmb, item_id):
+        """Sélectionne l'item d'un GtkComboBoxText par son id XML glade.
+
+        Args:
+            cmb: GtkComboBoxText cible (peut être None).
+            item_id: valeur de l'attribut id de l'item glade.
+        """
+        if cmb is None:
+            return
+        model = cmb.get_model()
+        if model is None:
+            return
+        it = model.get_iter_first()
+        idx = 0
+        while it is not None:
+            if model.get_value(it, 0) == item_id:
+                cmb.set_active(idx)
+                return
+            it = model.iter_next(it)
+            idx += 1
+        cmb.set_active(0)
+
+    def _cmb_get_id(self, cmb, default=""):
+        """Retourne l'id actif d'un GtkComboBoxText (colonne 0 du modèle).
+
+        Args:
+            cmb: GtkComboBoxText source (peut être None).
+            default: valeur retournée si rien de sélectionné.
+
+        Returns:
+            str: id actif ou default.
+        """
+        if cmb is None:
+            return default
+        idx = cmb.get_active()
+        model = cmb.get_model()
+        if model is None or idx < 0:
+            return default
+        it = model.iter_nth_child(None, idx)
+        return model.get_value(it, 0) if it else default
+
+    # ── handler RDP geometry ────────────────────────────────────────────────
+
+    def _on_rdp_geometry_changed(self, cmb):
+        """Affiche/masque la boîte WxH custom selon la sélection géométrie RDP.
+
+        Args:
+            cmb: GtkComboBoxText rdpCmbGeometry.
+        """
+        is_custom = self._cmb_get_id(cmb) == "custom"
+        if self.rdpBoxCustomGeo:
+            if is_custom:
+                self.rdpBoxCustomGeo.show()
+            else:
+                self.rdpBoxCustomGeo.hide()
+
+    # ── handlers SPICE (glade-natifs) ──────────────────────────────────────
+
+    def on_spiceRadioUri_toggled(self, widget, *args):
+        """Affiche la section URI et masque libvirt/Proxmox.
+
+        Args:
+            widget: GtkRadioButton spiceRadioUri.
+        """
+        if not widget.get_active():
+            return
+        if self.spiceGridUri:
+            self.spiceGridUri.show()
+        if self.spiceGridLibvirt:
+            self.spiceGridLibvirt.hide()
+        if self.spiceGridProxmox:
+            self.spiceGridProxmox.hide()
+
+    def on_spiceRadioLibvirt_toggled(self, widget, *args):
+        """Affiche la section libvirt et masque URI/Proxmox.
+
+        Args:
+            widget: GtkRadioButton spiceRadioLibvirt.
+        """
+        if not widget.get_active():
+            return
+        if self.spiceGridUri:
+            self.spiceGridUri.hide()
+        if self.spiceGridLibvirt:
+            self.spiceGridLibvirt.show()
+        if self.spiceGridProxmox:
+            self.spiceGridProxmox.hide()
+
+    def on_spiceRadioProxmox_toggled(self, widget, *args):
+        """Affiche la section Proxmox et masque URI/libvirt.
+
+        Args:
+            widget: GtkRadioButton spiceRadioProxmox.
+        """
+        if not widget.get_active():
+            return
+        if self.spiceGridUri:
+            self.spiceGridUri.hide()
+        if self.spiceGridLibvirt:
+            self.spiceGridLibvirt.hide()
+        if self.spiceGridProxmox:
+            self.spiceGridProxmox.show()
+
+    # ── handler Serial template ─────────────────────────────────────────────
+
+    # Préréglages par constructeur : (baud, databits, parity, stopbits, flow)
+    _SERIAL_TEMPLATES = {
+        "cisco": ("9600", "8", "n", "1", "n"),
+        "h3c": ("9600", "8", "n", "1", "n"),
+        "juniper": ("9600", "8", "n", "1", "n"),
+        "aruba": ("9600", "8", "n", "1", "n"),
+        "bmc": ("115200", "8", "n", "1", "n"),
+    }
+
+    def on_serialCmbTemplate_changed(self, widget, *args):
+        """Pré-remplit les combos série selon le template constructeur.
+
+        Args:
+            widget: GtkComboBoxText serialCmbTemplate.
+        """
+        tpl_id = self._cmb_get_id(widget, "custom")
+        tpl = self._SERIAL_TEMPLATES.get(tpl_id)
+        if tpl is None:
+            return
+        baud, db, par, sb, fl = tpl
+        self._cmb_set_id(self.serialCmbBaud, baud)
+        self._cmb_set_id(self.serialCmbDatabits, db)
+        self._cmb_set_id(self.serialCmbParity, par)
+        self._cmb_set_id(self.serialCmbStopbits, sb)
+        self._cmb_set_id(self.serialCmbFlow, fl)
+
+    # ── compatibilité ascendante (anciens attributs injectés) ───────────────
+
+    def _inject_spice_frame(self):
+        """Obsolète — les widgets SPICE sont maintenant dans le glade.
+
+        Args:
+            (none)
+        """
+        pass  # gardé pour ne pas casser d'éventuels appels hérités
+
+    # ── stub attributs legacy (_serial_cmb_*, _spice_*) ────────────────────
+    # Les anciennes méthodes init()/on_okbutton1 testaient hasattr(self, "_serial_cmb_databits").
+    # On expose les nouveaux widgets sous les deux noms pour la compatibilité.
+
+    @property
+    def _serial_cmb_databits(self):
+        """Alias legacy → serialCmbDatabits."""
+        return self.serialCmbDatabits
+
+    @property
+    def _serial_cmb_parity(self):
+        """Alias legacy → serialCmbParity."""
+        return self.serialCmbParity
+
+    @property
+    def _serial_cmb_stopbits(self):
+        """Alias legacy → serialCmbStopbits."""
+        return self.serialCmbStopbits
+
+    @property
+    def _serial_cmb_flow(self):
+        """Alias legacy → serialCmbFlow."""
+        return self.serialCmbFlow
+
+    # ── vieille implémentation inline supprimée (remplacée par glade) ───────
+    #
+    # Méthodes supprimées :
+    #   _on_spice_mode_toggled  → on_spiceRadioUri/Libvirt/Proxmox_toggled
+    #   _on_spice_apply         → plus nécessaire (champs persistés directement)
+    #   _spice_prefill_from_extra_params → _spice_load_from_host() dans init()
+    #
+    # Le code ci-dessous était l'ancienne implémentation dynamique.
+    # Il est conservé sous forme de commentaire pour référence.
+    #
+    # def _inject_spice_frame(self):  [voir archive git]
+
+    def _inject_spice_frame_LEGACY(self):  # noqa — archive
+        """Ancienne injection dynamique conservée pour référence git.
+
+        Ne pas appeler.
+
+        Args:
+            (none)
+        """
+        nb = self.get_widget("nbHost")
+        sw_props = self.get_widget("swHostProps")
+        if nb is None or sw_props is None:
+            return
+
+        outer = sw_props.get_parent()  # GtkViewport's parent = swHostProps's child
+        # Conteneur englobant onglet Properties = sw_props lui-même
+        # On veut insérer un frame dans le VIEWPORT, sous le grid.
+        # Plus simple : on crée un VBox qui enveloppe [grid, spice_frame]
+        # et remplace le contenu du Viewport.
+        viewport = sw_props.get_child()
+        if viewport is None:
+            return
+        grid = viewport.get_child()
+        if grid is None:
+            return
+
+        # Créer un VBox englobant
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        vbox.set_visible(True)
+        grid.reparent(vbox)
+        vbox.reorder_child(grid, 0)
+
+        # ── Frame SPICE ────────────────────────────────────────────────────
+        frame = Gtk.Frame(label=_("SPICE connection mode"))
+        frame.set_margin_top(8)
+        frame.set_margin_bottom(4)
+        inner = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        inner.set_margin_start(8)
+        inner.set_margin_end(8)
+        inner.set_margin_top(6)
+        inner.set_margin_bottom(6)
+        frame.add(inner)
+
+        # Radios
+        self._spice_radio_libvirt = Gtk.RadioButton(
+            label=_("libvirt — tunnel SSH (virt-viewer --connect)")
+        )
+        self._spice_radio_proxmox = Gtk.RadioButton.new_from_widget(self._spice_radio_libvirt)
+        self._spice_radio_proxmox.set_label(_("Proxmox — proxy API (pvesh spiceproxy)"))
+        inner.pack_start(self._spice_radio_libvirt, False, False, 0)
+        inner.pack_start(self._spice_radio_proxmox, False, False, 0)
+
+        # Section libvirt
+        self._spice_libvirt_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        hb1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb1.pack_start(Gtk.Label(label=_("libvirt URI:")), False, False, 0)
+        self._spice_entry_uri = Gtk.Entry()
+        self._spice_entry_uri.set_placeholder_text("qemu+ssh://root@192.168.105.41/system")
+        self._spice_entry_uri.set_hexpand(True)
+        hb1.pack_start(self._spice_entry_uri, True, True, 0)
+        self._spice_libvirt_box.pack_start(hb1, False, False, 0)
+        hb2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb2.pack_start(Gtk.Label(label=_("VM name:")), False, False, 0)
+        self._spice_entry_vmname = Gtk.Entry()
+        self._spice_entry_vmname.set_placeholder_text("spice-test")
+        self._spice_entry_vmname.set_hexpand(True)
+        hb2.pack_start(self._spice_entry_vmname, True, True, 0)
+        self._spice_libvirt_box.pack_start(hb2, False, False, 0)
+        inner.pack_start(self._spice_libvirt_box, False, False, 0)
+
+        # Section Proxmox
+        self._spice_proxmox_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        hb3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb3.pack_start(Gtk.Label(label=_("Proxmox node:")), False, False, 0)
+        self._spice_entry_node = Gtk.Entry()
+        self._spice_entry_node.set_placeholder_text("DOCKER41")
+        self._spice_entry_node.set_hexpand(True)
+        hb3.pack_start(self._spice_entry_node, True, True, 0)
+        self._spice_proxmox_box.pack_start(hb3, False, False, 0)
+        hb4 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        hb4.pack_start(Gtk.Label(label=_("VMID:")), False, False, 0)
+        self._spice_entry_vmid = Gtk.Entry()
+        self._spice_entry_vmid.set_placeholder_text("100")
+        self._spice_entry_vmid.set_width_chars(8)
+        hb4.pack_start(self._spice_entry_vmid, False, False, 0)
+        self._spice_proxmox_box.pack_start(hb4, False, False, 0)
+        self._spice_proxmox_box.set_no_show_all(True)
+        self._spice_proxmox_box.hide()
+        inner.pack_start(self._spice_proxmox_box, False, False, 0)
+
+        # Bouton Appliquer
+        btn_apply = Gtk.Button(label=_("↩ Apply to Extra arguments"))
+        btn_apply.get_style_context().add_class("suggested-action")
+        btn_apply.connect("clicked", self._on_spice_apply)
+        inner.pack_start(btn_apply, False, False, 4)
+
+        lbl_hint = Gtk.Label()
+        lbl_hint.set_markup(_("<small><i>Or type directly in 'Extra arguments' below</i></small>"))
+        lbl_hint.set_xalign(0)
+        inner.pack_start(lbl_hint, False, False, 0)
+
+        frame.show_all()
+        self._spice_proxmox_box.hide()  # masqué par défaut
+        vbox.pack_start(frame, False, False, 0)
+        viewport.add(vbox)
+        vbox.show()
+
+        self._spice_frame = frame
+        self._spice_frame.set_no_show_all(True)
+        self._spice_frame.hide()
+
+    # -- Whost custom methods {
+    def _on_proto_changed(self, cmb):
+        """Adapte le port par defaut au protocole selectionne.
+
+        Args:
+            cmb (Gtk.ComboBoxText): ComboBox modifie.
+        """
+        proto = cmb.get_active_text()
+        current = self.txtPort.get_text()
+        if current in ("22", "23", "3389", "5900", "5930", "9600", ""):
+            self.txtPort.set_text(_PROTO_DEFAULTS.get(proto, ""))
+
     def init(self, group, host=None):
+        """Initialise les parametres de configuration avec les valeurs par defaut."""
+        self._group_value = group
         self.cmbGroup.get_child().set_text(group)
         if host == None:
             self.isNew = True
@@ -2551,9 +7342,9 @@ class Whost(SimpleGladeApp):
         self.oldName = host.name
         self.txtDescription.set_text(host.description)
         self.txtHost.set_text(host.host)
-        i =  self.cmbType.get_model().get_iter_first()
-        while i!=None:
-            if (host.type == self.cmbType.get_model()[i][0]):
+        i = self.cmbType.get_model().get_iter_first()
+        while i != None:
+            if host.type == self.cmbType.get_model()[i][0]:
                 self.cmbType.set_active_iter(i)
                 break
             else:
@@ -2562,39 +7353,53 @@ class Whost(SimpleGladeApp):
         self.txtPass.set_text(host.password)
         self.txtPrivateKey.set_text(host.private_key)
         self.txtPort.set_text(host.port)
+        # Protocole
+        proto = getattr(host, "protocol", "ssh")
+        protos = ["ssh", "telnet", "rdp", "vnc", "spice", "serial", "local"]
+        self.cmbProtocol.set_active(protos.index(proto) if proto in protos else 0)
         for t in host.tunnel:
-            if t!="":
-                tun = t.split(":")
+            if t != "":
+                # fix #66: split sur max 2 ":" pour preserver les hotes avec port (host:port)
+                tun = t.split(":", 2)
+                if len(tun) < 3:
+                    tun += [""] * (3 - len(tun))
                 tun.append(t)
-                self.treeModel.append(  tun )
+                self.treeModel.append(tun)
         self.txtCommands.set_sensitive(False)
         self.chkCommands.set_active(False)
-        if host.commands!='' and host.commands!=None:
+        if host.commands != "" and host.commands != None:
             self.txtCommands.get_buffer().set_text(host.commands)
             self.txtCommands.set_sensitive(True)
             self.chkCommands.set_active(True)
-        use_keep_alive = host.keep_alive!='' and host.keep_alive!='0' and host.keep_alive!=None
+        use_keep_alive = (
+            host.keep_alive != "" and host.keep_alive != "0" and host.keep_alive != None
+        )
         self.txtKeepAlive.set_sensitive(use_keep_alive)
         self.chkKeepAlive.set_active(use_keep_alive)
-        self.txtKeepAlive.set_text(host.keep_alive)
-        if host.font_color!='' and host.font_color!=None and host.back_color!='' and host.back_color!=None:
+        self.txtKeepAlive.set_text(str(host.keep_alive))
+        if (
+            host.font_color != ""
+            and host.font_color != None
+            and host.back_color != ""
+            and host.back_color != None
+        ):
             self.get_widget("chkDefaultColors").set_active(False)
             self.btnFColor.set_sensitive(True)
             self.btnBColor.set_sensitive(True)
-            fcolor=host.font_color
-            bcolor=host.back_color
+            fcolor = host.font_color
+            bcolor = host.back_color
         else:
             self.get_widget("chkDefaultColors").set_active(True)
             self.btnFColor.set_sensitive(False)
             self.btnBColor.set_sensitive(False)
-            fcolor=DEFAULT_FGCOLOR
-            bcolor=DEFAULT_BGCOLOR
+            fcolor = DEFAULT_FGCOLOR
+            bcolor = DEFAULT_BGCOLOR
 
         self.btnFColor.set_rgba(parse_color_rgba(fcolor))
         self.btnBColor.set_rgba(parse_color_rgba(bcolor))
 
-        self.btnFColor.selected_color=fcolor
-        self.btnBColor.selected_color=bcolor
+        self.btnFColor.selected_color = fcolor
+        self.btnBColor.selected_color = bcolor
         self.chkX11.set_active(host.x11)
         self.chkAgent.set_active(host.agent)
         self.chkCompression.set_active(host.compression)
@@ -2605,13 +7410,113 @@ class Whost(SimpleGladeApp):
         self.cmbDelete.set_active(host.delete_key)
         self.update_texttags()
         self.txtTerm.set_text(host.term)
+        # ── Onglet Serial ────────────────────────────────────────────────────
+        self._cmb_set_id(self.serialCmbBaud, getattr(host, "serial_baud", "9600"))
+        self._cmb_set_id(self.serialCmbDatabits, getattr(host, "serial_databits", "8"))
+        self._cmb_set_id(self.serialCmbParity, getattr(host, "serial_parity", "n"))
+        self._cmb_set_id(self.serialCmbStopbits, getattr(host, "serial_stopbits", "1"))
+        self._cmb_set_id(self.serialCmbFlow, getattr(host, "serial_flow", "n"))
+        self._cmb_set_id(self.serialCmbTool, getattr(host, "serial_tool", "picocom"))
+
+        # ── Onglet RDP ───────────────────────────────────────────────────────
+        if self.rdpTxtDomain:
+            self.rdpTxtDomain.set_text(getattr(host, "rdp_domain", ""))
+        geo = getattr(host, "rdp_geometry", "fullscreen")
+        self._cmb_set_id(self.rdpCmbGeometry, geo)
+        if geo == "custom" and self.rdpBoxCustomGeo:
+            self.rdpBoxCustomGeo.show()
+            if self.rdpTxtWidth:
+                self.rdpTxtWidth.set_text(getattr(host, "rdp_width", ""))
+            if self.rdpTxtHeight:
+                self.rdpTxtHeight.set_text(getattr(host, "rdp_height", ""))
+        if self.rdpChkCertIgnore:
+            v = getattr(host, "rdp_cert_ignore", False)
+            self.rdpChkCertIgnore.set_active(str(v).lower() in ("true", "1", "yes"))
+        if self.rdpChkDynRes:
+            v = getattr(host, "rdp_dyn_res", False)
+            self.rdpChkDynRes.set_active(str(v).lower() in ("true", "1", "yes"))
+        if self.rdpTxtRemoteApp:
+            self.rdpTxtRemoteApp.set_text(getattr(host, "rdp_remote_app", ""))
+
+        # ── Onglet VNC ───────────────────────────────────────────────────────
+        self._cmb_set_id(self.vncCmbViewer, getattr(host, "vnc_viewer", "tigervnc"))
+        if self.vncTxtDisplay:
+            self.vncTxtDisplay.set_text(getattr(host, "vnc_display", ""))
+        if self.vncChkViewOnly:
+            v = getattr(host, "vnc_view_only", False)
+            self.vncChkViewOnly.set_active(str(v).lower() in ("true", "1", "yes"))
+        if self.vncChkFullscreen:
+            v = getattr(host, "vnc_fullscreen", False)
+            self.vncChkFullscreen.set_active(str(v).lower() in ("true", "1", "yes"))
+
+        # ── Onglet SPICE ─────────────────────────────────────────────────────
+        spice_mode = getattr(host, "spice_mode", "uri")
+        if spice_mode == "libvirt":
+            if self.spiceRadioLibvirt:
+                self.spiceRadioLibvirt.set_active(True)
+            if self.spiceGridUri:
+                self.spiceGridUri.hide()
+            if self.spiceGridLibvirt:
+                self.spiceGridLibvirt.show()
+            if self.spiceGridProxmox:
+                self.spiceGridProxmox.hide()
+        elif spice_mode == "proxmox":
+            if self.spiceRadioProxmox:
+                self.spiceRadioProxmox.set_active(True)
+            if self.spiceGridUri:
+                self.spiceGridUri.hide()
+            if self.spiceGridLibvirt:
+                self.spiceGridLibvirt.hide()
+            if self.spiceGridProxmox:
+                self.spiceGridProxmox.show()
+        else:
+            if self.spiceRadioUri:
+                self.spiceRadioUri.set_active(True)
+            if self.spiceGridUri:
+                self.spiceGridUri.show()
+            if self.spiceGridLibvirt:
+                self.spiceGridLibvirt.hide()
+            if self.spiceGridProxmox:
+                self.spiceGridProxmox.hide()
+        if self.spiceTxtTlsPort:
+            self.spiceTxtTlsPort.set_text(getattr(host, "spice_tls_port", ""))
+        if self.spiceTxtCaCert:
+            self.spiceTxtCaCert.set_text(getattr(host, "spice_ca_cert", ""))
+        if self.spiceTxtLibvirtUri:
+            self.spiceTxtLibvirtUri.set_text(getattr(host, "spice_libvirt_uri", ""))
+        if self.spiceTxtVmName:
+            self.spiceTxtVmName.set_text(getattr(host, "spice_vm_name", ""))
+        if self.spiceTxtPxNode:
+            self.spiceTxtPxNode.set_text(getattr(host, "spice_px_node", ""))
+        if self.spiceTxtPxVmid:
+            self.spiceTxtPxVmid.set_text(getattr(host, "spice_px_vmid", ""))
+
+        # Si l'hote est gere par ~/.ssh/config (flag ssh_config_managed pose par
+        # la migration), adapter le dialogue (champs SSH grises + notice rouge).
+        # Les sections gcm.conf sont positionnelles ("host N") : on retrouve la
+        # bonne par correspondance group + name + host.
+        try:
+            cp = configparser.RawConfigParser()
+            cp.read(CONFIG_FILE)
+            for section in cp.sections():
+                if (
+                    section.startswith("host ")
+                    and cp.get(section, "name", fallback="") == (host.name or "")
+                    and cp.get(section, "group", fallback="") == (host.group or "")
+                    and cp.get(section, "host", fallback="") == (host.host or "")
+                ):
+                    patch_edit_host_dialog(self.builder, section, cp)
+                    break
+        except Exception as exc:
+            app_logger.debug("Whost.init | patch_edit_host_dialog skipped | exc=%s", exc)
 
     def update_texttags(self, *args):
+        """Met a jour les tags de texte (couleurs, polices) dans la vue."""
         buf = self.txtCommands.get_buffer()
         text_iter = buf.get_start_iter()
         buf.remove_all_tags(text_iter, buf.get_end_iter())
         while True:
-            found = text_iter.forward_search("##D=",0, None)
+            found = text_iter.forward_search("##D=", 0, None)
             if not found:
                 break
             start, end = found
@@ -2622,31 +7527,55 @@ class Whost(SimpleGladeApp):
                 buf.apply_tag_by_name("DELAY2", n, end)
             text_iter = end
 
-    #-- Whost custom methods }
+    # -- Whost custom methods }
 
-    #-- Whost.on_cancelbutton1_clicked {
+    # -- Whost.on_cancelbutton1_clicked {
     def on_cancelbutton1_clicked(self, widget, *args):
+        """Gestionnaire du bouton Annuler.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         self.get_widget("wHost").destroy()
-    #-- Whost.on_cancelbutton1_clicked }
 
+    # -- Whost.on_cancelbutton1_clicked }
 
-    #-- Whost.on_okbutton1_clicked {
+    # -- Whost.on_okbutton1_clicked {
     def on_okbutton1_clicked(self, widget, *args):
-        group = self.cmbGroup.get_active_text().strip()
+        """Gestionnaire du bouton OK / Valider.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        group_txt = self.cmbGroup.get_active_text()
+        if (
+            not group_txt
+            and self.cmbGroup.get_has_entry()
+            and self.cmbGroup.get_child() is not None
+        ):
+            group_txt = self.cmbGroup.get_child().get_text()
+        # Fallback sur la valeur stockée à l'init (cmbGroup peut être insensible)
+        if not group_txt and hasattr(self, "_group_value"):
+            group_txt = self._group_value
+        group = (group_txt or "").strip()
         name = self.txtName.get_text().strip()
         description = self.txtDescription.get_text().strip()
         host = self.txtHost.get_text().strip()
-        ctype = self.cmbType.get_active_text().strip()
+        ctype = (self.cmbType.get_active_text() or "").strip()
         user = self.txtUser.get_text().strip()
         password = self.txtPass.get_text().strip()
         private_key = self.txtPrivateKey.get_text().strip()
         port = self.txtPort.get_text().strip()
         buf = self.txtCommands.get_buffer()
-        commands = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False).strip() if self.chkCommands.get_active() else ""
+        commands = (
+            buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False).strip()
+            if self.chkCommands.get_active()
+            else ""
+        )
         keepalive = self.txtKeepAlive.get_text().strip()
         if self.get_widget("chkDefaultColors").get_active():
-            fcolor=""
-            bcolor=""
+            fcolor = ""
+            bcolor = ""
         else:
             fcolor = color_to_hex(self.btnFColor.get_rgba())
             bcolor = color_to_hex(self.btnBColor.get_rgba())
@@ -2662,235 +7591,484 @@ class Whost(SimpleGladeApp):
 
         if ctype == "":
             ctype = "ssh"
-        tunnel=""
+        tunnel = ""
 
-        if ctype=="ssh":
+        if ctype == "ssh":
             for x in self.treeModel:
-                tunnel = '%s,%s' % (x[3], tunnel)
-            tunnel=tunnel[:-1]
+                tunnel = "%s,%s" % (x[3], tunnel)
+            tunnel = tunnel[:-1]
 
-        #Validar datos
-        if group=="" or name=="" or (host=="" and ctype!='local'):
-            msgbox(_("Los campos grupo, nombre y host son obligatorios"))
+        # Validar datos
+        if group == "" or name == "" or (host == "" and ctype != "local"):
+            msgbox(_("Fields group, name and host are required"))
             return
 
-        if not (port and port.isdigit() and 1 <= int(port) <= 65535):
-            msgbox(_("Puerto invalido"))
+        if ctype != "local" and not (port and port.isdigit() and 1 <= int(port) <= 65535):
+            msgbox(_("Invalid port"))
             return
 
         term = self.txtTerm.get_text()
+        protocol = (
+            self.cmbProtocol.get_active_text().strip()
+            if hasattr(self, "cmbProtocol") and self.cmbProtocol.get_active_text()
+            else "ssh"
+        )
+        # Lire les paramètres série depuis les combos dédiés
+        # ── Lire Serial ──────────────────────────────────────────────────────
+        serial_baud = self._cmb_get_id(self.serialCmbBaud, "9600")
+        serial_databits = self._cmb_get_id(self.serialCmbDatabits, "8")
+        serial_parity = self._cmb_get_id(self.serialCmbParity, "n")
+        serial_stopbits = self._cmb_get_id(self.serialCmbStopbits, "1")
+        serial_flow = self._cmb_get_id(self.serialCmbFlow, "n")
+        serial_tool = self._cmb_get_id(self.serialCmbTool, "picocom")
 
-        host = Host(group, name, description, host, user, password, private_key, port, tunnel, ctype, commands, keepalive, fcolor, bcolor, x11, agent, compression, compressionLevel,  extra_params, log, backspace_key, delete_key, term)
+        # ── Lire RDP ─────────────────────────────────────────────────────────
+        rdp_domain = self.rdpTxtDomain.get_text().strip() if self.rdpTxtDomain else ""
+        rdp_geometry = self._cmb_get_id(self.rdpCmbGeometry, "fullscreen")
+        rdp_width = self.rdpTxtWidth.get_text().strip() if self.rdpTxtWidth else ""
+        rdp_height = self.rdpTxtHeight.get_text().strip() if self.rdpTxtHeight else ""
+        rdp_cert_ignore = self.rdpChkCertIgnore.get_active() if self.rdpChkCertIgnore else False
+        rdp_dyn_res = self.rdpChkDynRes.get_active() if self.rdpChkDynRes else False
+        rdp_remote_app = self.rdpTxtRemoteApp.get_text().strip() if self.rdpTxtRemoteApp else ""
+
+        # ── Lire VNC ─────────────────────────────────────────────────────────
+        vnc_viewer = self._cmb_get_id(self.vncCmbViewer, "tigervnc")
+        vnc_display = self.vncTxtDisplay.get_text().strip() if self.vncTxtDisplay else ""
+        vnc_view_only = self.vncChkViewOnly.get_active() if self.vncChkViewOnly else False
+        vnc_fullscreen = self.vncChkFullscreen.get_active() if self.vncChkFullscreen else False
+
+        # ── Lire SPICE ───────────────────────────────────────────────────────
+        if self.spiceRadioLibvirt and self.spiceRadioLibvirt.get_active():
+            spice_mode = "libvirt"
+        elif self.spiceRadioProxmox and self.spiceRadioProxmox.get_active():
+            spice_mode = "proxmox"
+        else:
+            spice_mode = "uri"
+        spice_tls_port = self.spiceTxtTlsPort.get_text().strip() if self.spiceTxtTlsPort else ""
+        spice_ca_cert = self.spiceTxtCaCert.get_text().strip() if self.spiceTxtCaCert else ""
+        spice_libvirt_uri = (
+            self.spiceTxtLibvirtUri.get_text().strip() if self.spiceTxtLibvirtUri else ""
+        )
+        spice_vm_name = self.spiceTxtVmName.get_text().strip() if self.spiceTxtVmName else ""
+        spice_px_node = self.spiceTxtPxNode.get_text().strip() if self.spiceTxtPxNode else ""
+        spice_px_vmid = self.spiceTxtPxVmid.get_text().strip() if self.spiceTxtPxVmid else ""
+
+        host = Host(
+            group,
+            name,
+            description,
+            host,
+            user,
+            password,
+            private_key,
+            port,
+            tunnel,
+            ctype,
+            commands,
+            keepalive,
+            fcolor,
+            bcolor,
+            x11,
+            agent,
+            compression,
+            compressionLevel,
+            extra_params,
+            log,
+            backspace_key,
+            delete_key,
+            term,
+            protocol,
+            serial_databits,
+            serial_parity,
+            serial_stopbits,
+            serial_flow,
+            serial_tool,
+            rdp_domain,
+            rdp_geometry,
+            rdp_width,
+            rdp_height,
+            rdp_cert_ignore,
+            rdp_dyn_res,
+            rdp_remote_app,
+            vnc_viewer,
+            vnc_display,
+            vnc_view_only,
+            vnc_fullscreen,
+            spice_mode,
+            spice_tls_port,
+            spice_ca_cert,
+            spice_libvirt_uri,
+            spice_vm_name,
+            spice_px_node,
+            spice_px_vmid,
+        )
+        host.serial_baud = serial_baud
+        host.protocol = protocol
 
         try:
-            #Guardar
-            if not group in groups: #not groups.has_key(group):
-                groups[group]=[]
+            # Guardar
+            if group not in groups:  # not groups.has_key(group):
+                groups[group] = []
 
             if self.isNew:
                 for h in groups[group]:
                     if h.name == name:
-                        msgbox("%s [%s] %s [%s]" % (_("El nombre"), name, _("ya existe para el grupo"), group))
+                        msgbox(
+                            "%s [%s] %s [%s]"
+                            % (
+                                _("Host name"),
+                                name,
+                                _("already exists for group"),
+                                group,
+                            )
+                        )
                         return
-                #agregar host a grupo
-                groups[group].append( host )
+                # agregar host a grupo
+                groups[group].append(host)
             else:
-                if self.oldGroup!=group:
-                    #revisar que no este el nombre en el nuevo grupo
-                    if not group in groups: #if not groups.has_key(group):
-                        groups[group] = [ host ]
+                if self.oldGroup != group:
+                    # revisar que no este el nombre en el nuevo grupo
+                    if group not in groups:  # if not groups.has_key(group):
+                        groups[group] = [host]
                     else:
                         for h in groups[group]:
                             if h.name == name:
-                                msgbox("%s [%s] %s [%s]" % (_("El nombre"), name, _("ya existe para el grupo"), group))
+                                msgbox(
+                                    "%s [%s] %s [%s]"
+                                    % (
+                                        _("Host name"),
+                                        name,
+                                        _("already exists for group"),
+                                        group,
+                                    )
+                                )
                                 return
-                        groups[group].append( host )
+                        groups[group].append(host)
                         for h in groups[self.oldGroup]:
                             if h.name == self.oldName:
                                 groups[self.oldGroup].remove(h)
                                 break
                 else:
-                    if self.oldName!=name:
+                    if self.oldName != name:
                         for h in groups[self.oldGroup]:
                             if h.name == name:
-                                msgbox("%s [%s] %s [%s]" % (_("El nombre"), name, _("ya existe para el grupo"), group))
+                                msgbox(
+                                    "%s [%s] %s [%s]"
+                                    % (
+                                        _("Host name"),
+                                        name,
+                                        _("already exists for group"),
+                                        group,
+                                    )
+                                )
                                 return
                         for h in groups[self.oldGroup]:
                             if h.name == self.oldName:
                                 index = groups[self.oldGroup].index(h)
-                                groups[self.oldGroup][ index ] = host
+                                groups[self.oldGroup][index] = host
                                 break
                     else:
                         for h in groups[self.oldGroup]:
                             if h.name == self.oldName:
                                 index = groups[self.oldGroup].index(h)
-                                groups[self.oldGroup][ index ] = host
+                                groups[self.oldGroup][index] = host
                                 break
         except:
-            msgbox("%s [%s]" % (_("Error al guardar el host. Descripcion"), sys.exc_info()[1]))
+            msgbox("%s [%s]" % (_("Error saving host. Description"), sys.exc_info()[1]))
 
         global wMain
         wMain.updateTree()
         wMain.writeConfig()
 
         self.get_widget("wHost").destroy()
-    #-- Whost.on_okbutton1_clicked }
 
-    #-- Whost.on_cmbType_changed {
+    # -- Whost.on_okbutton1_clicked }
+
+    # -- Whost.on_cmbType_changed {
     def on_cmbType_changed(self, widget, *args):
-        is_local = widget.get_active_text()=="local"
-        self.txtUser.set_sensitive(not is_local)
-        self.txtPassword.set_sensitive(not is_local)
+        """Gestionnaire de changement du protocole.
+
+        Gère la visibilité et la sensibilité des widgets selon le protocole
+        sélectionné, et met à jour le port par défaut.
+
+        Args:
+            widget (Gtk.ComboBox): Combo modifie.
+        """
+        proto = widget.get_active_text() or "ssh"
+        is_ssh = proto == "ssh"
+        is_local = proto == "local"
+        is_serial = proto == "serial"
+
+        # Champs désactivés pour local
+        self.txtUser.set_sensitive(not is_local and not is_serial)
+        self.txtPassword.set_sensitive(not is_local and not is_serial)
         self.txtPort.set_sensitive(not is_local)
         self.txtHost.set_sensitive(not is_local)
         self.txtExtraParams.set_sensitive(not is_local)
 
-        if widget.get_active_text()=="ssh":
-            self.get_widget("tunnelGrid").show()
-            self.txtKeepAlive.set_sensitive(True)
-            self.chkKeepAlive.set_sensitive(True)
-            self.chkX11.set_sensitive(True)
-            self.chkAgent.set_sensitive(True)
-            self.chkCompression.set_sensitive(True)
-            self.txtCompressionLevel.set_sensitive(self.chkCompression.get_active())
-            self.txtPrivateKey.set_sensitive(True)
-            self.btnBrowse.set_sensitive(True)
-            port = "22"
-        else:
-            self.get_widget("tunnelGrid").hide()
-            self.txtKeepAlive.set_text('0')
-            self.txtKeepAlive.set_sensitive(False)
-            self.chkKeepAlive.set_sensitive(False)
-            self.chkX11.set_sensitive(False)
-            self.chkAgent.set_sensitive(False)
-            self.chkCompression.set_sensitive(False)
-            self.txtCompressionLevel.set_sensitive(False)
-            self.txtPrivateKey.set_sensitive(False)
-            self.btnBrowse.set_sensitive(False)
-            port = "23"
-            if is_local:
-                self.txtUser.set_text('')
-                self.txtPassword.set_text('')
-                self.txtPort.set_text('')
-                self.txtHost.set_text('')
-        self.txtPort.set_text(port)
-    #-- Whost.on_cmbType_changed }
+        # Options SSH uniquement
+        self.get_widget("tunnelGrid").set_visible(is_ssh)
+        self.txtKeepAlive.set_sensitive(is_ssh)
+        self.chkKeepAlive.set_sensitive(is_ssh)
+        self.chkX11.set_sensitive(is_ssh)
+        self.chkAgent.set_sensitive(is_ssh)
+        self.chkCompression.set_sensitive(is_ssh)
+        self.txtCompressionLevel.set_sensitive(is_ssh and self.chkCompression.get_active())
+        self.txtPrivateKey.set_sensitive(is_ssh)
+        self.btnBrowse.set_sensitive(is_ssh)
+        if not is_ssh:
+            self.txtKeepAlive.set_text("0")
 
-    #-- Whost.on_chkKeepAlive_toggled {
+        # Réinitialiser les champs si local
+        if is_local:
+            self.txtUser.set_text("")
+            self.txtPassword.set_text("")
+            self.txtPort.set_text("")
+            self.txtHost.set_text("")
+
+        # Port par défaut (seulement si valeur encore standard)
+        known_ports = set(_PROTO_DEFAULTS.values()) | {""}
+        current_port = self.txtPort.get_text()
+        if current_port in known_ports:
+            self.txtPort.set_text(_PROTO_DEFAULTS.get(proto, ""))
+
+        # Afficher/masquer le frame paramètres série
+        if hasattr(self, "_serial_frame"):
+            if is_serial:
+                self._serial_frame.show()
+            else:
+                self._serial_frame.hide()
+
+        # Afficher/masquer le frame SPICE
+        is_spice = proto == "spice"
+        if hasattr(self, "_spice_frame"):
+            if is_spice:
+                self._spice_frame.show()
+                self._spice_prefill_from_extra_params()
+            else:
+                self._spice_frame.hide()
+
+    # -- Whost.on_cmbType_changed }
+
+    # -- Whost.on_chkKeepAlive_toggled {
     def on_chkKeepAlive_toggled(self, widget, *args):
-        if (widget.get_active()):
-            self.txtKeepAlive.set_text('120')
+        """Gestionnaire du toggle Keep-Alive.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
+        if widget.get_active():
+            self.txtKeepAlive.set_text("120")
         else:
-            self.txtKeepAlive.set_text('0')
+            self.txtKeepAlive.set_text("0")
         self.txtKeepAlive.set_sensitive(widget.get_active())
-    #-- Whost.on_chkKeepAlive_toggled }
 
-    #-- Whost.on_chkCompression_toggled {
+    # -- Whost.on_chkKeepAlive_toggled }
+
+    # -- Whost.on_chkCompression_toggled {
     def on_chkCompression_toggled(self, widget, *args):
+        """Gestionnaire du toggle Compression SSH.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
         self.txtCompressionLevel.set_sensitive(widget.get_active())
-    #-- Whost.on_chkCompression_toggled }
 
+    # -- Whost.on_chkCompression_toggled }
 
-    #-- Whost.on_chkDynamic_toggled {
+    # -- Whost.on_chkDynamic_toggled {
     def on_chkDynamic_toggled(self, widget, *args):
+        """Gestionnaire du toggle Tunnel dynamique SOCKS.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
         self.txtRemoteHost.set_sensitive(not widget.get_active())
         self.txtRemotePort.set_sensitive(not widget.get_active())
-    #-- Whost.on_chkDynamic_toggled }
 
-    #-- Whost.on_btnAdd_clicked {
+    # -- Whost.on_chkDynamic_toggled }
+
+    # -- Whost.on_btnAdd_clicked {
     def on_btnAdd_clicked(self, widget, *args):
+        """Gestionnaire du bouton Ajouter un hote.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         local = self.txtLocalPort.get_text().strip()
         host = self.txtRemoteHost.get_text().strip()
         remote = self.txtRemotePort.get_text().strip()
 
         if self.chkDynamic.get_active():
-            host = '*'
-            remote = '*'
+            host = "*"
+            remote = "*"
 
-        #Validar datos del tunel
+        # fix #66: si l'utilisateur a saisi "host:port" dans le champ remote host,
+        # extraire le port et le placer dans remote port automatiquement
+        if not self.chkDynamic.get_active() and ":" in host and remote == "":
+            parts = host.rsplit(":", 1)
+            if parts[1].isdigit():
+                host = parts[0]
+                remote = parts[1]
+                self.txtRemoteHost.set_text(host)
+                self.txtRemotePort.set_text(remote)
+
+        # Validar datos del tunel
         if host == "":
-            msgbox(_("Debe ingresar host remoto"))
+            msgbox(_("Enter remote host"))
             return
 
         for x in self.treeModel:
             if x[0] == local:
-                msgbox(_("Puerto local ya fue asignado"))
+                msgbox(_("Local port already assigned"))
                 return
 
-        tunel = self.treeModel.append( [local, host, remote, '%s:%s:%s' % (local, host, remote) ] )
-    #-- Whost.on_btnAdd_clicked }
+        tunel = self.treeModel.append([local, host, remote, "%s:%s:%s" % (local, host, remote)])
 
-    #-- Whost.on_btnDel_clicked {
+    # -- Whost.on_btnAdd_clicked }
+
+    # -- Whost.on_btnDel_clicked {
     def on_btnDel_clicked(self, widget, *args):
-        if self.treeTunel.get_selection().get_selected()[1]!=None:
+        """Gestionnaire du bouton Supprimer un hote.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        if self.treeTunel.get_selection().get_selected()[1] != None:
             self.treeModel.remove(self.treeTunel.get_selection().get_selected()[1])
-    #-- Whost.on_btnDel_clicked }
 
-    #-- Whost.on_chkCommands_toggled {
+    # -- Whost.on_btnDel_clicked }
+
+    # -- Whost.on_chkCommands_toggled {
     def on_chkCommands_toggled(self, widget, *args):
+        """Gere on chkCommands toggled.
+
+        Args:
+            widget: Parametre widget.
+        """
         self.txtCommands.set_sensitive(widget.get_active())
-    #-- Whost.on_chkCommands_toggled }
 
-    #-- Whost.on_btnBColor_clicked {
+    # -- Whost.on_chkCommands_toggled }
+
+    # -- Whost.on_btnBColor_clicked {
     def on_btnBColor_clicked(self, widget, *args):
-        widget.selected_color = widget.get_color().to_string()
-    #-- Whost.on_btnBColor_clicked }
+        """Gestionnaire du bouton couleur d'arriere-plan.
 
-    #-- Whost.on_chkDefaultColors_toggled {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        widget.selected_color = widget.get_rgba().to_string()
+
+    # -- Whost.on_btnBColor_clicked }
+
+    # -- Whost.on_chkDefaultColors_toggled {
     def on_chkDefaultColors_toggled(self, widget, *args):
+        """Gestionnaire du toggle Couleurs par defaut.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
         self.btnFColor.set_sensitive(not widget.get_active())
         self.btnBColor.set_sensitive(not widget.get_active())
-    #-- Whost.on_chkDefaultColors_toggled }
 
-    #-- Whost.on_btnFColor_clicked {
+    # -- Whost.on_chkDefaultColors_toggled }
+
+    # -- Whost.on_btnFColor_clicked {
     def on_btnFColor_clicked(self, widget, *args):
-        widget.selected_color = widget.get_color().to_string()
-    #-- Whost.on_btnFColor_clicked }
+        """Gestionnaire du bouton couleur de premier plan.
 
-    #-- Whost.on_btnBrowse_clicked {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        widget.selected_color = widget.get_rgba().to_string()
+
+    # -- Whost.on_btnFColor_clicked }
+
+    # -- Whost.on_btnBrowse_clicked {
     def on_btnBrowse_clicked(self, widget, *args):
+        """Gestionnaire du bouton Parcourir.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         global wMain
-        filename = show_open_dialog(parent=wMain.wMain, title=_("Abrir"), action=Gtk.FileChooserAction.OPEN)
+        filename = show_open_dialog(
+            parent=wMain.wMain, title=_("Open"), action=Gtk.FileChooserAction.OPEN
+        )
         if filename != None:
             self.txtPrivateKey.set_text(filename)
-    #-- Whost.on_btnBrowse_clicked }
 
-class Wabout(SimpleGladeApp):
+    # -- Whost.on_btnBrowse_clicked }
 
-    def __init__(self, path="gnome-connection-manager.glade",
-                 root="wAbout",
-                 domain=domain_name, **kwargs):
+
+class Wabout(GCMBase):
+    def __init__(
+        self,
+        path="gnome-connection-manager.glade",
+        root="wAbout",
+        domain=domain_name,
+        **kwargs,
+    ):
+        """Initialise l'instance.
+
+        Args:
+            path: Parametre path.
+            root: Parametre root.
+            domain: Parametre domain.
+        """
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
+        GCMBase.__init__(self, path, root, domain, parent=wMain.window)
         self.wAbout.set_icon_from_file(ICON_PATH)
-    #-- Wabout.new {
+
+    # -- Wabout.new {
     def new(self):
+        """Cree et retourne une nouvelle instance depuis le fichier Glade.
+
+        Returns:
+            instance: Nouvelle instance de la classe.
+        """
         self.wAbout.set_program_name(app_name)
         self.wAbout.set_version(app_version)
         self.wAbout.set_website(app_web)
-    #-- Wabout.new }
 
-    #-- Wabout custom methods {
+    # -- Wabout.new }
+
+    # -- Wabout custom methods {
     #   Write your own methods here
-    #-- Wabout custom methods }
+    # -- Wabout custom methods }
 
-    #-- Wabout.on_wAbout_close {
+    # -- Wabout.on_wAbout_close {
     def on_wAbout_close(self, widget, *args):
+        """Gestionnaire de fermeture de la fenetre A propos.
+
+        Args:
+            widget (Gtk.Widget): Widget source.
+        """
         self.wAbout.destroy()
-    #-- Wabout.on_wAbout_close }
+
+    # -- Wabout.on_wAbout_close }
 
 
-class Wconfig(SimpleGladeApp):
+class Wconfig(GCMBase):
+    def __init__(self, path="gnome-connection-manager.glade", root="wConfig", domain=domain_name):
+        """Initialise l'instance.
 
-    def __init__(self, path="gnome-connection-manager.glade",
-                 root="wConfig",
-                 domain=domain_name):
+        Args:
+            path: Parametre path.
+            root: Parametre root.
+            domain: Parametre domain.
+        """
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
+        GCMBase.__init__(self, path, root, domain, parent=wMain.window)
 
-    #-- Wconfig.new {
+    # -- Wconfig.new {
     def new(self):
-        #Agregar controles
+        # Agregar controles
+        """Cree et retourne une nouvelle instance depuis le fichier Glade.
+
+        Returns:
+            instance: Nouvelle instance de la classe.
+        """
         self.tblGeneral = self.get_widget("tblGeneral")
         self.btnFColor = self.get_widget("btnFColor1")
         self.btnBColor = self.get_widget("btnBColor1")
@@ -2898,158 +8076,256 @@ class Wconfig(SimpleGladeApp):
         self.lblFont = self.get_widget("lblFont")
         self.treeCmd = self.get_widget("treeCommands")
         self.treeCustom = self.get_widget("treeCustom")
+        self.nbConfig = self.get_widget("nbConfig")
         self.dlgColor = None
         self.capture_keys = False
 
-        self.tblGeneral.rows = 0
-        self.addParam(_("Separador de Palabras"), "conf.WORD_SEPARATORS", str)
-        self.addParam(_(u"Tamaño del buffer"), "conf.BUFFER_LINES", int, 1, 1000000)
-        self.addParam(_("Transparencia"), "conf.TRANSPARENCY", int, 0, 100)
-        self.addParam(_("TERM"), "conf.TERM", str)
-        self.addParam(_("Ruta de logs"), "conf.LOG_PATH", str)
-        self.addParam(_("Abrir consola local al inicio"), "conf.STARTUP_LOCAL", bool)
-        self.addParam(_("Log consola local"), "conf.LOG_LOCAL", bool)
-        self.addParam(_(u"Pegar con botón derecho"), "conf.PASTE_ON_RIGHT_CLICK", bool)
-        self.addParam(_(u"Copiar selección al portapapeles"), "conf.AUTO_COPY_SELECTION", bool)
-        self.addParam(_("Confirmar al cerrar una consola"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
-        self.addParam(_(u"Confirmar al cerrar una consola con botón central del mouse"), "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE", bool)
-        self.addParam(_(u"Reiniciar en el primer/último tab al llegar al final"), "conf.CYCLE_TABS", bool)
-        self.addParam(_("Cerrar consola"), "conf.AUTO_CLOSE_TAB", list, [_("Nunca"), _("Siempre"), _(u"Sólo si no hay errores")])
-        self.addParam(_("Confirmar al salir"), "conf.CONFIRM_ON_EXIT", bool)
-        self.addParam(_("Comprobar actualizaciones"), "conf.CHECK_UPDATES", bool)
-        self.addParam(_(u"Ocultar botón donar"), "conf.HIDE_DONATE", bool)
-        self.addParam(_(u"Deshabilitar franjas alternas en la ventana de hosts"), "conf.DISABLE_HOSTS_STRIPES", bool)
-        self.addParam(_(u"Título dinámico"), "conf.UPDATE_TITLE", bool)
-        self.addParam(_(u"Título"), "conf.APP_TITLE", str)
+        if isinstance(self.nbConfig, Gtk.Notebook):
+            self.nbConfig.set_scrollable(True)
 
-        if len(conf.FONT_COLOR)==0:
+        self.tblGeneral.rows = 0
+        self.addParam(_("Word separator"), "conf.WORD_SEPARATORS", str)
+        self.addParam(_("Buffer size"), "conf.BUFFER_LINES", int, 1, 1000000)
+        self.addParam(_("Transparency"), "conf.TRANSPARENCY", int, 0, 100)
+        self.addParam(_("TERM"), "conf.TERM", str)
+        self.addParam(_("Logs path"), "conf.LOG_PATH", str)
+        self.addParam(_("Continuous VTE tab logging mode"), "conf.CONTINUOUS_TAB_LOG", bool)
+        self.addParam(_("Open local console on startup"), "conf.STARTUP_LOCAL", bool)
+        self.addParam(_("Log local console sessions"), "conf.LOG_LOCAL", bool)
+        self.addParam(_("Paste on right click"), "conf.PASTE_ON_RIGHT_CLICK", bool)
+        self.addParam(_("Copy selection to clipboard"), "conf.AUTO_COPY_SELECTION", bool)
+        self.addParam(_("Confirm on close console"), "conf.CONFIRM_ON_CLOSE_TAB", bool)
+        self.addParam(
+            _("Confirm on close console with middle click"),
+            "conf.CONFIRM_ON_CLOSE_TAB_MIDDLE",
+            bool,
+        )
+        self.addParam(
+            _("Circle around tabs when going to the previous/next tab"),
+            "conf.CYCLE_TABS",
+            bool,
+        )
+        self.addParam(
+            _("Close console"),
+            "conf.AUTO_CLOSE_TAB",
+            list,
+            [_("Never"), _("Always"), _("Only on clean exit")],
+        )
+        self.addParam(_("Confirm on exit"), "conf.CONFIRM_ON_EXIT", bool)
+        self.addParam(_("Check updates"), "conf.CHECK_UPDATES", bool)
+        self.addParam(
+            _("Disable alternating stripes in hosts window"),
+            "conf.DISABLE_HOSTS_STRIPES",
+            bool,
+        )
+        self.addParam(_("Dynamic title"), "conf.UPDATE_TITLE", bool)
+        self.addParam(_("Title"), "conf.APP_TITLE", str)
+
+        if len(conf.FONT_COLOR) == 0:
             self.get_widget("chkDefaultColors1").set_active(True)
             self.btnFColor.set_sensitive(False)
             self.btnBColor.set_sensitive(False)
-            fcolor=DEFAULT_FGCOLOR
-            bcolor=DEFAULT_BGCOLOR
+            fcolor = DEFAULT_FGCOLOR
+            bcolor = DEFAULT_BGCOLOR
         else:
             self.get_widget("chkDefaultColors1").set_active(False)
             self.btnFColor.set_sensitive(True)
             self.btnBColor.set_sensitive(True)
-            fcolor=conf.FONT_COLOR
-            bcolor=conf.BACK_COLOR
+            fcolor = conf.FONT_COLOR
+            bcolor = conf.BACK_COLOR
 
-        self.btnFColor.set_color(parse_color(fcolor))
-        self.btnBColor.set_color(parse_color(bcolor))
-        self.btnFColor.selected_color=fcolor
-        self.btnBColor.selected_color=bcolor
+        self.btnFColor.set_rgba(parse_color_rgba(fcolor))
+        self.btnBColor.set_rgba(parse_color_rgba(bcolor))
+        self.btnFColor.selected_color = fcolor
+        self.btnBColor.selected_color = bcolor
 
-        #Fuente
-        if len(conf.FONT)==0 or conf.FONT == 'monospace':
-            conf.FONT = 'monospace'
+        # ── Thème GTK (Light / Dark / System) dans l'onglet Colors ────────────
+        _colors_tab = self.get_widget("table6")
+        if _colors_tab is not None:
+            _theme_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+            _theme_lbl = Gtk.Label(label=_("GTK Theme:"))
+            _theme_lbl.set_xalign(0)
+            _theme_box.pack_start(_theme_lbl, False, False, 0)
+            self._cmb_theme = Gtk.ComboBoxText()
+            self._cmb_theme.append("system", _("System"))
+            self._cmb_theme.append("light", _("Light"))
+            self._cmb_theme.append("dark", _("Dark"))
+            # Sélectionner l'état actuel
+            _tm = getattr(conf, "THEME_MODE", "system")
+            if _tm not in ("system", "light", "dark"):
+                _tm = "dark" if conf.DARK_MODE else "light"
+            self._cmb_theme.set_active_id(_tm)
+            self._cmb_theme.connect("changed", self._on_theme_combo_changed)
+            _theme_box.pack_start(self._cmb_theme, False, False, 0)
+            _theme_box.show_all()
+            # Attacher sous le GtkTable Colors (dans le parent du table6)
+            _parent = _colors_tab.get_parent()
+            if _parent is not None:
+                _theme_box.set_margin_start(4)
+                _theme_box.set_margin_top(6)
+                _parent.pack_start(_theme_box, False, False, 0)
+                _parent.reorder_child(_theme_box, -1)
+
+        # Fuente
+        if len(conf.FONT) == 0 or conf.FONT == "monospace":
+            conf.FONT = "monospace"
         else:
             self.chkDefaultFont.set_active(False)
         self.btnFont.set_sensitive(not self.chkDefaultFont.get_active())
         self.btnFont.selected_font = Pango.FontDescription(conf.FONT)
         self.btnFont.set_label(self.btnFont.selected_font.to_string())
-        self.btnFont.get_child().modify_font(self.btnFont.selected_font)
+        set_widget_font(self.btnFont.get_child(), self.btnFont.selected_font)
 
-        #commandos
+        # commandos
         self.treeModel = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
         self.treeCmd.set_model(self.treeModel)
-        column = Gtk.TreeViewColumn(_(u"Acción"), Gtk.CellRendererText(), text=0)
+        column = Gtk.TreeViewColumn(_("Action"), Gtk.CellRendererText(), text=0)
         column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
         column.set_expand(True)
-        self.treeCmd.append_column( column )
+        self.treeCmd.append_column(column)
 
         renderer = Gtk.CellRendererText()
         renderer.set_property("editable", True)
-        renderer.connect('edited', self.on_edited, self.treeModel, 1)
-        renderer.connect('editing-started', self.on_editing_started, self.treeModel, 1)
-        column = Gtk.TreeViewColumn(_("Atajo"), renderer, text=1)
+        renderer.connect("edited", self.on_edited, self.treeModel, 1)
+        renderer.connect("editing-started", self.on_editing_started, self.treeModel, 1)
+        column = Gtk.TreeViewColumn(_("Shortcut"), renderer, text=1)
         column.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         column.set_expand(False)
-        self.treeCmd.append_column( column )
+        self.treeCmd.append_column(column)
 
         self.treeModel2 = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
         self.treeCustom.set_model(self.treeModel2)
         renderer = MultilineCellRenderer()
         renderer.set_property("editable", True)
-        renderer.connect('edited', self.on_edited, self.treeModel2, 0)
-        column = Gtk.TreeViewColumn(_("Comando"), renderer, text=0)
+        renderer.connect("edited", self.on_edited, self.treeModel2, 0)
+        column = Gtk.TreeViewColumn(_("Command"), renderer, text=0)
         column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
         column.set_expand(True)
-        self.treeCustom.append_column( column )
+        self.treeCustom.append_column(column)
         renderer = Gtk.CellRendererText()
         renderer.set_property("editable", True)
-        renderer.connect('edited', self.on_edited, self.treeModel2, 1)
-        renderer.connect('editing-started', self.on_editing_started, self.treeModel2, 1)
-        column = Gtk.TreeViewColumn(_("Atajo"), renderer, text=1)
+        renderer.connect("edited", self.on_edited, self.treeModel2, 1)
+        renderer.connect("editing-started", self.on_editing_started, self.treeModel2, 1)
+        column = Gtk.TreeViewColumn(_("Shortcut"), renderer, text=1)
         column.set_sizing(Gtk.TreeViewColumnSizing.AUTOSIZE)
         column.set_expand(False)
-        self.treeCustom.append_column( column )
+        self.treeCustom.append_column(column)
 
-        slist = sorted(shortcuts.items(), key=lambda i: i[1][0] )
+        slist = sorted(shortcuts.items(), key=lambda i: i[1][0])
 
         for s in slist:
-            if type(s[1])==list:
-                self.treeModel.append(None, [ s[1][0], s[0] ])
+            if type(s[1]) == list:
+                self.treeModel.append(None, [s[1][0], s[0]])
         for s in slist:
-            if type(s[1])!=list:
-                self.treeModel2.append(None, [ s[1], s[0] ])
+            if type(s[1]) != list:
+                self.treeModel2.append(None, [s[1], s[0]])
 
-        self.treeModel2.append(None, [ '', '' ])
-    #-- Wconfig.new }
+        self.treeModel2.append(None, ["", ""])
 
-    #-- Wconfig custom methods {
+        # Onglet supplémentaire dans les préférences
+        if isinstance(self.nbConfig, Gtk.Notebook):
+            self._serial_tpl_prefs = SerialTemplatesTab(self.nbConfig)
+
+    # -- Wconfig.new }
+
+    # -- Wconfig custom methods {
     def addParam(self, name, field, ptype, *args):
+        """Ajoute un parametre dans le tableau de parametres.
+
+        Args:
+            key (str): Nom du parametre.
+            value (str): Valeur du parametre.
+        """
         x = self.tblGeneral.rows
         self.tblGeneral.rows += 1
         value = eval(field)
-        if ptype==bool:
+        if ptype == bool:
             obj = Gtk.CheckButton()
             obj.set_label(name)
             obj.set_active(value)
-            obj.set_alignment(0, 0.5)
+            obj.set_halign(Gtk.Align.START)
             obj.show()
-            obj.field=field
-            self.tblGeneral.attach(obj, 0, 2, x, x+1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, 0)
-        elif ptype==int:
+            obj.field = field
+            self.tblGeneral.attach(
+                obj,
+                0,
+                2,
+                x,
+                x + 1,
+                Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
+                0,
+            )
+        elif ptype == int:
             obj = Gtk.SpinButton(climb_rate=10)
-            if len(args)==2:
+            if len(args) == 2:
                 obj.set_range(args[0], args[1])
             obj.set_increments(1, 10)
             obj.set_numeric(True)
             obj.set_value(value)
             obj.show()
-            obj.field=field
+            obj.field = field
             lbl = Gtk.Label(label=name)
-            lbl.set_alignment(0, 0.5)
+            lbl.set_xalign(0.0)
             lbl.show()
-            self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
-            self.tblGeneral.attach(obj, 1, 2, x, x+1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, 0)
-        elif ptype==list:
+            self.tblGeneral.attach(lbl, 0, 1, x, x + 1, Gtk.AttachOptions.FILL, 0)
+            self.tblGeneral.attach(
+                obj,
+                1,
+                2,
+                x,
+                x + 1,
+                Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
+                0,
+            )
+        elif ptype == list:
             obj = Gtk.ComboBoxText()
             for s in args[0]:
                 obj.append_text(s)
             obj.set_active(value)
             obj.show()
-            obj.field=field
+            obj.field = field
             lbl = Gtk.Label(label=name)
-            lbl.set_alignment(0, 0.5)
+            lbl.set_xalign(0.0)
             lbl.show()
-            self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
-            self.tblGeneral.attach(obj, 1, 2, x, x+1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, 0)
+            self.tblGeneral.attach(lbl, 0, 1, x, x + 1, Gtk.AttachOptions.FILL, 0)
+            self.tblGeneral.attach(
+                obj,
+                1,
+                2,
+                x,
+                x + 1,
+                Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
+                0,
+            )
         else:
             obj = Gtk.Entry()
             obj.set_text(value)
             obj.show()
-            obj.field=field
+            obj.field = field
             lbl = Gtk.Label(label=name)
-            lbl.set_alignment(0, 0.5)
+            lbl.set_xalign(0.0)
             lbl.show()
-            self.tblGeneral.attach(lbl, 0, 1, x, x+1, Gtk.AttachOptions.FILL, 0)
-            self.tblGeneral.attach(obj, 1, 2, x, x+1, Gtk.AttachOptions.EXPAND|Gtk.AttachOptions.FILL, 0)
+            self.tblGeneral.attach(lbl, 0, 1, x, x + 1, Gtk.AttachOptions.FILL, 0)
+            self.tblGeneral.attach(
+                obj,
+                1,
+                2,
+                x,
+                x + 1,
+                Gtk.AttachOptions.EXPAND | Gtk.AttachOptions.FILL,
+                0,
+            )
 
     def on_edited(self, widget, rownum, value, model, colnum):
+        """Gestionnaire de fin d'edition d'une cellule.
+
+        Args:
+            renderer (Gtk.CellRendererText): Renderer source.
+            path (str): Chemin de la cellule.
+            new_text (str): Nouveau texte.
+        """
         model[rownum][colnum] = value
-        if model==self.treeModel2:
+        if model == self.treeModel2:
             i = self.treeModel2.get_iter_first()
             while i != None:
                 j = self.treeModel2.iter_next(i)
@@ -3057,22 +8333,81 @@ class Wconfig(SimpleGladeApp):
                 if self.treeModel2[i][0] == self.treeModel2[i][1] == "":
                     self.treeModel2.remove(i)
                 i = j
-            self.treeModel2.append(None, [ '', '' ])
+            self.treeModel2.append(None, ["", ""])
             if self.capture_keys:
                 self.capture_keys = False
 
     def on_editing_started(self, widget, entry, rownum, model, colnum):
+        """Gestionnaire de debut d'edition d'une cellule.
+
+        Args:
+            renderer (Gtk.CellRenderer): Renderer source.
+            editable (Gtk.CellEditable): Widget editable.
+            path (str): Chemin de la cellule.
+        """
         self.capture_keys = True
-        entry.connect('key-press-event', self.on_treeCommands_key_press_event, model, rownum, colnum)
-    #-- Wconfig custom methods }
+        entry.connect(
+            "key-press-event",
+            self.on_treeCommands_key_press_event,
+            model,
+            rownum,
+            colnum,
+        )
 
-    #-- Wconfig.on_cancelbutton1_clicked {
+    # -- Wconfig custom methods }
+
+    def _on_theme_combo_changed(self, combo):
+        """Bascule le thème GTK depuis le combo Light/Dark/System."""
+        theme_id = combo.get_active_id() or "system"
+        conf.THEME_MODE = theme_id
+        settings = Gtk.Settings.get_default()
+        if theme_id == "dark":
+            conf.DARK_MODE = True
+            settings.set_property("gtk-application-prefer-dark-theme", True)
+        elif theme_id == "light":
+            conf.DARK_MODE = False
+            settings.set_property("gtk-application-prefer-dark-theme", False)
+        else:
+            # System : détecter color-scheme du bureau
+            try:
+                import subprocess as _sp2
+
+                _dark = _sp2.run(
+                    ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                    capture_output=True,
+                    text=True,
+                    timeout=3,
+                )
+                conf.DARK_MODE = _dark.returncode == 0 and "dark" in _dark.stdout.lower()
+            except Exception:
+                conf.DARK_MODE = False
+            settings.set_property("gtk-application-prefer-dark-theme", conf.DARK_MODE)
+        wMain.writeConfig()
+        # Synchronise le GtkCheckMenuItem du menu Vue
+        mnu_dark = wMain.get_widget("mnu_dark_mode")
+        if mnu_dark:
+            mnu_dark.handler_block_by_func(wMain.on_mnu_dark_mode_toggled)
+            mnu_dark.set_active(conf.DARK_MODE)
+            mnu_dark.handler_unblock_by_func(wMain.on_mnu_dark_mode_toggled)
+
+    # -- Wconfig.on_cancelbutton1_clicked {
     def on_cancelbutton1_clicked(self, widget, *args):
-        self.get_widget("wConfig").destroy()
-    #-- Wconfig.on_cancelbutton1_clicked }
+        """Gestionnaire du bouton Annuler.
 
-    #-- Wconfig.on_okbutton1_clicked {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        self.get_widget("wConfig").destroy()
+
+    # -- Wconfig.on_cancelbutton1_clicked }
+
+    # -- Wconfig.on_okbutton1_clicked {
     def on_okbutton1_clicked(self, widget, *args):
+        """Gestionnaire du bouton OK / Valider.
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         for obj in self.tblGeneral:
             if hasattr(obj, "field"):
                 if isinstance(obj, Gtk.CheckButton):
@@ -3086,116 +8421,192 @@ class Wconfig(SimpleGladeApp):
                 exec("%s=%s" % (obj.field, value))
 
         if self.get_widget("chkDefaultColors1").get_active():
-            conf.FONT_COLOR=""
-            conf.BACK_COLOR=""
+            conf.FONT_COLOR = ""
+            conf.BACK_COLOR = ""
         else:
             conf.FONT_COLOR = self.btnFColor.selected_color
             conf.BACK_COLOR = self.btnBColor.selected_color
 
-        if self.btnFont.selected_font.to_string() != 'monospace' and not self.chkDefaultFont.get_active():
+        if (
+            self.btnFont.selected_font.to_string() != "monospace"
+            and not self.chkDefaultFont.get_active()
+        ):
             conf.FONT = self.btnFont.selected_font.to_string()
         else:
-            conf.FONT = ''
+            conf.FONT = ""
 
-        #Guardar shortcuts
-        scuts={}
+        # Guardar shortcuts
+        scuts = {}
         for x in self.treeModel:
-            if x[0]!='' and x[1]!='':
+            if x[0] != "" and x[1] != "":
                 scuts[x[1]] = [x[0]]
         for x in self.treeModel2:
-            if x[0]!='' and x[1]!='':
+            if x[0] != "" and x[1] != "":
                 scuts[x[1]] = x[0]
         global shortcuts
         shortcuts = scuts
 
-        #Boton donate
-        global wMain
-        if conf.HIDE_DONATE:
-            wMain.get_widget("btnDonate").hide()
-        else:
-            wMain.get_widget("btnDonate").show()
-
         # Update servers window colors
         wMain.updateTree()
 
-        #Recrear menu de comandos personalizados
+        # Recrear menu de comandos personalizados
         wMain.populateCommandsMenu()
+        # Sauvegarder prefs Libvirt
+        if hasattr(self, "_lv_prefs"):
+            self._lv_prefs.apply(conf.__dict__)
+        if hasattr(self, "_serial_tpl_prefs"):
+            self._serial_tpl_prefs.apply()
+
         wMain.writeConfig()
 
         self.get_widget("wConfig").destroy()
-    #-- Wconfig.on_okbutton1_clicked }
 
-    #-- Wconfig.on_btnBColor_clicked {
+    # -- Wconfig.on_okbutton1_clicked }
+
+    # -- Wconfig.on_btnBColor_clicked {
     def on_btnBColor_clicked(self, widget, *args):
-        widget.selected_color = widget.get_color().to_string()
-    #-- Wconfig.on_btnBColor_clicked }
+        """Gestionnaire du bouton couleur d'arriere-plan.
 
-    #-- Wconfig.on_btnFColor_clicked {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        widget.selected_color = widget.get_rgba().to_string()
+
+    # -- Wconfig.on_btnBColor_clicked }
+
+    # -- Wconfig.on_btnFColor_clicked {
     def on_btnFColor_clicked(self, widget, *args):
-        widget.selected_color = widget.get_color().to_string()
-    #-- Wconfig.on_btnFColor_clicked }
+        """Gestionnaire du bouton couleur de premier plan.
 
-    #-- Wconfig.on_chkDefaultColors_toggled {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        widget.selected_color = widget.get_rgba().to_string()
+
+    # -- Wconfig.on_btnFColor_clicked }
+
+    # -- Wconfig.on_chkDefaultColors_toggled {
     def on_chkDefaultColors_toggled(self, widget, *args):
+        """Gestionnaire du toggle Couleurs par defaut.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
         self.btnFColor.set_sensitive(not widget.get_active())
         self.btnBColor.set_sensitive(not widget.get_active())
-    #-- Wconfig.on_chkDefaultColors_toggled }
 
-    #-- Wconfig.on_chkDefaultFont_toggled {
+    # -- Wconfig.on_chkDefaultColors_toggled }
+
+    # -- Wconfig.on_chkDefaultFont_toggled {
     def on_chkDefaultFont_toggled(self, widget, *args):
+        """Gestionnaire du toggle Police par defaut.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+        """
         self.btnFont.set_sensitive(not widget.get_active())
         self.lblFont.set_sensitive(not widget.get_active())
-    #-- Wconfig.on_chkDefaultFont_toggled }
 
-    #-- Wconfig.on_btnFont_clicked {
+    # -- Wconfig.on_chkDefaultFont_toggled }
+
+    # -- Wconfig.on_btnFont_clicked {
     def on_btnFont_clicked(self, widget, *args):
-        show_font_dialog(self, _("Seleccione la fuente"), self.btnFont)
-    #-- Wconfig.on_btnFont_clicked }
+        """Gestionnaire du bouton Police.
 
-    #-- Wconfig.on_treeCommands_key_press_event {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        show_font_dialog(self, _("Select font"), self.btnFont)
+
+    # -- Wconfig.on_btnFont_clicked }
+
+    # -- Wconfig.on_treeCommands_key_press_event {
     def on_treeCommands_key_press_event(self, widget, event, *args):
-        if self.capture_keys and len(args)==3 and (event.keyval != Gdk.KEY_Return or
-                                                   event.state != 0):
+        """Gestionnaire de touche dans la liste des commandes.
+
+        Args:
+            widget (Gtk.TreeView): Widget source.
+            event (Gdk.EventKey): Evenement clavier.
+        """
+        if (
+            self.capture_keys
+            and len(args) == 3
+            and (event.keyval != Gdk.KEY_Return or event.state != 0)
+        ):
             model, rownum, colnum = args
             key = get_key_name(event)
-            if key not in ['RETURN', 'KP_ENTER']:
+            if key not in ["RETURN", "KP_ENTER"]:
                 widget.set_text(get_key_name(event))
-    #-- Wconfig.on_treeCommands_key_press_event }
+
+    # -- Wconfig.on_treeCommands_key_press_event }
 
 
-class Wcluster(SimpleGladeApp):
-    def __init__(self, path="gnome-connection-manager.glade",
-                 root="wCluster",
-                 domain=domain_name, terms=None, **kwargs):
+class Wcluster(GCMBase):
+    def __init__(
+        self,
+        path="gnome-connection-manager.glade",
+        root="wCluster",
+        domain=domain_name,
+        terms=None,
+        **kwargs,
+    ):
+        """Initialise l'instance.
+
+        Args:
+            path: Parametre path.
+            root: Parametre root.
+            domain: Parametre domain.
+            terms: Parametre terms.
+        """
         self.terms = terms
         path = os.path.join(glade_dir, path)
-        SimpleGladeApp.__init__(self, path, root, domain, parent=wMain.window)
+        GCMBase.__init__(self, path, root, domain, parent=wMain.window)
 
-    #-- Wcluster.new {
+    # -- Wcluster.new {
     def new(self):
-        self.treeHosts = self.get_widget('treeHosts')
-        self.treeStore = Gtk.TreeStore( GObject.TYPE_BOOLEAN, GObject.TYPE_STRING, GObject.TYPE_OBJECT )
+        """Cree et retourne une nouvelle instance depuis le fichier Glade.
+
+        Returns:
+            instance: Nouvelle instance de la classe.
+        """
+        self.treeHosts = self.get_widget("treeHosts")
+        self.treeStore = Gtk.TreeStore(
+            GObject.TYPE_BOOLEAN, GObject.TYPE_STRING, GObject.TYPE_OBJECT
+        )
         for x in self.terms:
-            self.treeStore.append( None, (False, x[0], x[1]) )
-        self.treeHosts.set_model( self.treeStore )
+            self.treeStore.append(None, (False, x[0], x[1]))
+        self.treeHosts.set_model(self.treeStore)
 
         crt = Gtk.CellRendererToggle()
-        crt.set_property('activatable', True)
-        crt.connect('toggled', self.on_active_toggled)
-        col = Gtk.TreeViewColumn(_("Activar"), crt, active=0)
-        self.treeHosts.append_column( col )
-        self.treeHosts.append_column(Gtk.TreeViewColumn(_("Host"), Gtk.CellRendererText(), text=1 ))
+        crt.set_property("activatable", True)
+        crt.connect("toggled", self.on_active_toggled)
+        col = Gtk.TreeViewColumn(_("Activate"), crt, active=0)
+        self.treeHosts.append_column(col)
+        self.treeHosts.append_column(Gtk.TreeViewColumn(_("Host"), Gtk.CellRendererText(), text=1))
         self.get_widget("txtCommands1").history = []
-    #-- Wcluster.new }
 
-    #-- Wcluster custom methods {
+    # -- Wcluster.new }
+
+    # -- Wcluster custom methods {
     #   Write your own methods here
 
     def on_active_toggled(self, widget, path):
+        """Gestionnaire de bascule d'activation d'un terminal cluster.
+
+        Args:
+            widget (Gtk.CheckButton): Bouton bascule.
+            path (str): Chemin dans le modele.
+        """
         self.treeStore[path][0] = not self.treeStore[path][0]
         self.change_color(self.treeStore[path][2], self.treeStore[path][0])
 
     def change_color(self, term, activate):
+        """Change la couleur d'un terminal dans la liste cluster.
+
+        Args:
+            widget (Gtk.ColorButton): Bouton couleur.
+            path (str): Chemin dans le modele.
+        """
         obj = term.get_parent()
         if obj == None:
             return
@@ -3204,54 +8615,95 @@ class Wcluster(SimpleGladeApp):
             return
         nb.get_tab_label(obj).set_selected(activate)
 
-    #-- Wcluster custom methods }
+    # -- Wcluster custom methods }
 
-    #-- Wcluster.on_wCluster_destroy {
+    # -- Wcluster.on_wCluster_destroy {
     def on_wCluster_destroy(self, widget, *args):
+        """Gestionnaire de destruction de la fenetre cluster.
+
+        Args:
+            widget (Gtk.Window): Fenetre detruite.
+        """
         self.on_btnNone_clicked(None)
-    #-- Wcluster.on_wCluster_destroy }
 
-    #-- Wcluster.on_cancelbutton2_clicked {
+    # -- Wcluster.on_wCluster_destroy }
+
+    # -- Wcluster.on_cancelbutton2_clicked {
     def on_cancelbutton2_clicked(self, widget, *args):
-        self.get_widget("wCluster").destroy()
-    #-- Wcluster.on_cancelbutton2_clicked }
+        """Gestionnaire du bouton Annuler (cluster).
 
-    #-- Wcluster.on_btnAll_clicked {
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
+        self.get_widget("wCluster").destroy()
+
+    # -- Wcluster.on_cancelbutton2_clicked }
+
+    # -- Wcluster.on_btnAll_clicked {
     def on_btnAll_clicked(self, widget, *args):
+        """Gestionnaire du bouton Tout selectionner (cluster).
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         for x in self.treeStore:
             x[0] = True
             self.change_color(x[2], x[0])
-    #-- Wcluster.on_btnAll_clicked }
 
-    #-- Wcluster.on_btnNone_clicked {
+    # -- Wcluster.on_btnAll_clicked }
+
+    # -- Wcluster.on_btnNone_clicked {
     def on_btnNone_clicked(self, widget, *args):
+        """Gestionnaire du bouton Tout deselectionner (cluster).
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         for x in self.treeStore:
             x[0] = False
             self.change_color(x[2], x[0])
-    #-- Wcluster.on_btnNone_clicked }
 
-    #-- Wcluster.on_btnInvert_clicked {
+    # -- Wcluster.on_btnNone_clicked }
+
+    # -- Wcluster.on_btnInvert_clicked {
     def on_btnInvert_clicked(self, widget, *args):
+        """Gestionnaire du bouton Inverser la selection (cluster).
+
+        Args:
+            widget (Gtk.Button): Bouton clique.
+        """
         for x in self.treeStore:
             x[0] = not x[0]
             self.change_color(x[2], x[0])
-    #-- Wcluster.on_btnInvert_clicked }
 
-    #-- Wcluster.on_txtCommands_key_press_event {
+    # -- Wcluster.on_btnInvert_clicked }
+
+    # -- Wcluster.on_txtCommands_key_press_event {
     def on_txtCommands_key_press_event(self, widget, event, *args):
-        if not event.state & Gdk.ModifierType.CONTROL_MASK and Gdk.keyval_name(event.keyval).upper() == 'RETURN':
-           buf = widget.get_buffer()
-           text = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
-           buf.set_text('')
-           for x in self.treeStore:
-               if x[0]:
-                   vte_feed(x[2], text + '\r')
-           widget.history.append(text)
-           widget.history_index = -1
-           return True
-        if event.state & Gdk.ModifierType.CONTROL_MASK and Gdk.keyval_name(event.keyval).upper() in ['UP','DOWN']:
+        """Gestionnaire de touche dans la zone de commandes cluster.
+
+        Args:
+            widget (Gtk.TextView): Widget source.
+            event (Gdk.EventKey): Evenement clavier.
+        """
+        if (
+            not event.state & Gdk.ModifierType.CONTROL_MASK
+            and Gdk.keyval_name(event.keyval).upper() == "RETURN"
+        ):
+            buf = widget.get_buffer()
+            text = buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False)
+            buf.set_text("")
+            for x in self.treeStore:
+                if x[0]:
+                    vte_feed(x[2], text + "\r")
+            widget.history.append(text)
+            widget.history_index = -1
+            return True
+        if event.state & Gdk.ModifierType.CONTROL_MASK and Gdk.keyval_name(
+            event.keyval
+        ).upper() in ["UP", "DOWN"]:
             if len(widget.history) > 0:
-                if Gdk.keyval_name(event.keyval).upper() == 'UP':
+                if Gdk.keyval_name(event.keyval).upper() == "UP":
                     widget.history_index -= 1
                     if widget.history_index < -1:
                         widget.history_index = len(widget.history) - 1
@@ -3259,268 +8711,91 @@ class Wcluster(SimpleGladeApp):
                     widget.history_index += 1
                     if widget.history_index >= len(widget.history):
                         widget.history_index = -1
-                widget.get_buffer().set_text(widget.history[widget.history_index] if widget.history_index>=0 else '')
-    #-- Wcluster.on_txtCommands_key_press_event }
+                widget.get_buffer().set_text(
+                    widget.history[widget.history_index] if widget.history_index >= 0 else ""
+                )
+
+    # -- Wcluster.on_txtCommands_key_press_event }
 
 
-class NotebookTabLabel(Gtk.HBox):
-    '''Notebook tab label with close button.
-    '''
-    def __init__(self, title, owner_, widget_, popup_):
-        Gtk.HBox.__init__(self, homogeneous=False, spacing=0)
-
-        self.title = title
-        self.owner = owner_
-        self.eb = Gtk.EventBox()
-        label = self.label = Gtk.Label()
-        self.eb.connect('button-press-event', self.popupmenu, label)
-        label.halign=0
-        label.valign=0.5
-        label.set_text(title)
-        self.eb.add(label)
-        self.pack_start(self.eb, True, True, 0)
-        label.show()
-        self.eb.show()
-        close_image = Gtk.Image.new_from_icon_name("window-close", Gtk.IconSize.MENU)
-        _, image_w, image_h = Gtk.icon_size_lookup(Gtk.IconSize.MENU)
-        self.widget_=widget_
-        self.popup = popup_
-        close_btn = Gtk.Button()
-        close_btn.set_relief(Gtk.ReliefStyle.NONE)
-        close_btn.connect('clicked', self.on_close_tab, owner_)
-        close_btn.set_size_request(image_w+7, image_h+6)
-        close_btn.add(close_image)
-        #style = close_btn.get_style();
-        self.eb2 = Gtk.EventBox()
-        self.eb2.add(close_btn)
-        self.pack_start(self.eb2, False, False, 0)
-        self.eb2.show()
-        close_btn.show_all()
-        self.is_active = True
-        self.eb.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
-        self.eb2.add_events(Gdk.EventMask.SCROLL_MASK | Gdk.EventMask.SMOOTH_SCROLL_MASK) #let the scroll-event pass through
-        self.show()
-
-    def set_selected(self, sel):
-        if sel:
-            self.get_style_context().add_class("selected")
-        else:
-            self.get_style_context().remove_class("selected")
-
-    def on_close_tab(self, widget, notebook, *args):
-        if conf.CONFIRM_ON_CLOSE_TAB and msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) != Gtk.ResponseType.OK:
-            return True
-
-        self.close_tab(widget)
-
-    def close_tab(self, widget):
-        notebook = self.widget_.get_parent()
-        page=notebook.page_num(self.widget_)
-        if page >= 0:
-            notebook.is_closed = True
-            notebook.remove_page(page)
-            notebook.is_closed = False
-            self.widget_.destroy()
-
-    def mark_tab_as_closed(self):
-        self.label.set_markup("<span color='darkgray' strikethrough='true'>%s</span>" % (self.label.get_text()))
-        self.is_active = False
-        if conf.AUTO_CLOSE_TAB != 0:
-            if conf.AUTO_CLOSE_TAB == 2:
-                terminal = self.widget_.get_parent().get_nth_page(self.widget_.get_parent().page_num(self.widget_)).get_child()
-                if terminal.get_child_exit_status() != 0:
-                    return
-            self.close_tab(self.widget_)
-
-    def mark_tab_as_active(self):
-        self.label.set_markup("%s" % (self.label.get_text()))
-        self.is_active = True
-
-    def get_text(self):
-        return self.label.get_text()
-
-    def popupmenu(self, widget, event, label):
-        if event.type == Gdk.EventType.BUTTON_PRESS and event.button == 3:
-            self.popup.label = self.label
-            if self.is_active:
-                self.popup.mnuReopen.hide()
-            else:
-                self.popup.mnuReopen.show()
-
-            # show/hide split menu
-            nb = self.widget_.get_parent()
-            if nb.get_n_pages() > 1:
-                self.popup.mnuSplitH.show()
-                self.popup.mnuSplitV.show()
-            else:
-                self.popup.mnuSplitH.hide()
-                self.popup.mnuSplitV.hide()
-
-            #enable or disable log checkbox according to terminal 
-            self.popup.mnuLog.set_active( hasattr(self.widget_.get_children()[0], "log_handler_id") and self.widget_.get_children()[0].log_handler_id != 0 )
-            self.popup.popup( None, None, None, None, event.button, event.time)
-            return True
-        elif event.type == Gdk.EventType.BUTTON_PRESS and event.button == 2:
-            if conf.CONFIRM_ON_CLOSE_TAB_MIDDLE and msgconfirm("%s [%s]?" % ( _("Cerrar consola"), self.label.get_text().strip()) ) != Gtk.ResponseType.OK:
-                return True
-            self.close_tab(self.widget_)
-
-class EntryDialog( Gtk.Dialog):
-    def __init__(self, title, message, default_text='', modal=True, mask=False):
-        Gtk.Dialog.__init__(self)
-        self.set_title(title)
-        self.connect("destroy", self.quit)
-        self.connect("delete_event", self.quit)
-        if modal:
-            self.set_modal(True)
-        box = Gtk.VBox(spacing=10)
-        box.set_border_width(10)
-        self.vbox.pack_start(box, True, True, 0)
-        box.show()
-        if message:
-            label = Gtk.Label(label=message)
-            box.pack_start(label, True, True, 0)
-            label.show()
-        self.entry = Gtk.Entry()
-        self.entry.set_text(default_text)
-        self.entry.set_visibility(not mask)
-        box.pack_start(self.entry, True, True, 0)
-        self.entry.show()
-        self.entry.grab_focus()
-        button = Gtk.Button(stock=Gtk.STOCK_OK)
-        button.connect("clicked", self.click)
-        self.entry.connect("activate", self.click)
-        button.set_can_default(True)
-        self.action_area.pack_start(button, True, True, 0)
-        button.show()
-        button.grab_default()
-        button = Gtk.Button(stock=Gtk.STOCK_CANCEL)
-        button.connect("clicked", self.quit)
-        button.set_can_default(True)
-        self.action_area.pack_start(button, True, True, 0)
-        button.show()
-        self.ret = None
-
-    def quit(self, w=None, event=None):
-        self.hide()
-        self.destroy()
-
-    def click(self, button):
-        self.value = self.entry.get_text()
-        self.response(Gtk.ResponseType.OK)
-
-
-
-class CellTextView(Gtk.TextView, Gtk.CellEditable):
-
-    __gtype_name__ = "CellTextView"
-
-    __gproperties__ = {
-            'editing-canceled': (bool, 'Editing cancelled', 'Editing was cancelled', False, GObject.ParamFlags.READWRITE),
-        }
-
-    def do_editing_done(self, *args):
-        self.remove_widget()
-
-    def do_remove_widget(self, *args):
-        pass
-
-    def do_start_editing(self, *args):
-        pass
-
-    def get_text(self):
-        text_buffer = self.get_buffer()
-        bounds = text_buffer.get_bounds()
-        return text_buffer.get_text(*bounds, include_hidden_chars=True)
-
-    def set_text(self, text):
-        self.get_buffer().set_text(text)
-
-
-class MultilineCellRenderer(Gtk.CellRendererText):
-
-    __gtype_name__ = "MultilineCellRenderer"
-
-    def __init__(self):
-        Gtk.CellRendererText.__init__(self)
-        self._in_editor_menu = False
-
-    def _on_editor_focus_out_event(self, editor, *args):
-        if self._in_editor_menu: return
-        editor.remove_widget()
-        self.emit("editing-canceled")
-
-    def _on_editor_key_press_event(self, editor, event):
-        if event.state & (Gdk.ModifierType.SHIFT_MASK | Gdk.ModifierType.CONTROL_MASK): return
-        if event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
-            editor.remove_widget()
-            self.emit("edited", editor.path, editor.get_text())
-        elif event.keyval == Gdk.KEY_Escape:
-            editor.remove_widget()
-            self.emit("editing-canceled")
-
-    def _on_editor_populate_popup(self, editor, menu):
-        self._in_editor_menu = True
-        def on_menu_unmap(menu, self):
-            self._in_editor_menu = False
-        menu.connect("unmap", on_menu_unmap, self)
-
-    def _on_editor_pressed(self, editor, menu):
-        #avoid bug: gtk_text_mark_get_buffer: assertion 'GTK_IS_TEXT_MARK (mark)' failed
-        return True
-
-    def do_start_editing(self, event, widget, path, bg_area, cell_area, flags):
-        editor = CellTextView()
-        editor.modify_font(self.props.font_desc)
-        editor.set_text(self.props.text)
-        editor.set_size_request(cell_area.width, cell_area.height)
-        editor.set_border_width(min(self.props.xpad, self.props.ypad))
-        editor.path = path
-        editor.connect("focus-out-event", self._on_editor_focus_out_event)
-        editor.connect("key-press-event", self._on_editor_key_press_event)
-        editor.connect("populate-popup", self._on_editor_populate_popup)
-        editor.connect("button-press-event", self._on_editor_pressed)
-        editor.show()
-        return editor
-
-
-from threading import Thread
 class CheckUpdates(Thread):
-
     def __init__(self, p):
+        """Initialise l'instance.
+
+        Args:
+            p: Parametre p.
+        """
         Thread.__init__(self)
         self.parent = p
 
     def msg(self, text, parent):
-        self.msgBox = Gtk.MessageDialog(parent=parent, modal=True, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK, text=text)
+        """Envoie une notification.
+
+        Args:
+            title (str): Titre de la notification.
+            body (str): Corps du message.
+        """
+        self.msgBox = Gtk.MessageDialog(
+            parent=parent,
+            modal=True,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text=text,
+        )
         self.msgBox.set_icon_from_file(ICON_PATH)
-        self.msgBox.connect('response', self.on_clicked)
+        self.msgBox.connect("response", self.on_clicked)
         self.msgBox.show_all()
         return False
 
     def on_clicked(self, *args):
+        """Gestionnaire de clic sur la notification.
+
+        Args:
+            notification (object): Notification source.
+            action (str): Action declenchee.
+        """
         self.msgBox.destroy()
 
     def run(self):
+        """Execute la boucle de notifications."""
         try:
-            import urllib.request as urllib, socket
+            import socket
+            import urllib.request as urllib
+
             socket.setdefaulttimeout(5)
-            web = urllib.urlopen('http://kuthulu.com/gcm/_current.html')
-            if web.getcode()==200:
-                new_version = web.readline().strip().decode('utf-8')
-                if len(new_version)>0 and new_version > app_version:
-                    self.tag = GLib.timeout_add(0, self.msg, "%s\n\nCURRENT VERSION: %s\nNEW VERSION: %s" % (_("Hay una nueva version disponible en http://kuthulu.com/gcm/?module=download"), app_version, new_version), self.parent.get_widget("wMain"))
-        except Exception as e:
+            web = urllib.urlopen(
+                "https://raw.githubusercontent.com/MathildeDec/gnome-connection-manager/develop/_current.html"
+            )
+            if web.getcode() == 200:
+                new_version = web.readline().strip().decode("utf-8")
+                if len(new_version) > 0 and new_version > app_version:
+                    self.tag = GLib.timeout_add(
+                        0,
+                        self.msg,
+                        "%s\n\nCURRENT VERSION: %s\nNEW VERSION: %s"
+                        % (
+                            _(
+                                "A new version is available: https://github.com/MathildeDec/gnome-connection-manager/releases"
+                            ),
+                            app_version,
+                            new_version,
+                        ),
+                        self.parent.get_widget("wMain"),
+                    )
+        except Exception:
             pass
 
-#-- main {
+
+# -- main {
+
 
 def main():
+    """Point d'entree principal de l'application GCM."""
     w_main = Wmain()
     w_main.run()
+
 
 if __name__ == "__main__":
     main()
 
-#-- main }
-
+# -- main }

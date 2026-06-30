@@ -1,0 +1,19 @@
+services:
+  rdesktop:
+    image: lscr.io/linuxserver/rdesktop:ubuntu-xfce
+    container_name: rdesktop
+    security_opt:
+      - seccomp:unconfined #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock #optional
+      - ./data:/config #optional
+    ports:
+      - 3389:3389
+    devices:
+      - /dev/dri:/dev/dri #optional
+    shm_size: "1gb" #optional
+    restart: unless-stopped

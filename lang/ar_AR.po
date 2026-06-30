@@ -1,0 +1,1173 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "حفظ"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "فتح"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "في الانتظار…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "اتصال"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "قطع الاتصال"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "خيارات xfreerdp:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "سجل xfreerdp:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp غير موجود"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "جارٍ الاتصال…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "انتهت الجلسة"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "انتهى (الرمز {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "المنفذ التسلسلي:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "مثال: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "معدل البود:"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "سرعة الإرسال بالبود"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "القالب:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "تحميل إعدادات تسلسلية موصى بها من الشركة المصنعة"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "بتات البيانات:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "عدد بتات البيانات لكل بايت (8 = قياسي)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "التماثل:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "بت التماثل: لا يوجد (N) = قياسي، زوجي (E)، فردي (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "بتات التوقف:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "بتات التوقف: 1 = قياسي، 2 = RS-485 / أجهزة قديمة"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "التحكم في التدفق:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"التحكم في التدفق:\n"
+"  بلا = وحدة تحكم قياسية\n"
+"  XON/XOFF = برمجي (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = عتادي (كابل كامل)\n"
+"  DSR/DTR = عتاد قديم"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"خيارات خام إضافية تُمرَّر إلى البرنامج\n"
+"مثال: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "استيراد من libvirt"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "مستخدم SSH للمحاكي الافتراضي:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "المحاكيات الافتراضية (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "تم اكتشاف عنوان URI لـ libvirt"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+msgstr ""
+"مثال: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "إضافة"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>أنواع الاتصال المراد استيرادها:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (ProxyJump -J عبر المحاكي الافتراضي عندما يكون عنوان IP للجهاز "
+"الافتراضي معروفًا، وإلا فاستخدام واجهة المحاكي + -t ssh user@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - يتم التعامل مع نفق SSH "
+"تلقائيًا)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (فحص المنفذ 3389 من المحاكي الافتراضي عبر nc/nmap - يتم التجاوز إذا كان"
+" المنفذ مغلقًا)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  فحص المحاكيات الافتراضية"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "استبدال الاتصالات الحالية بنفس الاسم والبروتوكول"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ تحديد الكل"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ إلغاء تحديد الكل"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "البروتوكول"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "اسم الجهاز الافتراضي"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "المجموعة"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / المضيف"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "الحالة"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "تم الاستيراد"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  استيراد المحدد"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  إغلاق"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"لم يتم العثور على عنوان URI في dconf (هل virt-manager غير مُهيأ؟).\n"
+"أضف عناوين URI يدويًا أدناه."
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "هدف libvirt غير صالح."
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "لم يتم تحديد عنوان URI."
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "لم يتم تحديد نوع الاتصال."
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  إعادة الفحص"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr "لا يوجد اتصال للاستيراد (الكل موجود مسبقًا أو لم يتم تحديد أي شيء)."
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ تم الاستيراد"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  فحص مضيفي Proxmox"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "أهداف Proxmox المكتشفة (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "هدف Proxmox مكتشف"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "إضافة هدف Proxmox:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "مثال: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (غير متاح هنا: يتطلب Proxmox تذكرة/وكيل API)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"لم يتم العثور على عنوان URI لـ SSH في dconf.\n"
+"أدخل عنوان IP/مضيف أدناه وانقر فوق إضافة."
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "هدف Proxmox غير صالح."
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "لم يتم تحديد هدف Proxmox."
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>انقر نقرًا مزدوجًا على خلية لتحريرها.\n"
+"تنسيق الملف: <tt>[serial_templates]</tt> في <tt>gcm.conf</tt>\n"
+"<tt>جهازي = 9600,n,n,8,1</tt>  (البود، التدفق، التماثل، البتات، التوقف)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "اسم القالب"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "معدل البود"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "التدفق"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "التماثل"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "بتات البيانات"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "التوقف"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ إضافة"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− إزالة"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "استعادة الإعدادات الافتراضية"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "قوالب تسلسلية"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "قالب جديد"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "مستخدم SSH الافتراضي (الأجهزة الافتراضية):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "بحث..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "إعادة تسمية علامة التبويب"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "أدخل اسمًا جديدًا"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr "وضع التسجيل المستمر نشط ولا يمكن تعطيله لكل علامة تبويب."
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "نسخ"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "لصق"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "نسخ ولصق"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "تحديد الكل"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "نسخ الكل"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "حفظ المخزن المؤقت في ملف"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "تقسيم أفقي"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "تقسيم عمودي"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "إعادة ضبط وحدة التحكم"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "إعادة ضبط ومسح وحدة التحكم"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4674
+msgid "Clone console"
+msgstr "نسخ وحدة التحكم"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "تمكين التسجيل"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "إغلاق وحدة التحكم"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "أوامر مخصصة"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "نسخ العنوان"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "إضافة مضيف"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "تحرير"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "إزالة"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "تكرار المضيف"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "توسيع الكل"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "طي الكل"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "إعادة الاتصال بالمضيف"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "لم يتم استيراد أي مضيف."
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "لا يوجد مضيف جديد (تم تجاهل التكرارات)."
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "تعذر فتح ملف السجل للكتابة"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "خطأ في الاتصال بالخادم"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "إدخال غير صالح في ملف التكوين"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "حفظ باسم"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "تعذر فتح الملف للكتابة"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "يوجد"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "وحدة تحكم مفتوحة، أتريد الخروج على أي حال؟"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "استيراد الخوادم"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "أدخل كلمة المرور"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "كلمة مرور غير صالحة"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "ستتم استبدال قائمة الخوادم، هل تريد الاستمرار؟"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "ملف غير صالح"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "تصدير الخوادم"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "هل تريد بالفعل إزالة المضيف"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "هل تريد بالفعل إزالة جميع المضيفين في المجموعة"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "لا توجد وحدات تحكم مفتوحة"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "محلي"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "المضيف"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "بعيد"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "الحقول المجموعة والاسم والمضيف مطلوبة"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "منفذ غير صالح"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "اسم المضيف"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "موجود بالفعل للمجموعة"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "خطأ في حفظ المضيف. الوصف"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "أدخل المضيف البعيد"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "المنفذ المحلي مخصص بالفعل"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "فاصل الكلمات"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "حجم المخزن المؤقت"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "الشفافية"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "مسار السجلات"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "وضع تسجيل علامات تبويب VTE المستمر"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "فتح وحدة التحكم المحلية عند بدء التشغيل"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "تسجيل جلسات وحدة التحكم المحلية"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "اللصق بالنقر بزر الماوس الأيمن"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "نسخ التحديد إلى الحافظة"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "التأكيد عند إغلاق وحدة التحكم"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "التأكيد عند إغلاق وحدة التحكم بالنقر الأوسط"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "التنقل الدائري بين علامات التبويب عند الذهاب إلى السابق/التالي"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "أبدًا"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "دائمًا"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "فقط عند الخروج النظيف"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "التأكيد عند الخروج"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "التحقق من التحديثات"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "تعطيل الأشرطة المتناوبة في نافذة المضيفين"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "عنوان ديناميكي"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "العنوان"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "الإجراء"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "اختصار"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "الأمر"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "تحديد الخط"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "تفعيل"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "حسناً"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"يتوفر إصدار جديد: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"هذا هو gnome-connection-manager، كتبه وصيانته\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - تشيلي"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "مدير اتصال SSH بسيط لـ Gnome"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "الصفحة الرئيسية للمشروع"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "المجموعة"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "إغلاق"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "حدد وحدات التحكم المراد استخدامها:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "مسح التحديد"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "عكس التحديد"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "أدخل النص المراد إرساله إلى وحدات التحكم: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">CTRL+أعلى/CTRL+أسفل للسجل</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "الإعدادات"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "عام"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "لون الخلفية:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "لون المقدمة:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "تحديد لون الخلفية"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "تحديد لون المقدمة"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "الألوان الافتراضية"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "استخدام خط ذو عرض ثابت افتراضي"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "الخط:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "الألوان"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "الأوامر القياسية"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "أوامر مخصصة"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "الاختصارات"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "تحرير المضيف"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "الاسم"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "الوصف"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "النوع"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "المنفذ"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "المستخدم"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "المفتاح الخاص"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "لإنشاء مجموعات فرعية، استخدم الصيغة group1/group2/group3"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "تسلسلي"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "محلي"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "اتركه فارغًا للمصادقة بدون كلمة مرور / بالمفتاح العام"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "إعادة توجيه X11"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "إعادة توجيه الوكيل"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "الضغط"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "وسائط إضافية"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "تمكين التسجيل"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "ثوانٍ بين حزم keep-alive"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"مستوى الضغط: \n"
+"فارغ: الضغط الافتراضي\n"
+"1: الحد الأدنى\n"
+"9: الحد الأقصى"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "وسائط إضافية تُمرَّر إلى سطر الأوامر"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "الخصائص"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "ديناميكي"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "إنشاء إعادة توجيه منفذ ديناميكي"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "المنفذ المحلي"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "المضيف البعيد"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "المنفذ البعيد"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "إعادة توجيه المنفذ"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "إرسال أوامر بعد تسجيل الدخول"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>استخدم ##D=ميلي ثانية لإضافة تأخير.\n"
+"مثال: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "الأوامر"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "تسلسلات المفاتيح"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "مفتاح المسافة للخلف:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "حذف:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "تلقائي"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "مسافة للخلف ASCII \t[Ctrl+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "حذف ASCII       \t[Ctrl+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "تسلسل الحذف \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "محو TTY"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "الألوان والمفاتيح"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "Gnome Connection Manager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_ملف"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "حفظ المخزن المؤقت لوحدة التحكم النشطة في ملف"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "حفظ المخزن المؤقت باسم"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "استيراد قائمة الخوادم من ملف"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "ا_ستيراد الخوادم"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "تصدير قائمة الخوادم إلى ملف"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "ت_صدير الخوادم"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "استيراد من Proxmox"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_خروج"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_تحرير"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_عرض"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "إظهار شريط الأدوات"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "إظهار اللوحة"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "ال_خوادم"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_مساعدة"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_حول"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "فتح وحدة التحكم المحلية"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr "الاتصال بالمضيف المحدد أو جميع المضيفين في المجموعة المحددة"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "إضافة مضيف جديد"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "تحرير خصائص المضيفين"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "إزالة المضيف المحدد"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "تقسيم وحدة التحكم أفقيًا"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "تقسيم وحدة التحكم عموديًا"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "إلغاء تقسيم جميع وحدات التحكم"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "إرسال أوامر إلى عدة مضيفين في نفس الوقت"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "تسمية"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "صفحة 1"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "صفحة 2"

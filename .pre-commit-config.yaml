@@ -1,0 +1,71 @@
+# .pre-commit-config.yaml — GCM v1.3+
+# Hooks exécutés avant chaque `git commit`.
+# Installation : pre-commit install
+# Mise à jour   : pre-commit autoupdate
+# Exécution manuelle sur tous les fichiers : pre-commit run --all-files
+
+repos:
+
+  # ── Vérifications générales ────────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: debug-statements        # détecte les `import pdb; pdb.set_trace()`
+
+  # ── Ruff — linter + formateur (Google docstring style) ────────────────────
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.16
+    hooks:
+      # 1. Linter : corrige automatiquement ce qui peut l'être
+      - id: ruff
+        args:
+          - --fix
+          - --exit-non-zero-on-fix   # force un nouveau `git add` après fix auto
+      # 2. Formateur : équivalent black mais intégré à ruff
+      - id: ruff-format
+
+  # ── Black — désactivé : ruff-format gère le formatage (évite conflit de versions) ───────────
+  # - repo: https://github.com/psf/black
+  #   rev: 25.1.0
+  #   hooks:
+  #     - id: black
+  #       language_version: python3
+
+  # ── Flake8 — complémentaire à ruff pour les plugins non couverts ──────────
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8
+        additional_dependencies: []
+        args:
+          - --max-line-length=120
+          - --extend-ignore=E203,W503,W504,E501,E401,E402,E711,E712,E713,E721,E722,E266,F401,F841,F824
+          - --per-file-ignores=urlregex.py:W605 E262,gnome_connection_manager.py:F821
+
+  # ── Validation .po / .mo (gettext) ────────────────────────────────────────
+  - repo: local
+    hooks:
+      - id: validate-po
+        name: validate .po files (msgfmt --check)
+        language: python
+        entry: python3 tools/validate_po.py
+        files: \.po$
+        pass_filenames: true
+
+  # ── Validation XML / Glade / JSON ─────────────────────────────────────────
+  - repo: local
+    hooks:
+      - id: validate-xml-glade-json
+        name: validate XML / Glade / JSON syntax
+        language: python
+        entry: python3 tools/validate_xml_json.py
+        files: \.(glade|xml|json)$
+        pass_filenames: true

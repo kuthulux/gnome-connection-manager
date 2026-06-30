@@ -1,0 +1,1171 @@
+# German translation for gnome-connection-manager
+# Copyright (C) 2026
+# This file is distributed under the same license as the gnome-connection-manager package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-connection-manager\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: 2026-06-11 22:14+0200\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "Speichern"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "Öffnen"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "Warten…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "Verbinden"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "Trennen"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "xfreerdp-Optionen:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "xfreerdp-Protokoll:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp nicht gefunden"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "Verbinde…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "Sitzung beendet"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "Beendet (Code {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "Serieller Port:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "Bsp.: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "Baudrate:"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "Übertragungsgeschwindigkeit in Baud"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "Vorlage:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "Vom Hersteller empfohlene Serielleinstellungen laden"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "Datenbits:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "Anzahl der Datenbits pro Byte (8 = Standard)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "Parität:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "Paritätsbit: Kein (N) = Standard, Gerade (E), Ungerade (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "Stoppbits:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "Stoppbits: 1 = Standard, 2 = RS-485 / ältere Hardware"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "Flusskontrolle:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"Flusskontrolle:\n"
+"  Keine = Standard-Konsole\n"
+"  XON/XOFF = Software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = Hardware (vollständiges Kabel)\n"
+"  DSR/DTR = ältere Hardware"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"Zusätzliche Parameter direkt an das Programm übergeben\n"
+"Bsp.: --logfile /tmp/serial.log  (picocom)\n"
+"       -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "Von libvirt importieren"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "Hypervisor-SSH-Benutzer:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "Hypervisoren (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "Erkannte libvirt-URI"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | qemu+ssh://root@192.168.105.41/"
+"system"
+msgstr ""
+"Bsp.: 192.168.105.41 | root@192.168.105.41 | qemu+ssh://root@192.168.105.41/"
+"system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>Zu importierende Verbindungstypen:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (ProxyJump -J über Hypervisor, wenn VM-IP bekannt, sonst Hypervisor-"
+"Shell + -t ssh benutzer@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH-Tunnel wird "
+"automatisch verwaltet)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (Port 3389 vom Hypervisor über nc/nmap prüfen - übersprungen, wenn "
+"Port geschlossen)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  Hypervisoren scannen"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "Vorhandene Verbindungen mit gleichem Namen und Protokoll überschreiben"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ Alle auswählen"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ Alle abwählen"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "Protokoll"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "VM-Name"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "Gruppe"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / Host"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "Status"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "Importiert"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  Auswahl importieren"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  Schließen"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"Keine URI in dconf gefunden (virt-manager nicht konfiguriert?).\n"
+"Fügen Sie Ihre URIs unten manuell hinzu."
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "Ungültiges libvirt-Ziel."
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "Keine URI ausgewählt."
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "Kein Verbindungstyp ausgewählt."
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  Erneut scannen"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr "Keine Verbindung zum Importieren (alle vorhanden oder keine ausgewählt)."
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ Importiert"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  Proxmox-Hosts scannen"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "Erkannte Proxmox-Ziele (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "Erkanntes Proxmox-Ziel"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "Proxmox-Ziel hinzufügen:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "Bsp.: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (hier nicht verfügbar: Proxmox erfordert API-Ticket/Proxy)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"Keine SSH-URI in dconf gefunden.\n"
+"IP/Host unten eingeben und auf Hinzufügen klicken."
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "Ungültiges Proxmox-Ziel."
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "Kein Proxmox-Ziel ausgewählt."
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>Doppelklick auf eine Zelle zum Bearbeiten.\n"
+"Dateiformat: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>Mein Gerät = 9600,n,n,8,1</tt>  (baud,fluss,parität,bits,stop)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "Vorlagenname"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "Baudrate"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "Fluss"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "Parität"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "Datenbits"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "Stop"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ Hinzufügen"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− Entfernen"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "Standardwerte wiederherstellen"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "Serielle Vorlagen"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "Neue Vorlage"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "Standard-SSH-Benutzer (VMs):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "suchen..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "Reiter umbenennen"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "Neuen Namen eingeben"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr "Kontinuierlicher Protokollmodus ist aktiv und kann nicht pro Reiter deaktiviert werden."
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "Kopieren"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "Einfügen"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "Kopieren und einfügen"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "Alles auswählen"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "Alles kopieren"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "Puffer in Datei speichern"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "Horizontal teilen"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "Vertikal teilen"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "Konsole zurücksetzen"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "Konsole zurücksetzen und leeren"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4679
+msgid "Clone console"
+msgstr "Konsole klonen"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "Protokollierung aktivieren"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "Konsole schließen"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "Benutzerdefinierte Befehle"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "Adresse kopieren"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "Host hinzufügen"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "Entfernen"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "Host duplizieren"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "Alle ausklappen"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "Alle einklappen"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "Erneut mit Host verbinden"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "Kein Host importiert."
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "Kein neuer Host (Duplikate ignoriert)."
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "Protokolldatei kann nicht zum Schreiben geöffnet werden"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "Fehler beim Verbinden mit dem Server"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "Ungültiger Eintrag in der Konfigurationsdatei"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "Speichern unter"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "Datei kann nicht zum Schreiben geöffnet werden"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "Es gibt"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "offene Konsolen, trotzdem beenden?"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "Server importieren"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "Passwort eingeben"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "Ungültiges Passwort"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "Serverliste wird überschrieben, fortfahren?"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "Ungültige Datei"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "Server exportieren"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "Möchten Sie den Host wirklich entfernen"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "Möchten Sie wirklich alle Hosts in der Gruppe entfernen"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "Keine offenen Konsolen"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "Lokal"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "Host"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "Entfernt"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "Die Felder Gruppe, Name und Host sind erforderlich"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "Ungültiger Port"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "Hostname"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "existiert bereits für die Gruppe"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "Fehler beim Speichern des Hosts. Beschreibung"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "Entfernten Host eingeben"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "Lokaler Port bereits vergeben"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "Worttrennzeichen"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "Puffergröße"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "Transparenz"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "Protokollpfad"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "Kontinuierlicher VTE-Reiter-Protokollmodus"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "Lokale Konsole beim Start öffnen"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "Lokale Konsolensitzungen protokollieren"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "Bei Rechtsklick einfügen"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "Auswahl in Zwischenablage kopieren"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "Beim Schließen der Konsole bestätigen"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "Beim Schließen der Konsole per Mittelklick bestätigen"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "Reiter beim Wechsel zum vorherigen/nächsten zyklisch durchlaufen"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "Nie"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "Immer"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "Nur bei sauberem Beenden"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "Beim Beenden bestätigen"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "Auf Aktualisierungen prüfen"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "Abwechselnde Streifen im Host-Fenster deaktivieren"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "Dynamischer Titel"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "Titel"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "Aktion"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "Tastenkürzel"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "Befehl"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "Schriftart auswählen"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "Aktivieren"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "OK"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"Eine neue Version ist verfügbar: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"Dies ist gnome-connection-manager, geschrieben und gepflegt von\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "Ein einfacher SSH-Verbindungsmanager für GNOME"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "Projektwebseite"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "Cluster"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "Schließen"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "Zu verwendende Konsolen auswählen:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "Auswahl aufheben"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "Auswahl umkehren"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "Text zum Senden an Konsolen eingeben: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">STRG+HOCH/STRG+RUNTER für Verlauf</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "Allgemein"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "Hintergrundfarbe:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "Vordergrundfarbe:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "Hintergrundfarbe auswählen"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "Vordergrundfarbe auswählen"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "Standardfarben"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "Standard-Festbreitenschrift verwenden"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "Schriftart:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "Farben"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "Standardbefehle"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "Benutzerdefinierte Befehle"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "Tastenkürzel"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "Host bearbeiten"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "Name"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "Beschreibung"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "Typ"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "Port"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "Benutzer"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "Passwort"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "Privater Schlüssel"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "Zur Erstellung von Untergruppen das Format gruppe1/gruppe2/gruppe3 verwenden"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "seriell"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "lokal"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "Leer lassen für passwortlose Authentifizierung / Authentifizierung per öffentlichem Schlüssel"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "X11-Weiterleitung"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "Agent-Weiterleitung"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "Komprimierung"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "Zusätzliche Argumente"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "Protokollierung aktivieren"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "Sekunden zwischen Keep-Alive-Paketen"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"Komprimierungsstufe: \n"
+"leer: Standardkomprimierung\n"
+"1: min\n"
+"9: max"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "Zusätzliche Argumente für die Befehlszeile"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "Eigenschaften"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "Dynamisch"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "Dynamische Port-Weiterleitung erstellen"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "Lokaler Port"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "Entfernter Host"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "Entfernter Port"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "Port-Weiterleitung"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "Befehle nach der Anmeldung senden"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>##D=Millisekunden verwenden, um eine Verzögerung hinzuzufügen.\n"
+"Bsp.: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "Befehle"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "Tastensequenzen"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "Rücktaste:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "Entf:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "Automatisch"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "ASCII Rücktaste \t[Strg+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "ASCII Entf      \t[Strg+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "Entf-Sequenz    \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "TTY Löschen"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "Farben und Tasten"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "GNOME-Verbindungsmanager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_Datei"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "Aktiven Konsolenpuffer in Datei speichern"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "Puffer speichern unter"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "Serverliste aus Datei importieren"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "_Server importieren"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "Serverliste in Datei exportieren"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "_Server exportieren"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "Von Proxmox importieren"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_Beenden"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_Bearbeiten"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_Ansicht"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "Symbolleiste anzeigen"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "Panel anzeigen"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "_Server"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_Hilfe"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_Über"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "Lokale Konsole öffnen"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr "Mit ausgewähltem Host oder allen Hosts in der ausgewählten Gruppe verbinden"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "Neuen Host hinzufügen"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "Host-Eigenschaften bearbeiten"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "Ausgewählten Host entfernen"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "Konsole horizontal teilen"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "Konsole vertikal teilen"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "Alle Konsolen zusammenführen"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "Befehle gleichzeitig an mehrere Hosts senden"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "Bezeichnung"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "Seite 1"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "Seite 2"

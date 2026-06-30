@@ -96,7 +96,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="label" translatable="yes">Seleccione las consolas a utilizar:</property>
+                <property name="label" translatable="yes">Select consoles to use:</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -175,7 +175,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                                     <property name="can-focus">False</property>
                                     <property name="xpad">0</property>
                                     <property name="ypad">0</property>
-                                    <property name="label" translatable="yes">Seleccionar todo</property>
+                                    <property name="label" translatable="yes">Select all</property>
                                     <property name="use-underline">True</property>
                                     <property name="xalign">0.5</property>
                                     <property name="yalign">0.5</property>
@@ -235,7 +235,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                                     <property name="can-focus">False</property>
                                     <property name="xpad">0</property>
                                     <property name="ypad">0</property>
-                                    <property name="label" translatable="yes">Limpiar selección</property>
+                                    <property name="label" translatable="yes">Clear selection</property>
                                     <property name="use-underline">True</property>
                                     <property name="xalign">0.5</property>
                                     <property name="yalign">0.5</property>
@@ -295,7 +295,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                                     <property name="can-focus">False</property>
                                     <property name="xpad">0</property>
                                     <property name="ypad">0</property>
-                                    <property name="label" translatable="yes">Invertir selección</property>
+                                    <property name="label" translatable="yes">Invert selection</property>
                                     <property name="use-underline">True</property>
                                     <property name="xalign">0.5</property>
                                     <property name="yalign">0.5</property>
@@ -349,7 +349,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="label" translatable="yes">Ingrese el texto a enviar a las consolas: </property>
+                <property name="label" translatable="yes">Enter the text to send to consoles: </property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -384,7 +384,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 <property name="can-focus">False</property>
                 <property name="xpad">0</property>
                 <property name="ypad">0</property>
-                <property name="label" translatable="yes">&lt;span size="smaller"&gt;CTRL+UP/CTRL+DOWN para historial&lt;/span&gt;</property>
+                <property name="label" translatable="yes">&lt;span size="smaller"&gt;CTRL+UP/CTRL+DOWN for history&lt;/span&gt;</property>
                 <property name="use-markup">True</property>
                 <property name="xalign">0.019999999552965164</property>
                 <property name="yalign">0.5</property>
@@ -407,7 +407,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
   </object>
   <object class="GtkDialog" id="wConfig">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Configuración</property>
+    <property name="title" translatable="yes">Settings</property>
     <property name="modal">True</property>
     <property name="type-hint">dialog</property>
     <child internal-child="vbox">
@@ -455,7 +455,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="nbConfig">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
@@ -664,7 +664,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">False</property>
                     <property name="xpad">0</property>
                     <property name="ypad">0</property>
-                    <property name="label" translatable="yes">Color del fondo:</property>
+                    <property name="label" translatable="yes">Background color:</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0.5</property>
                   </object>
@@ -681,7 +681,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">False</property>
                     <property name="xpad">0</property>
                     <property name="ypad">0</property>
-                    <property name="label" translatable="yes">Color del texto:</property>
+                    <property name="label" translatable="yes">Foreground color:</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0.5</property>
                   </object>
@@ -697,7 +697,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
-                    <property name="title" translatable="yes">Seleccione el color de fondo</property>
+                    <property name="title" translatable="yes">Select background color</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -713,7 +713,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
-                    <property name="title" translatable="yes">Seleccione el color del texto</property>
+                    <property name="title" translatable="yes">Select foreground color</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -726,7 +726,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="chkDefaultColors1">
-                    <property name="label" translatable="yes">Usar colores por defecto</property>
+                    <property name="label" translatable="yes">Default colors</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -742,7 +742,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="chkDefaultFont">
-                    <property name="label" translatable="yes">Usar fuente de ancho fijo por defecto</property>
+                    <property name="label" translatable="yes">Use default fixed width font</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -765,7 +765,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">False</property>
                     <property name="xpad">0</property>
                     <property name="ypad">0</property>
-                    <property name="label" translatable="yes">Fuente:</property>
+                    <property name="label" translatable="yes">Font:</property>
                     <property name="xalign">0</property>
                     <property name="yalign">0.5</property>
                   </object>
@@ -819,7 +819,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Colores</property>
+                <property name="label" translatable="yes">Colors</property>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -847,7 +847,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                             <property name="can-focus">False</property>
                             <property name="xpad">0</property>
                             <property name="ypad">0</property>
-                            <property name="label" translatable="yes">Comandos Predefinidos</property>
+                            <property name="label" translatable="yes">Standard Commands</property>
                             <property name="xalign">0.5</property>
                             <property name="yalign">0.5</property>
                           </object>
@@ -892,7 +892,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                             <property name="can-focus">False</property>
                             <property name="xpad">0</property>
                             <property name="ypad">1</property>
-                            <property name="label" translatable="yes">Comandos Personalizados</property>
+                            <property name="label" translatable="yes">Custom Commands</property>
                             <property name="xalign">0.5</property>
                             <property name="yalign">0.5</property>
                           </object>
@@ -931,7 +931,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Atajos</property>
+                <property name="label" translatable="yes">Shortcuts</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -950,7 +950,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
   </object>
   <object class="GtkDialog" id="wHost">
     <property name="can-focus">False</property>
-    <property name="title" translatable="yes">Editar Host</property>
+    <property name="title" translatable="yes">Edit Host</property>
     <property name="modal">True</property>
     <property name="type-hint">dialog</property>
     <child internal-child="vbox">
@@ -998,21 +998,33 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
           </packing>
         </child>
         <child>
-          <object class="GtkNotebook">
+          <object class="GtkNotebook" id="nbHost">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
-              <!-- n-columns=2 n-rows=16 -->
-              <object class="GtkGrid">
+              <object class="GtkScrolledWindow" id="swHostProps">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="row-homogeneous">True</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="min-content-height">400</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <!-- n-columns=2 n-rows=16 -->
+                      <object class="GtkGrid" id="gridHostProps">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-homogeneous">True</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Grupo</property>
+                    <property name="label" translatable="yes">Group</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1024,7 +1036,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Nombre</property>
+                    <property name="label" translatable="yes">Name</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1036,7 +1048,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Descripción</property>
+                    <property name="label" translatable="yes">Description</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1060,7 +1072,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Tipo</property>
+                    <property name="label" translatable="yes">Type</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1072,7 +1084,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Puerto</property>
+                    <property name="label" translatable="yes">Port</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1084,7 +1096,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Usuario</property>
+                    <property name="label" translatable="yes">User</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1108,7 +1120,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Clave Privada</property>
+                    <property name="label" translatable="yes">Private key</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1119,7 +1131,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkComboBoxText" id="cmbGroup">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Usar formato grupo1/grupo2/grupo3 para crear subgrupos</property>
+                    <property name="tooltip-text" translatable="yes">To create subgroups use format group1/group2/group3</property>
                     <property name="margin-start">10</property>
                     <property name="hexpand">True</property>
                     <property name="has-entry">True</property>
@@ -1175,6 +1187,10 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <items>
                       <item id="ssh" translatable="yes">ssh</item>
                       <item id="telnet" translatable="yes">telnet</item>
+                      <item id="rdp" translatable="yes">rdp</item>
+                      <item id="vnc" translatable="yes">vnc</item>
+                      <item id="spice" translatable="yes">spice</item>
+                      <item id="serial" translatable="yes">serial</item>
                       <item id="local" translatable="yes">local</item>
                     </items>
                     <signal name="changed" handler="on_cmbType_changed" swapped="no"/>
@@ -1210,7 +1226,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkEntry" id="txtPassword">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Dejar en blanco para autenticación sin password/public key</property>
+                    <property name="tooltip-text" translatable="yes">Leave blank for passwordless/public key authentication</property>
                     <property name="margin-start">10</property>
                     <property name="visibility">False</property>
                     <property name="invisible-char">●</property>
@@ -1282,7 +1298,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Redirigir X11</property>
+                    <property name="label" translatable="yes">X11 Forwarding</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1294,7 +1310,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Redirigir Agente</property>
+                    <property name="label" translatable="yes">Agent Forwarding</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1303,7 +1319,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="chkCompression">
-                    <property name="label" translatable="yes">Compresión</property>
+                    <property name="label" translatable="yes">Compression</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -1321,7 +1337,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Opciones extra</property>
+                    <property name="label" translatable="yes">Extra arguments</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1333,7 +1349,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Habilitar Log</property>
+                    <property name="label" translatable="yes">Enable Logging</property>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -1356,7 +1372,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkSpinButton" id="txtKeepAlive">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Intervalo en segundos para enviar paquetes keep-alive</property>
+                    <property name="tooltip-text" translatable="yes">Seconds between keep-alive packets</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
@@ -1396,8 +1412,8 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <object class="GtkSpinButton" id="txtCompressionLevel">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Nivel de compresión: 
-blanco: por defecto
+                    <property name="tooltip-text" translatable="yes">Compression level:
+blank: default compression
 1: min
 9: max</property>
                     <property name="margin-start">10</property>
@@ -1411,7 +1427,7 @@ blanco: por defecto
                   <object class="GtkEntry" id="txtExtraParams">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Parámetros extra a pasar a la línea de comandos</property>
+                    <property name="tooltip-text" translatable="yes">Extra arguments to pass to command line</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
@@ -1446,11 +1462,15 @@ blanco: por defecto
                 </child>
               </object>
             </child>
+          </object>
+        </child>
+      </object>
+            </child>
             <child type="tab">
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Propiedades</property>
+                <property name="label" translatable="yes">Properties</property>
               </object>
               <packing>
                 <property name="tab-fill">False</property>
@@ -1473,11 +1493,11 @@ blanco: por defecto
                         <property name="can-focus">False</property>
                         <child>
                           <object class="GtkCheckButton" id="chkDynamic">
-                            <property name="label" translatable="yes">Dinámico</property>
+                            <property name="label" translatable="yes">Dynamic</property>
                             <property name="visible">True</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">False</property>
-                            <property name="tooltip-text" translatable="yes">Crear redirección dinámica de puertos</property>
+                            <property name="tooltip-text" translatable="yes">Create dynamic port forwarding</property>
                             <property name="draw-indicator">True</property>
                             <signal name="toggled" handler="on_chkDynamic_toggled" swapped="no"/>
                           </object>
@@ -1491,7 +1511,7 @@ blanco: por defecto
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Puerto Local</property>
+                            <property name="label" translatable="yes">Local Port</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -1503,7 +1523,7 @@ blanco: por defecto
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Host Remoto</property>
+                            <property name="label" translatable="yes">Remote Host</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -1515,7 +1535,7 @@ blanco: por defecto
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Puerto Remoto</property>
+                            <property name="label" translatable="yes">Remote Port</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -1686,7 +1706,7 @@ blanco: por defecto
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Túnel</property>
+                <property name="label" translatable="yes">Port forwarding</property>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -1700,7 +1720,7 @@ blanco: por defecto
                 <property name="can-focus">False</property>
                 <child>
                   <object class="GtkCheckButton" id="chkCommands">
-                    <property name="label" translatable="yes">Enviar comandos al iniciar sesión</property>
+                    <property name="label" translatable="yes">Send commands after login</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
@@ -1717,8 +1737,8 @@ blanco: por defecto
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">&lt;span size='smaller'&gt;Usar ##D=milisegundos para introducir un delay.
-Ej: ##D=1000&lt;/span&gt;</property>
+                    <property name="label" translatable="yes">&lt;span size='smaller'&gt;Use ##D=milliseconds to add a delay.
+Ex: ##D=1000&lt;/span&gt;</property>
                     <property name="use-markup">True</property>
                   </object>
                   <packing>
@@ -1754,7 +1774,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Comandos</property>
+                <property name="label" translatable="yes">Commands</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -1773,7 +1793,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                     <property name="orientation">vertical</property>
                     <child>
                       <object class="GtkCheckButton" id="chkDefaultColors">
-                        <property name="label" translatable="yes">Usar colores por defecto</property>
+                        <property name="label" translatable="yes">Default colors</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
@@ -1797,7 +1817,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Color del texto:</property>
+                            <property name="label" translatable="yes">Foreground color:</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -1809,7 +1829,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="halign">start</property>
-                            <property name="label" translatable="yes">Color del fondo:</property>
+                            <property name="label" translatable="yes">Background color:</property>
                           </object>
                           <packing>
                             <property name="left-attach">0</property>
@@ -1822,7 +1842,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
                             <property name="margin-start">10</property>
-                            <property name="title" translatable="yes">Seleccione el color del texto</property>
+                            <property name="title" translatable="yes">Select foreground color</property>
                             <signal name="color-set" handler="on_btnFColor_clicked" swapped="no"/>
                           </object>
                           <packing>
@@ -1836,7 +1856,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                             <property name="can-focus">True</property>
                             <property name="receives-default">True</property>
                             <property name="margin-start">10</property>
-                            <property name="title" translatable="yes">Seleccione el color de fondo</property>
+                            <property name="title" translatable="yes">Select background color</property>
                             <signal name="color-set" handler="on_btnBColor_clicked" swapped="no"/>
                           </object>
                           <packing>
@@ -1881,7 +1901,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="halign">start</property>
-                        <property name="label" translatable="yes">Sequencias de Teclas:</property>
+                        <property name="label" translatable="yes">Key sequences</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -1980,12 +2000,785 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Colores y Teclas</property>
+                <property name="label" translatable="yes">Colors and Keys</property>
               </object>
               <packing>
                 <property name="position">3</property>
                 <property name="tab-fill">False</property>
               </packing>
+            </child>
+            <!-- ═══════════════════════ ONGLET RDP ═══════════════════════ -->
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="min-content-height">300</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <!-- n-columns=2 n-rows=6 -->
+                      <object class="GtkGrid" id="gridRdpProps">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-homogeneous">True</property>
+                        <property name="row-spacing">4</property>
+                        <property name="column-spacing">6</property>
+                        <property name="margin-start">8</property>
+                        <property name="margin-end">8</property>
+                        <property name="margin-top">8</property>
+                        <!-- Domain -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Domain</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="rdpTxtDomain">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="margin-start">10</property>
+                            <property name="placeholder-text">CORP</property>
+                            <property name="hexpand">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <!-- Resolution -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Resolution</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="rdpCmbGeometry">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="hexpand">True</property>
+                            <items>
+                              <item id="fullscreen">Fullscreen</item>
+                              <item id="1920x1080">1920×1080</item>
+                              <item id="1280x1024">1280×1024</item>
+                              <item id="1024x768">1024×768</item>
+                              <item id="800x600">800×600</item>
+                              <item id="custom">Custom…</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <!-- Custom WxH -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Width × Height</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="rdpBoxCustomGeo">
+                            <property name="visible">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">4</property>
+                            <property name="margin-start">10</property>
+                            <child>
+                              <object class="GtkEntry" id="rdpTxtWidth">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="width-chars">6</property>
+                                <property name="placeholder-text">1920</property>
+                              </object>
+                              <packing><property name="expand">False</property><property name="fill">False</property><property name="position">0</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label">×</property>
+                              </object>
+                              <packing><property name="expand">False</property><property name="fill">False</property><property name="position">1</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="rdpTxtHeight">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="width-chars">6</property>
+                                <property name="placeholder-text">1080</property>
+                              </object>
+                              <packing><property name="expand">False</property><property name="fill">False</property><property name="position">2</property></packing>
+                            </child>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <!-- cert:ignore -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Ignore certificate</property>
+                            <property name="tooltip-text">/cert:ignore — ne pas valider le certificat TLS du serveur RDP</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">3</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="rdpChkCertIgnore">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">3</property></packing>
+                        </child>
+                        <!-- dynamic-resolution -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Dynamic resolution</property>
+                            <property name="tooltip-text">/dynamic-resolution — résolution suit le redimensionnement de la fenêtre</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">4</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="rdpChkDynRes">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">4</property></packing>
+                        </child>
+                        <!-- RemoteApp -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">RemoteApp (/app:)</property>
+                            <property name="tooltip-text">Lancer une application distante spécifique via /app: (ex: ||mstsc)</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">5</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="rdpTxtRemoteApp">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="margin-start">10</property>
+                            <property name="placeholder-text">||iexplore</property>
+                            <property name="hexpand">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">5</property></packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing><property name="position">4</property></packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">RDP</property>
+              </object>
+              <packing><property name="position">4</property><property name="tab-fill">False</property></packing>
+            </child>
+
+            <!-- ═══════════════════════ ONGLET VNC ═══════════════════════ -->
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="min-content-height">200</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <object class="GtkGrid" id="gridVncProps">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-homogeneous">True</property>
+                        <property name="row-spacing">4</property>
+                        <property name="column-spacing">6</property>
+                        <property name="margin-start">8</property>
+                        <property name="margin-end">8</property>
+                        <property name="margin-top">8</property>
+                        <!-- Viewer -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">VNC viewer</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="vncCmbViewer">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="hexpand">True</property>
+                            <items>
+                              <item id="tigervnc">tigervnc (vncviewer)</item>
+                              <item id="vinagre">vinagre</item>
+                              <item id="remmina">remmina</item>
+                              <item id="krdc">krdc</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <!-- Display number -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Display number</property>
+                            <property name="tooltip-text">Numéro d'affichage X (:0, :1…). Port = 5900 + display. Laissez vide pour utiliser le port directement.</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="vncTxtDisplay">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="margin-start">10</property>
+                            <property name="width-chars">6</property>
+                            <property name="placeholder-text">0</property>
+                            <property name="tooltip-text">0 → port 5900, 1 → port 5901, etc.</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <!-- View only -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">View only</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="vncChkViewOnly">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <!-- Fullscreen -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Fullscreen</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">3</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="vncChkFullscreen">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">3</property></packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing><property name="position">5</property></packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">VNC</property>
+              </object>
+              <packing><property name="position">5</property><property name="tab-fill">False</property></packing>
+            </child>
+
+            <!-- ════════════════════ ONGLET SPICE ════════════════════ -->
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="min-content-height">280</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <object class="GtkBox" id="spiceBox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">6</property>
+                        <property name="margin-start">8</property>
+                        <property name="margin-end">8</property>
+                        <property name="margin-top">8</property>
+                        <!-- Mode radios -->
+                        <child>
+                          <object class="GtkRadioButton" id="spiceRadioUri">
+                            <property name="label" translatable="yes">URI directe  spice://host:port</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                            <property name="active">True</property>
+                            <signal name="toggled" handler="on_spiceRadioUri_toggled" swapped="no"/>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">0</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="spiceRadioLibvirt">
+                            <property name="label" translatable="yes">Tunnel libvirt  virt-viewer --connect URI vm</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                            <property name="group">spiceRadioUri</property>
+                            <signal name="toggled" handler="on_spiceRadioLibvirt_toggled" swapped="no"/>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">1</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="spiceRadioProxmox">
+                            <property name="label" translatable="yes">Proxmox proxy  pvesh spiceproxy</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="draw-indicator">True</property>
+                            <property name="group">spiceRadioUri</property>
+                            <signal name="toggled" handler="on_spiceRadioProxmox_toggled" swapped="no"/>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">2</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkSeparator">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-top">4</property>
+                            <property name="margin-bottom">4</property>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">3</property></packing>
+                        </child>
+                        <!-- URI section -->
+                        <child>
+                          <object class="GtkGrid" id="spiceGridUri">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="row-homogeneous">True</property>
+                            <property name="row-spacing">4</property>
+                            <property name="column-spacing">6</property>
+                            <!-- TLS port -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">TLS port</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtTlsPort">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="width-chars">8</property>
+                                <property name="placeholder-text">5901</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <!-- CA cert -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">CA certificate</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtCaCert">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="hexpand">True</property>
+                                <property name="placeholder-text">/etc/pki/ca-trust/source/anchors/spice-ca.pem</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                            </child>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">4</property></packing>
+                        </child>
+                        <!-- Libvirt section -->
+                        <child>
+                          <object class="GtkGrid" id="spiceGridLibvirt">
+                            <property name="visible">False</property>
+                            <property name="no-show-all">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="row-homogeneous">True</property>
+                            <property name="row-spacing">4</property>
+                            <property name="column-spacing">6</property>
+                            <!-- libvirt URI -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">libvirt URI</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtLibvirtUri">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="hexpand">True</property>
+                                <property name="placeholder-text">qemu+ssh://root@192.168.105.41/system</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <!-- VM name -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">VM name</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtVmName">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="hexpand">True</property>
+                                <property name="placeholder-text">spice-test</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                            </child>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">5</property></packing>
+                        </child>
+                        <!-- Proxmox section -->
+                        <child>
+                          <object class="GtkGrid" id="spiceGridProxmox">
+                            <property name="visible">False</property>
+                            <property name="no-show-all">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="row-homogeneous">True</property>
+                            <property name="row-spacing">4</property>
+                            <property name="column-spacing">6</property>
+                            <!-- Node -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">Proxmox node</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtPxNode">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="hexpand">True</property>
+                                <property name="placeholder-text">DOCKER41</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                            </child>
+                            <!-- VMID -->
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">VMID</property>
+                              </object>
+                              <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="spiceTxtPxVmid">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="margin-start">10</property>
+                                <property name="width-chars">8</property>
+                                <property name="placeholder-text">100</property>
+                              </object>
+                              <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                            </child>
+                          </object>
+                          <packing><property name="expand">False</property><property name="fill">False</property><property name="position">6</property></packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing><property name="position">6</property></packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">SPICE</property>
+              </object>
+              <packing><property name="position">6</property><property name="tab-fill">False</property></packing>
+            </child>
+
+            <!-- ════════════════════ ONGLET SERIAL ═══════════════════ -->
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="min-content-height">250</property>
+                <child>
+                  <object class="GtkViewport">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="shadow-type">none</property>
+                    <child>
+                      <object class="GtkGrid" id="gridSerialProps">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="row-homogeneous">True</property>
+                        <property name="row-spacing">4</property>
+                        <property name="column-spacing">6</property>
+                        <property name="margin-start">8</property>
+                        <property name="margin-end">8</property>
+                        <property name="margin-top">8</property>
+                        <!-- Template -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Template</property>
+                            <property name="tooltip-text">Pré-remplit les paramètres selon le constructeur</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbTemplate">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="hexpand">True</property>
+                            <items>
+                              <item id="custom">— custom —</item>
+                              <item id="cisco">Cisco IOS (9600 8N1)</item>
+                              <item id="h3c">H3C/HPE Comware (9600 8N1)</item>
+                              <item id="juniper">Juniper (9600 8N1)</item>
+                              <item id="aruba">Aruba (9600 8N1)</item>
+                              <item id="bmc">BMC/iDRAC (115200 8N1)</item>
+                            </items>
+                            <signal name="changed" handler="on_serialCmbTemplate_changed" swapped="no"/>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">0</property></packing>
+                        </child>
+                        <!-- Baud rate -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Baud rate</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbBaud">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="hexpand">True</property>
+                            <items>
+                              <item id="1200">1200</item>
+                              <item id="2400">2400</item>
+                              <item id="4800">4800</item>
+                              <item id="9600">9600</item>
+                              <item id="19200">19200</item>
+                              <item id="38400">38400</item>
+                              <item id="57600">57600</item>
+                              <item id="115200">115200</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">1</property></packing>
+                        </child>
+                        <!-- Data bits -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Data bits</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbDatabits">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <items>
+                              <item id="5">5</item>
+                              <item id="6">6</item>
+                              <item id="7">7</item>
+                              <item id="8">8</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">2</property></packing>
+                        </child>
+                        <!-- Parity -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Parity</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">3</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbParity">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <items>
+                              <item id="n">None</item>
+                              <item id="e">Even</item>
+                              <item id="o">Odd</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">3</property></packing>
+                        </child>
+                        <!-- Stop bits -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Stop bits</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">4</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbStopbits">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <items>
+                              <item id="1">1</item>
+                              <item id="2">2</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">4</property></packing>
+                        </child>
+                        <!-- Flow control -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Flow control</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">5</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbFlow">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <items>
+                              <item id="n">None</item>
+                              <item id="x">XON/XOFF (logiciel)</item>
+                              <item id="h">RTS/CTS (matériel)</item>
+                              <item id="d">DTR/DSR</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">5</property></packing>
+                        </child>
+                        <!-- Tool -->
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Serial tool</property>
+                          </object>
+                          <packing><property name="left-attach">0</property><property name="top-attach">6</property></packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="serialCmbTool">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-start">10</property>
+                            <items>
+                              <item id="picocom">picocom</item>
+                              <item id="minicom">minicom</item>
+                              <item id="screen">screen</item>
+                            </items>
+                          </object>
+                          <packing><property name="left-attach">1</property><property name="top-attach">6</property></packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing><property name="position">7</property></packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Serial</property>
+              </object>
+              <packing><property name="position">7</property><property name="tab-fill">False</property></packing>
             </child>
           </object>
           <packing>
@@ -2017,7 +2810,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Archivo</property>
+                <property name="label" translatable="yes">_File</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -2027,8 +2820,8 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Guardar buffer de la consola activa en un archivo</property>
-                        <property name="label" translatable="yes">Guardar buffer _como</property>
+                        <property name="tooltip-text" translatable="yes">Save active console buffer to file</property>
+                        <property name="label" translatable="yes">Save buffer as</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_guardar_como1_activate" swapped="no"/>
                       </object>
@@ -2037,8 +2830,8 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Importar lista de servidores desde un archivo</property>
-                        <property name="label" translatable="yes">_Importar servidores</property>
+                        <property name="tooltip-text" translatable="yes">Import server list from file</property>
+                        <property name="label" translatable="yes">_Import servers</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_importar_servidores1_activate" swapped="no"/>
                       </object>
@@ -2047,10 +2840,78 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">Exportar lista de servidores a un archivo</property>
-                        <property name="label" translatable="yes">_Exportar servidores</property>
+                        <property name="tooltip-text" translatable="yes">Export server list to file</property>
+                        <property name="label" translatable="yes">_Export servers</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_exportar_servidores1_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_import_libvirt">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Import from libvirt</property>
+                        <signal name="activate" handler="on_mnu_import_libvirt_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_import_proxmox">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Import from Proxmox</property>
+                        <signal name="activate" handler="on_mnu_import_proxmox_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_import_csv">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Import from CSV…</property>
+                        <signal name="activate" handler="on_mnu_import_csv_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_import_json">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Import from JSON…</property>
+                        <signal name="activate" handler="on_mnu_import_json_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_export_csv">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Export to CSV…</property>
+                        <signal name="activate" handler="on_mnu_export_csv_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_export_json">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Export to JSON…</property>
+                        <signal name="activate" handler="on_mnu_export_json_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_edit_ssh_config">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Edit ~/.ssh/config…</property>
+                        <signal name="activate" handler="on_mnu_edit_ssh_config_activate" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -2063,7 +2924,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">_Salir</property>
+                        <property name="label" translatable="yes">_Quit</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_salir1_activate" swapped="no"/>
                       </object>
@@ -2076,7 +2937,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Editar</property>
+                <property name="label" translatable="yes">_Edit</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -2086,7 +2947,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Copiar</property>
+                        <property name="label" translatable="yes">Copy</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuCopy_activate" swapped="no"/>
                       </object>
@@ -2095,7 +2956,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Pegar</property>
+                        <property name="label" translatable="yes">Paste</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuPaste_activate" swapped="no"/>
                       </object>
@@ -2104,7 +2965,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Copiar y Pegar</property>
+                        <property name="label" translatable="yes">Copy and Paste</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuCopyPaste_activate" swapped="no"/>
                       </object>
@@ -2113,7 +2974,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Seleccionar todo</property>
+                        <property name="label" translatable="yes">Select all</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuSelectAll_activate" swapped="no"/>
                       </object>
@@ -2122,7 +2983,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Copiar todo</property>
+                        <property name="label" translatable="yes">Copy all</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuCopyAll_activate" swapped="no"/>
                       </object>
@@ -2137,7 +2998,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Comandos personalizados</property>
+                        <property name="label" translatable="yes">Custom commands</property>
                         <property name="use-underline">True</property>
                         <child type="submenu">
                           <object class="GtkMenu" id="menuCustomCommands">
@@ -2157,7 +3018,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Configuración</property>
+                        <property name="label" translatable="yes">Settings</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_menuSettings_activate" swapped="no"/>
                       </object>
@@ -2170,7 +3031,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Ver</property>
+                <property name="label" translatable="yes">_View</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -2180,7 +3041,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkCheckMenuItem" id="show_toolbar">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Mostrar Toolbar</property>
+                        <property name="label" translatable="yes">Show Toolbar</property>
                         <property name="use-underline">True</property>
                         <signal name="toggled" handler="on_show_toolbar_toggled" swapped="no"/>
                       </object>
@@ -2189,7 +3050,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkCheckMenuItem" id="show_panel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Mostrar Panel</property>
+                        <property name="label" translatable="yes">Show Panel</property>
                         <property name="use-underline">True</property>
                         <signal name="toggled" handler="on_show_panel_toggled" swapped="no"/>
                       </object>
@@ -2202,7 +3063,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">_Servidores</property>
+                <property name="label" translatable="yes">_Servers</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menuServers">
@@ -2216,7 +3077,30 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkMenuItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Ay_uda</property>
+                <property name="label" translatable="yes">SSH _Key</property>
+                <property name="use-underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem" id="mnu_manage_ssh_keys">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">_Manage SSH Keys…</property>
+                        <property name="use-underline">True</property>
+                        <signal name="activate" handler="on_mnu_manage_ssh_keys_activate" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">_Help</property>
                 <property name="use-underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu">
@@ -2226,7 +3110,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
                       <object class="GtkMenuItem">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">A_cerca de</property>
+                        <property name="label" translatable="yes">_About</property>
                         <property name="use-underline">True</property>
                         <signal name="activate" handler="on_acerca_de1_activate" swapped="no"/>
                       </object>
@@ -2250,7 +3134,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Abrir consola local</property>
+                <property name="tooltip-text" translatable="yes">Open local console</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Local</property>
                 <property name="use-underline">True</property>
@@ -2266,9 +3150,9 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Conectar a host seleccionado o a todos los host del grupo</property>
+                <property name="tooltip-text" translatable="yes">Connect to selected host or all hosts in selected group</property>
                 <property name="is-important">True</property>
-                <property name="label" translatable="yes">Conectar</property>
+                <property name="label" translatable="yes">Connect</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-network</property>
                 <signal name="clicked" handler="on_btnConnect_clicked" swapped="no"/>
@@ -2282,9 +3166,9 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Agregar nuevo host</property>
+                <property name="tooltip-text" translatable="yes">Add new host</property>
                 <property name="is-important">True</property>
-                <property name="label" translatable="yes">Agregar</property>
+                <property name="label" translatable="yes">Add</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-add</property>
                 <signal name="clicked" handler="on_btnAdd_clicked" swapped="no"/>
@@ -2298,9 +3182,9 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Editar propiedades de host seleccionado</property>
+                <property name="tooltip-text" translatable="yes">Edit hosts properties</property>
                 <property name="is-important">True</property>
-                <property name="label" translatable="yes">Editar</property>
+                <property name="label" translatable="yes">Edit</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-edit</property>
                 <signal name="clicked" handler="on_bntEdit_clicked" swapped="no"/>
@@ -2314,9 +3198,9 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Eliminar host seleccionado</property>
+                <property name="tooltip-text" translatable="yes">Remove selected host</property>
                 <property name="is-important">True</property>
-                <property name="label" translatable="yes">Eliminar</property>
+                <property name="label" translatable="yes">Remove</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-delete</property>
                 <signal name="clicked" handler="on_btnDel_clicked" swapped="no"/>
@@ -2340,7 +3224,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Separar consola horizontalmente</property>
+                <property name="tooltip-text" translatable="yes">Split console horizontally</property>
                 <property name="label" translatable="yes">__glade_unnamed_28</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-goto-last</property>
@@ -2355,7 +3239,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Separar consola verticalmente</property>
+                <property name="tooltip-text" translatable="yes">Split console vertically</property>
                 <property name="label" translatable="yes">__glade_unnamed_29</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-goto-bottom</property>
@@ -2370,7 +3254,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Unir todas las consolas</property>
+                <property name="tooltip-text" translatable="yes">Unsplit all consoles</property>
                 <property name="label" translatable="yes">__glade_unnamed_30</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-fullscreen</property>
@@ -2395,7 +3279,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Configuración</property>
+                <property name="tooltip-text" translatable="yes">Settings</property>
                 <property name="label" translatable="yes">__glade_unnamed_32</property>
                 <property name="use-underline">True</property>
                 <property name="stock-id">gtk-preferences</property>
@@ -2476,7 +3360,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="tooltip-text" translatable="yes">Enviar comandos a varios hosts al mismo tiempo</property>
+                <property name="tooltip-text" translatable="yes">Send commands to several hosts at the same time</property>
                 <property name="is-important">True</property>
                 <property name="label" translatable="yes">Cluster</property>
                 <property name="use-underline">True</property>
@@ -2492,32 +3376,6 @@ Ej: ##D=1000&lt;/span&gt;</property>
               <object class="GtkSeparatorToolItem">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolItem">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkButton" id="btnDonate">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
-                    <property name="relief">none</property>
-                    <signal name="clicked" handler="on_btnDonate_clicked" swapped="no"/>
-                    <child>
-                      <object class="GtkImage">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="pixbuf">donate.gif</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>

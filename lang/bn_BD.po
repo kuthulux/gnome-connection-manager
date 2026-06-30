@@ -1,0 +1,1174 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: bn_BD\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "বাতিল"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "সংরক্ষণ"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "খুলুন"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "অপেক্ষা করা হচ্ছে…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "সংযোগ করুন"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "সংযোগ বিচ্ছিন্ন করুন"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "xfreerdp অপশন:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "xfreerdp লগ:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp খুঁজে পাওয়া যায়নি"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "সংযোগ করা হচ্ছে…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "সেশন শেষ হয়েছে"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "সমাপ্ত (কোড {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "সিরিয়াল পোর্ট:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "উদাহরণ: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "বড রেট:"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "বড-এ ট্রান্সমিশন গতি"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "টেমপ্লেট:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "প্রস্তুতকারক সুপারিশকৃত সিরিয়াল সেটিংস লোড করুন"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "ডেটা বিট:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "প্রতি বাইটে ডেটা বিটের সংখ্যা (8 = স্ট্যান্ডার্ড)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "প্যারিটি:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "প্যারিটি বিট: কোনোটি নয় (N) = স্ট্যান্ডার্ড, জোড় (E), বিজোড় (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "স্টপ বিট:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "স্টপ বিট: 1 = স্ট্যান্ডার্ড, 2 = RS-485 / লেগ্যাসি হার্ডওয়্যার"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "ফ্লো কন্ট্রোল:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"ফ্লো কন্ট্রোল:\n"
+"  কোনোটি নয় = স্ট্যান্ডার্ড কনসোল\n"
+"  XON/XOFF = সফটওয়্যার (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = হার্ডওয়্যার (পূর্ণ ক্যাবল)\n"
+"  DSR/DTR = লেগ্যাসি হার্ডওয়্যার"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"বাইনারিতে পাঠানো অতিরিক্ত র‍্য বিকল্প\n"
+"উদাহরণ: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "libvirt থেকে আমদানি করুন"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "হাইপারভাইজার SSH ব্যবহারকারী:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "হাইপারভাইজার (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "সনাক্ত করা libvirt URI"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+msgstr ""
+"উদাহরণ: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "যোগ করুন"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>আমদানি করার সংযোগ প্রকার:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (VM IP জানা থাকলে হাইপারভাইজারের মাধ্যমে ProxyJump -J, অন্যথায় "
+"হাইপারভাইজার শেল + -t ssh user@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH টানেল স্বয়ংক্রিয়ভাবে"
+" পরিচালিত হয়)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (হাইপারভাইজার থেকে nc/nmap এর মাধ্যমে পোর্ট 3389 যাচাই - পোর্ট বন্ধ "
+"থাকলে এড়িয়ে যাওয়া হয়)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  হাইপারভাইজার স্ক্যান করুন"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "একই নাম এবং প্রোটোকলের বিদ্যমান সংযোগ ওভাররাইট করুন"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ সব নির্বাচন করুন"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ সব নির্বাচন বাতিল করুন"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "প্রোটোকল"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "VM নাম"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "গ্রুপ"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / হোস্ট"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "অবস্থা"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "আমদানি করা হয়েছে"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  নির্বাচিত আমদানি করুন"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  বন্ধ করুন"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"dconf-এ কোনো URI পাওয়া যায়নি (virt-manager কনফিগার করা হয়নি?)।\n"
+"নিচে ম্যানুয়ালি আপনার URI যুক্ত করুন।"
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "অবৈধ libvirt লক্ষ্য।"
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "কোনো URI নির্বাচিত নয়।"
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "কোনো সংযোগ প্রকার নির্বাচিত নয়।"
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  পুনঃস্ক্যান করুন"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr ""
+"আমদানির জন্য কোনো সংযোগ নেই (সব ইতিমধ্যে বিদ্যমান বা কিছুই নির্বাচিত নয়)।"
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ আমদানি করা হয়েছে"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  Proxmox হোস্ট স্ক্যান করুন"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "সনাক্ত করা Proxmox লক্ষ্য (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "সনাক্ত করা Proxmox লক্ষ্য"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "একটি Proxmox লক্ষ্য যুক্ত করুন:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "উদাহরণ: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (এখানে উপলব্ধ নয়: Proxmox-এর জন্য API টিকিট/প্রক্সি প্রয়োজন)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"dconf-এ কোনো SSH URI পাওয়া যায়নি।\n"
+"নিচে একটি IP/হোস্ট লিখুন এবং যুক্ত করুন ক্লিক করুন।"
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "অবৈধ Proxmox লক্ষ্য।"
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "কোনো Proxmox লক্ষ্য নির্বাচিত নয়।"
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>সম্পাদনা করতে একটি সেলে ডাবল-ক্লিক করুন।\n"
+"ফাইল ফরম্যাট: <tt>gcm.conf</tt>-এ <tt>[serial_templates]</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (বড,ফ্লো,প্যারিটি,বিট,স্টপ)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "টেমপ্লেট নাম"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "বড রেট"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "ফ্লো"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "প্যারিটি"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "ডেটা বিট"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "স্টপ"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ যুক্ত করুন"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− অপসারণ করুন"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "ডিফল্ট পুনরুদ্ধার করুন"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "সিরিয়াল টেমপ্লেট"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "নতুন টেমপ্লেট"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "ডিফল্ট SSH ব্যবহারকারী (VM):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "অনুসন্ধান করুন..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "ট্যাব নাম পরিবর্তন করুন"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "নতুন নাম লিখুন"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr "কন্টিনিউয়াস লগ মোড সক্রিয় এবং প্রতি ট্যাবে নিষ্ক্রিয় করা যায় না।"
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "কপি করুন"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "পেস্ট করুন"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "কপি এবং পেস্ট করুন"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "সব নির্বাচন করুন"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "সব কপি করুন"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "বাফার ফাইলে সংরক্ষণ করুন"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "বিভক্ত H"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "বিভক্ত V"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "কনসোল রিসেট করুন"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "কনসোল রিসেট এবং পরিষ্কার করুন"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4674
+msgid "Clone console"
+msgstr "কনসোল ক্লোন করুন"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "লগিং সক্ষম করুন"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "কনসোল বন্ধ করুন"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "কাস্টম কমান্ড"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "ঠিকানা কপি করুন"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "হোস্ট যুক্ত করুন"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "সম্পাদনা করুন"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "অপসারণ করুন"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "হোস্ট ডুপ্লিকেট করুন"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "সব বিস্তৃত করুন"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "সব সংকুচিত করুন"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "হোস্টে পুনরায় সংযোগ করুন"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "কোনো হোস্ট আমদানি করা হয়নি।"
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "কোনো নতুন হোস্ট নেই (ডুপ্লিকেট উপেক্ষা করা হয়েছে)।"
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "লগ ফাইল লেখার জন্য খোলা যাচ্ছে না"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "সার্ভারের সাথে সংযোগ করতে ত্রুটি"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "কনফিগারেশন ফাইলে অবৈধ এন্ট্রি"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "নামসহ সংরক্ষণ করুন"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "ফাইল লেখার জন্য খোলা যাচ্ছে না"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "আছে"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "টি কনসোল খোলা আছে, তবুও বের হবেন?"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "সার্ভার আমদানি করুন"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "পাসওয়ার্ড লিখুন"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "অবৈধ পাসওয়ার্ড"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "সার্ভার তালিকা ওভাররাইট হবে, চালিয়ে যাবেন?"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "অবৈধ ফাইল"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "সার্ভার এক্সপোর্ট করুন"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "আপনি কি সত্যিই হোস্ট অপসারণ করতে চান"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "আপনি কি সত্যিই গ্রুপের সমস্ত হোস্ট অপসারণ করতে চান"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "কোনো খোলা কনসোল নেই"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "লোকাল"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "হোস্ট"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "রিমোট"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "গ্রুপ, নাম এবং হোস্ট ফিল্ড আবশ্যক"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "অবৈধ পোর্ট"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "হোস্টের নাম"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "গ্রুপের জন্য ইতিমধ্যে বিদ্যমান"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "হোস্ট সংরক্ষণে ত্রুটি। বিবরণ"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "রিমোট হোস্ট লিখুন"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "লোকাল পোর্ট ইতিমধ্যে নির্ধারিত"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "শব্দ বিভাজক"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "বাফার আকার"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "স্বচ্ছতা"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "লগের পথ"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "কন্টিনিউয়াস VTE ট্যাব লগিং মোড"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "স্টার্টআপে লোকাল কনসোল খুলুন"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "লোকাল কনসোল সেশন লগ করুন"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "রাইট-ক্লিকে পেস্ট করুন"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "নির্বাচিত অংশ ক্লিপবোর্ডে কপি করুন"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "কনসোল বন্ধ করার সময় নিশ্চিত করুন"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "মধ্য-ক্লিকে কনসোল বন্ধ করার সময় নিশ্চিত করুন"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "পূর্ববর্তী/পরবর্তী ট্যাবে যাওয়ার সময় ট্যাবের মধ্যে চক্রাকারে ঘুরুন"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "কখনও না"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "সবসময়"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "শুধুমাত্র ক্লিন এক্সিটে"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "প্রস্থানে নিশ্চিত করুন"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "আপডেট পরীক্ষা করুন"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "হোস্ট উইন্ডোতে অল্টারনেটিং স্ট্রাইপ নিষ্ক্রিয় করুন"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "ডায়নামিক শিরোনাম"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "শিরোনাম"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "অ্যাকশন"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "শর্টকাট"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "কমান্ড"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "ফন্ট নির্বাচন করুন"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "সক্রিয় করুন"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "ঠিক আছে"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"একটি নতুন সংস্করণ উপলব্ধ: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"এটি gnome-connection-manager, যা লিখেছেন এবং পরিচালনা করেন\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - চিলি"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "Gnome-এর জন্য একটি সহজ SSH সংযোগ ম্যানেজার"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "প্রজেক্টের হোমপেজ"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "ক্লাস্টার"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "বন্ধ করুন"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "ব্যবহারের জন্য কনসোল নির্বাচন করুন:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "নির্বাচন পরিষ্কার করুন"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "নির্বাচন উল্টান"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "কনসোলে পাঠানোর জন্য টেক্সট লিখুন: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">ইতিহাসের জন্য CTRL+UP/CTRL+DOWN</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "সেটিংস"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "সাধারণ"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "ব্যাকগ্রাউন্ড রঙ:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "ফোরগ্রাউন্ড রঙ:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "ব্যাকগ্রাউন্ড রঙ নির্বাচন করুন"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "ফোরগ্রাউন্ড রঙ নির্বাচন করুন"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "ডিফল্ট রঙ"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "ডিফল্ট ফিক্সড-উইডথ ফন্ট ব্যবহার করুন"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "ফন্ট:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "রঙ"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "স্ট্যান্ডার্ড কমান্ড"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "কাস্টম কমান্ড"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "শর্টকাট"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "হোস্ট সম্পাদনা করুন"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "নাম"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "বিবরণ"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "প্রকার"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "পোর্ট"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "ব্যবহারকারী"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "পাসওয়ার্ড"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "প্রাইভেট কী"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "সাবগ্রুপ তৈরি করতে group1/group2/group3 ফরম্যাট ব্যবহার করুন"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "সিরিয়াল"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "লোকাল"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "পাসওয়ার্ডহীন/পাবলিক কী অথেন্টিকেশনের জন্য খালি রাখুন"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "X11 ফরওয়ার্ডিং"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "এজেন্ট ফরওয়ার্ডিং"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "কম্প্রেশন"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "অতিরিক্ত আর্গুমেন্ট"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "লগিং সক্ষম করুন"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "Keep-alive প্যাকেটের মধ্যে সেকেন্ড"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"কম্প্রেশন লেভেল:\n"
+"ফাঁকা: ডিফল্ট কম্প্রেশন\n"
+"1: সর্বনিম্ন\n"
+"9: সর্বোচ্চ"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "কমান্ড লাইনে পাস করার জন্য অতিরিক্ত আর্গুমেন্ট"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "প্রপার্টিজ"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "ডায়নামিক"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "ডায়নামিক পোর্ট ফরওয়ার্ডিং তৈরি করুন"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "লোকাল পোর্ট"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "রিমোট হোস্ট"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "রিমোট পোর্ট"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "পোর্ট ফরওয়ার্ডিং"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "লগইনের পরে কমান্ড পাঠান"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>বিলম্ব যুক্ত করতে ##D=মিলিসেকেন্ড ব্যবহার করুন।\n"
+"উদাহরণ: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "কমান্ড"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "কী সিকোয়েন্স"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "Backspace:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "Delete:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "স্বয়ংক্রিয়"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "ASCII Backspace \t[Ctrl+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "ASCII Delete    \t[Ctrl+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "ডিলিট সিকোয়েন্স \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "TTY মুছুন"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "রঙ এবং কী"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "Gnome Connection Manager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_ফাইল"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "অ্যাক্টিভ কনসোল বাফার ফাইলে সংরক্ষণ করুন"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "বাফার নামসহ সংরক্ষণ করুন"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "ফাইল থেকে সার্ভার তালিকা আমদানি করুন"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "_সার্ভার আমদানি করুন"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "ফাইলে সার্ভার তালিকা এক্সপোর্ট করুন"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "_সার্ভার এক্সপোর্ট করুন"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "Proxmox থেকে আমদানি করুন"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_প্রস্থান"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_সম্পাদনা"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_দৃশ্য"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "টুলবার দেখান"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "প্যানেল দেখান"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "_সার্ভার"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_সাহায্য"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_সম্পর্কে"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "লোকাল কনসোল খুলুন"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr "নির্বাচিত হোস্ট বা নির্বাচিত গ্রুপের সব হোস্টে সংযোগ করুন"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "নতুন হোস্ট যুক্ত করুন"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "হোস্টের প্রপার্টিজ সম্পাদনা করুন"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "নির্বাচিত হোস্ট অপসারণ করুন"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "কনসোল আনুভূমিকভাবে বিভক্ত করুন"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "কনসোল উলম্বভাবে বিভক্ত করুন"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "সব কনসোলের বিভক্তি বাতিল করুন"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "একসাথে একাধিক হোস্টে কমান্ড পাঠান"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "লেবেল"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "পৃষ্ঠা ১"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "পৃষ্ঠা ২"

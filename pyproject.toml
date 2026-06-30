@@ -1,0 +1,118 @@
+[project]
+name = "gnome-connection-manager"
+version = "1.3.3"
+description = "Simple tabbed SSH/Telnet/RDP/VNC/SPICE/Serial connection manager for GTK3"
+license = { text = "GPL-3.0-or-later" }
+requires-python = ">=3.10"
+dependencies = [
+    "loguru>=0.7.2",
+]
+
+# ─── Ruff ────────────────────────────────────────────────────────────────────
+[tool.ruff]
+# Cible Python 3.10+
+target-version = "py310"
+line-length = 99
+
+exclude = [
+    ".git",
+    "__pycache__",
+    "*.egg-info",
+    "dist",
+    "build",
+    "fork",
+]
+
+[tool.ruff.lint]
+# E/W  : pycodestyle  (style PEP 8)
+# F    : pyflakes     (erreurs logiques)
+# I    : isort        (ordre des imports)
+# D    : pydocstyle   (docstrings — style Google via convention = "google")
+# UP   : pyupgrade    (syntaxe Python moderne)
+# B    : flake8-bugbear (pièges courants)
+# C4   : flake8-comprehensions
+# SIM  : flake8-simplify
+select = ["E", "W", "F", "I", "D", "UP", "B", "C4", "SIM"]
+
+ignore = [
+    # D1xx — ne pas exiger de docstrings sur chaque fonction publique (code existant)
+    "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107",
+    # D2xx — flexibilité sur la mise en forme
+    "D200", "D202", "D205", "D212",
+    # E501 géré par line-length
+    "E501",
+    # B006 — listes mutables comme valeur par défaut (héritage upstream)
+    "B006",
+    # W291/W293 — espaces en fin de ligne (géré par trailing-whitespace pre-commit)
+    "W291", "W293",
+    # SIM117 — nested with (Python < 3.10 compat)
+    "SIM117",
+    # UP007 — X | Y union types (garder Optional[] pour compat)
+    "UP007",
+    # D415 — première ligne de docstring sans ponctuation finale (style existant)
+    "D415",
+    # C408 — dict() au lieu de {} (lisibilité intentionnelle avec kwargs nommés)
+    "C408",
+    # SIM105 — contextlib.suppress (optionnel, trop verbeux pour du code existant)
+    "SIM105",
+    # ── Violations héritage gnome_connection_manager.py (code upstream) ──────
+    # UP031 — printf-style % formatting (massivement utilisé dans l'original)
+    "UP031",
+    # E711 — comparaisons avec None/True/False (style upstream)
+    "E711",
+    # E721 — comparaison de type avec == (style upstream)
+    "E721",
+    # E722 — bare except (nombreux dans l'upstream)
+    "E722",
+    # SIM115 — open() sans context manager (code héritage)
+    "SIM115",
+    # SIM102 — if imbriqués collapsibles (lisibilité préférable)
+    "SIM102",
+    # SIM101 — isinstance() dupliqué
+    "SIM101",
+    # SIM108 — ternaire
+    "SIM108",
+    # B015 — comparaison inutile
+    "B015",
+    # B023 — variable de boucle dans lambda/closure (upstream)
+    "B023",
+    # F821 — undefined-name (noms GTK/GLib résolus à l'exécution, pas statiquement)
+    "F821",
+    # D417 — paramètres non documentés (nombreuses fonctions héritées)
+    "D417",
+    # E402 — imports non en tête de fichier (guards try/except pour GTK)
+    "E402",
+    # F841 — variables locales non utilisées (upstream)
+    "F841",
+]
+
+# Style de docstrings : Google
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+# isort : compatibilité black
+[tool.ruff.lint.isort]
+force-single-line = false
+known-first-party = ["gnome_connection_manager"]
+
+[tool.ruff.lint.per-file-ignores]
+"urlregex.py" = ["W605"]
+
+[tool.ruff.format]
+# Formatage compatible black
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+docstring-code-format = true
+
+# ─── Black ───────────────────────────────────────────────────────────────────
+[tool.black]
+line-length = 99
+target-version = ["py310", "py311", "py312", "py313"]
+
+# ─── Pytest ──────────────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

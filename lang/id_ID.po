@@ -1,0 +1,1176 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-11 22:14+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: id_ID\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: gnome_connection_manager.py:579 gnome_connection_manager.py:3180
+#: gnome_connection_manager.py:6243 gnome_connection_manager.py:8726
+#: gnome-connection-manager.glade:424 gnome-connection-manager.glade:967
+msgid "Cancel"
+msgstr "Batal"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6244
+msgid "Save"
+msgstr "Simpan"
+
+#: gnome_connection_manager.py:581 gnome_connection_manager.py:6372
+#: gnome_connection_manager.py:7862
+msgid "Open"
+msgstr "Buka"
+
+#: gnome_connection_manager.py:978 gnome_connection_manager.py:1181
+#: gnome_connection_manager.py:1501 gnome_connection_manager.py:1668
+#: gnome_connection_manager.py:3032
+msgid "Waiting…"
+msgstr "Menunggu…"
+
+#: gnome_connection_manager.py:982 gnome_connection_manager.py:1185
+#: gnome_connection_manager.py:1223 gnome_connection_manager.py:1505
+#: gnome_connection_manager.py:1672 gnome_connection_manager.py:1962
+#: gnome_connection_manager.py:4605 gnome-connection-manager.glade:2291
+msgid "Connect"
+msgstr "Hubungkan"
+
+#: gnome_connection_manager.py:986 gnome_connection_manager.py:1077
+#: gnome_connection_manager.py:1190 gnome_connection_manager.py:1323
+#: gnome_connection_manager.py:1509 gnome_connection_manager.py:1614
+#: gnome_connection_manager.py:1676 gnome_connection_manager.py:1769
+#: gnome_connection_manager.py:1964 gnome_connection_manager.py:1990
+#: gnome_connection_manager.py:2156
+msgid "Disconnect"
+msgstr "Putuskan"
+
+#: gnome_connection_manager.py:993 gnome_connection_manager.py:1516
+#: gnome_connection_manager.py:1683 gnome_connection_manager.py:1949
+msgid "xfreerdp options:"
+msgstr "Opsi xfreerdp:"
+
+#: gnome_connection_manager.py:1002
+msgid "xfreerdp log:"
+msgstr "Log xfreerdp:"
+
+#: gnome_connection_manager.py:1062 gnome_connection_manager.py:1296
+#: gnome_connection_manager.py:1587 gnome_connection_manager.py:1742
+msgid "xfreerdp not found"
+msgstr "xfreerdp tidak ditemukan"
+
+#: gnome_connection_manager.py:1064 gnome_connection_manager.py:1298
+#: gnome_connection_manager.py:1589 gnome_connection_manager.py:1744
+#: gnome_connection_manager.py:2141
+msgid "Connecting…"
+msgstr "Menghubungkan…"
+
+#: gnome_connection_manager.py:1090 gnome_connection_manager.py:1236
+#: gnome_connection_manager.py:1601 gnome_connection_manager.py:1756
+msgid "Session ended"
+msgstr "Sesi berakhir"
+
+#: gnome_connection_manager.py:1092 gnome_connection_manager.py:1309
+#: gnome_connection_manager.py:1599 gnome_connection_manager.py:1754
+#, python-brace-format
+msgid "Ended (code {rc})"
+msgstr "Berakhir (kode {rc})"
+
+#: gnome_connection_manager.py:1838
+msgid "Serial port:"
+msgstr "Port serial:"
+
+#: gnome_connection_manager.py:1842
+msgid "Ex : /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+msgstr "Cth: /dev/ttyUSB0, /dev/ttyS0, /dev/ttyACM0"
+
+#: gnome_connection_manager.py:1846
+msgid "Baud rate:"
+msgstr "Kecepatan baud:"
+
+#: gnome_connection_manager.py:1864
+msgid "Transmission speed in baud"
+msgstr "Kecepatan transmisi dalam baud"
+
+#: gnome_connection_manager.py:1869
+msgid "Template:"
+msgstr "Templat:"
+
+#: gnome_connection_manager.py:1875
+msgid "Load vendor-recommended serial settings"
+msgstr "Muat pengaturan serial yang direkomendasikan vendor"
+
+#: gnome_connection_manager.py:1899
+msgid "Data bits:"
+msgstr "Bit data:"
+
+#: gnome_connection_manager.py:1905
+msgid "Number of data bits per byte (8 = standard)"
+msgstr "Jumlah bit data per byte (8 = standar)"
+
+#: gnome_connection_manager.py:1910
+msgid "Parity:"
+msgstr "Paritas:"
+
+#: gnome_connection_manager.py:1916
+msgid "Parity bit: None (N) = standard, Even (E), Odd (O)"
+msgstr "Bit paritas: Tidak ada (N) = standar, Genap (E), Ganjil (O)"
+
+#: gnome_connection_manager.py:1921
+msgid "Stop bits:"
+msgstr "Bit stop:"
+
+#: gnome_connection_manager.py:1927
+msgid "Stop bits: 1 = standard, 2 = RS-485 / legacy hardware"
+msgstr "Bit stop: 1 = standar, 2 = RS-485 / perangkat keras lama"
+
+#: gnome_connection_manager.py:1932
+msgid "Flow control:"
+msgstr "Kontrol aliran:"
+
+#: gnome_connection_manager.py:1939
+msgid ""
+"Flow control:\n"
+"  None = standard console\n"
+"  XON/XOFF = software (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = hardware (full cable)\n"
+"  DSR/DTR = legacy hardware"
+msgstr ""
+"Kontrol aliran:\n"
+"  Tidak ada = konsol standar\n"
+"  XON/XOFF = perangkat lunak (Ctrl-Q/Ctrl-S)\n"
+"  RTS/CTS = perangkat keras (kabel lengkap)\n"
+"  DSR/DTR = perangkat keras lama"
+
+#: gnome_connection_manager.py:1955
+msgid ""
+"Additional raw options passed to the binary\n"
+"Ex: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+msgstr ""
+"Opsi mentah tambahan yang diteruskan ke program\n"
+"Cth: --logfile /tmp/serial.log  (picocom)\n"
+"     -o -x  (minicom)"
+
+#: gnome_connection_manager.py:2923 gnome_connection_manager.py:2972
+#: gnome_connection_manager.py:3536 gnome-connection-manager.glade:2064
+msgid "Import from libvirt"
+msgstr "Impor dari libvirt"
+
+#: gnome_connection_manager.py:2941
+msgid "Hypervisor SSH user:"
+msgstr "Pengguna SSH hypervisor:"
+
+#: gnome_connection_manager.py:2949
+msgid "Hypervisors (virt-manager / dconf):"
+msgstr "Hypervisor (virt-manager / dconf):"
+
+#: gnome_connection_manager.py:2960
+msgid "Detected libvirt URI"
+msgstr "URI libvirt terdeteksi"
+
+#: gnome_connection_manager.py:2977
+msgid ""
+"Ex: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+msgstr ""
+"Cth: 192.168.105.41 | root@192.168.105.41 | "
+"qemu+ssh://root@192.168.105.41/system"
+
+#: gnome_connection_manager.py:2981 gnome-connection-manager.glade:2307
+msgid "Add"
+msgstr "Tambah"
+
+#: gnome_connection_manager.py:2988
+msgid "<b>Connection types to import:</b>"
+msgstr "<b>Jenis koneksi yang akan diimpor:</b>"
+
+#: gnome_connection_manager.py:2995
+msgid ""
+"SSH  (ProxyJump -J via hypervisor when VM IP is known, otherwise hypervisor "
+"shell + -t ssh user@vm)"
+msgstr ""
+"SSH  (ProxyJump -J melalui hypervisor jika IP VM diketahui, jika tidak shell"
+" hypervisor + -t ssh user@vm)"
+
+#: gnome_connection_manager.py:3002
+msgid ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - SSH tunnel handled "
+"automatically)"
+msgstr ""
+"SPICE  (virt-viewer --connect qemu+ssh://... vm - tunnel SSH ditangani "
+"secara otomatis)"
+
+#: gnome_connection_manager.py:3008
+msgid ""
+"RDP  (probe port 3389 from hypervisor via nc/nmap - skipped if port is "
+"closed)"
+msgstr ""
+"RDP  (memeriksa port 3389 dari hypervisor melalui nc/nmap - dilewati jika "
+"port tertutup)"
+
+#: gnome_connection_manager.py:3036
+msgid "🔍  Scan hypervisors"
+msgstr "🔍  Pindai hypervisor"
+
+#: gnome_connection_manager.py:3060
+msgid "Overwrite existing connections with the same name and protocol"
+msgstr "Timpa koneksi yang ada dengan nama dan protokol yang sama"
+
+#: gnome_connection_manager.py:3067
+msgid "✓ Check all"
+msgstr "✓ Pilih semua"
+
+#: gnome_connection_manager.py:3069
+msgid "✗ Uncheck all"
+msgstr "✗ Batalkan semua"
+
+#: gnome_connection_manager.py:3103
+msgid "Proto"
+msgstr "Proto"
+
+#: gnome_connection_manager.py:3114
+msgid "VM name"
+msgstr "Nama VM"
+
+#: gnome_connection_manager.py:3126 gnome-connection-manager.glade:1015
+msgid "Group"
+msgstr "Grup"
+
+#: gnome_connection_manager.py:3137
+msgid "IP / Host"
+msgstr "IP / Host"
+
+#: gnome_connection_manager.py:3148
+msgid "State"
+msgstr "Status"
+
+#: gnome_connection_manager.py:3159
+msgid "Imported"
+msgstr "Diimpor"
+
+#: gnome_connection_manager.py:3177
+msgid "⬇  Import selected"
+msgstr "⬇  Impor yang dipilih"
+
+#: gnome_connection_manager.py:3187
+msgid "✕  Close"
+msgstr "✕  Tutup"
+
+#: gnome_connection_manager.py:3211
+msgid ""
+"No URI found in dconf (virt-manager not configured?).\n"
+"Add your URIs manually below."
+msgstr ""
+"Tidak ada URI yang ditemukan di dconf (virt-manager belum dikonfigurasi?).\n"
+"Tambahkan URI Anda secara manual di bawah ini."
+
+#: gnome_connection_manager.py:3266
+msgid "Invalid libvirt target."
+msgstr "Target libvirt tidak valid."
+
+#: gnome_connection_manager.py:3358
+msgid "No URI selected."
+msgstr "Tidak ada URI yang dipilih."
+
+#: gnome_connection_manager.py:3370 gnome_connection_manager.py:3665
+msgid "No connection type selected."
+msgstr "Tidak ada jenis koneksi yang dipilih."
+
+#: gnome_connection_manager.py:3452
+msgid "🔄  Rescan"
+msgstr "🔄  Pindai ulang"
+
+#: gnome_connection_manager.py:3512
+msgid "No connection to import (all already exist or none selected)."
+msgstr ""
+"Tidak ada koneksi untuk diimpor (semua sudah ada atau tidak ada yang "
+"dipilih)."
+
+#: gnome_connection_manager.py:3518
+msgid "✓ Imported"
+msgstr "✓ Diimpor"
+
+#: gnome_connection_manager.py:3537
+msgid "🔍  Scan Proxmox hosts"
+msgstr "🔍  Pindai host Proxmox"
+
+#: gnome_connection_manager.py:3538
+msgid "Detected Proxmox targets (dconf):"
+msgstr "Target Proxmox terdeteksi (dconf):"
+
+#: gnome_connection_manager.py:3539
+msgid "Detected Proxmox target"
+msgstr "Target Proxmox terdeteksi"
+
+#: gnome_connection_manager.py:3540
+msgid "Add a Proxmox target:"
+msgstr "Tambahkan target Proxmox:"
+
+#: gnome_connection_manager.py:3542
+msgid "Ex: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+msgstr "Cth: 192.168.105.41 | root@192.168.105.41 | root@192.168.105.41:22"
+
+#: gnome_connection_manager.py:3545
+msgid "SPICE  (not available here: Proxmox requires API ticket/proxy)"
+msgstr "SPICE  (tidak tersedia di sini: Proxmox memerlukan tiket/proxy API)"
+
+#: gnome_connection_manager.py:3571
+msgid ""
+"No SSH URI found in dconf.\n"
+"Enter an IP/host below and click Add."
+msgstr ""
+"Tidak ada URI SSH yang ditemukan di dconf.\n"
+"Masukkan IP/host di bawah ini dan klik Tambah."
+
+#: gnome_connection_manager.py:3623
+msgid "Invalid Proxmox target."
+msgstr "Target Proxmox tidak valid."
+
+#: gnome_connection_manager.py:3653
+msgid "No Proxmox target selected."
+msgstr "Tidak ada target Proxmox yang dipilih."
+
+#: gnome_connection_manager.py:3723
+msgid ""
+"<i>Double-click a cell to edit it.\n"
+"File format: <tt>[serial_templates]</tt> in <tt>gcm.conf</tt>\n"
+"<tt>My device = 9600,n,n,8,1</tt>  (baud,flow,parity,bits,stop)</i>"
+msgstr ""
+"<i>Klik dua kali sel untuk mengeditnya.\n"
+"Format file: <tt>[serial_templates]</tt> di <tt>gcm.conf</tt>\n"
+"<tt>Perangkat saya = 9600,n,n,8,1</tt>  (baud,aliran,paritas,bit,stop)</i>"
+
+#: gnome_connection_manager.py:3740
+msgid "Template name"
+msgstr "Nama templat"
+
+#: gnome_connection_manager.py:3741
+msgid "Baud rate"
+msgstr "Kecepatan baud"
+
+#: gnome_connection_manager.py:3742
+msgid "Flow"
+msgstr "Aliran"
+
+#: gnome_connection_manager.py:3743
+msgid "Parity"
+msgstr "Paritas"
+
+#: gnome_connection_manager.py:3744
+msgid "Data bits"
+msgstr "Bit data"
+
+#: gnome_connection_manager.py:3745
+msgid "Stop"
+msgstr "Stop"
+
+#: gnome_connection_manager.py:3781
+msgid "+ Add"
+msgstr "+ Tambah"
+
+#: gnome_connection_manager.py:3783
+msgid "− Remove"
+msgstr "− Hapus"
+
+#: gnome_connection_manager.py:3785
+msgid "Restore defaults"
+msgstr "Kembalikan ke default"
+
+#: gnome_connection_manager.py:3791
+msgid "Serial Templates"
+msgstr "Templat Serial"
+
+#: gnome_connection_manager.py:3805
+msgid "New template"
+msgstr "Templat baru"
+
+#: gnome_connection_manager.py:3858
+msgid "Default SSH user (VMs):"
+msgstr "Pengguna SSH default (VM):"
+
+#: gnome_connection_manager.py:3876
+msgid "Libvirt"
+msgstr "Libvirt"
+
+#: gnome_connection_manager.py:3993 gnome_connection_manager.py:4313
+msgid "search..."
+msgstr "cari..."
+
+#: gnome_connection_manager.py:4428 gnome_connection_manager.py:4652
+msgid "Rename tab"
+msgstr "Ganti nama tab"
+
+#: gnome_connection_manager.py:4429
+msgid "Enter new name"
+msgstr "Masukkan nama baru"
+
+#: gnome_connection_manager.py:4498
+msgid "Continuous log mode is active and cannot be disabled per tab."
+msgstr "Mode log berkelanjutan aktif dan tidak dapat dinonaktifkan per tab."
+
+#: gnome_connection_manager.py:4520 gnome-connection-manager.glade:2109
+msgid "Copy"
+msgstr "Salin"
+
+#: gnome_connection_manager.py:4525 gnome-connection-manager.glade:2118
+msgid "Paste"
+msgstr "Tempel"
+
+#: gnome_connection_manager.py:4530 gnome-connection-manager.glade:2127
+msgid "Copy and Paste"
+msgstr "Salin dan Tempel"
+
+#: gnome_connection_manager.py:4535 gnome-connection-manager.glade:178
+#: gnome-connection-manager.glade:2136
+msgid "Select all"
+msgstr "Pilih semua"
+
+#: gnome_connection_manager.py:4540 gnome-connection-manager.glade:2145
+msgid "Copy all"
+msgstr "Salin semua"
+
+#: gnome_connection_manager.py:4545
+msgid "Save buffer to file"
+msgstr "Simpan buffer ke file"
+
+#: gnome_connection_manager.py:4550 gnome_connection_manager.py:4684
+msgid "Split H"
+msgstr "Pisah H"
+
+#: gnome_connection_manager.py:4555 gnome_connection_manager.py:4689
+msgid "Split V"
+msgstr "Pisah V"
+
+#: gnome_connection_manager.py:4564 gnome_connection_manager.py:4657
+msgid "Reset console"
+msgstr "Reset konsol"
+
+#: gnome_connection_manager.py:4569 gnome_connection_manager.py:4663
+msgid "Reset and Clear console"
+msgstr "Reset dan bersihkan konsol"
+
+#: gnome_connection_manager.py:4574 gnome_connection_manager.py:4674
+msgid "Clone console"
+msgstr "Klon konsol"
+
+#: gnome_connection_manager.py:4579 gnome_connection_manager.py:4679
+msgid "Enable logging"
+msgstr "Aktifkan pencatatan"
+
+#: gnome_connection_manager.py:4584 gnome_connection_manager.py:7975
+#: gnome_connection_manager.py:8598 gnome_connection_manager.py:8681
+msgid "Close console"
+msgstr "Tutup konsol"
+
+#: gnome_connection_manager.py:4596 gnome-connection-manager.glade:2160
+msgid "Custom commands"
+msgstr "Perintah khusus"
+
+#: gnome_connection_manager.py:4610
+msgid "Copy Address"
+msgstr "Salin alamat"
+
+#: gnome_connection_manager.py:4615
+msgid "Add Host"
+msgstr "Tambah host"
+
+#: gnome_connection_manager.py:4620 gnome-connection-manager.glade:2323
+msgid "Edit"
+msgstr "Edit"
+
+#: gnome_connection_manager.py:4625 gnome-connection-manager.glade:2339
+msgid "Remove"
+msgstr "Hapus"
+
+#: gnome_connection_manager.py:4630
+msgid "Duplicate Host"
+msgstr "Duplikat host"
+
+#: gnome_connection_manager.py:4639
+msgid "Expand all"
+msgstr "Perluas semua"
+
+#: gnome_connection_manager.py:4644
+msgid "Collapse all"
+msgstr "Tutup semua"
+
+#: gnome_connection_manager.py:4669
+msgid "Reconnect to host"
+msgstr "Hubungkan kembali ke host"
+
+#: gnome_connection_manager.py:4830 gnome_connection_manager.py:4894
+msgid "No host imported."
+msgstr "Tidak ada host yang diimpor."
+
+#: gnome_connection_manager.py:4880 gnome_connection_manager.py:4944
+msgid "No new host (duplicates ignored)."
+msgstr "Tidak ada host baru (duplikat diabaikan)."
+
+#: gnome_connection_manager.py:5283
+msgid "Can't open log file for writting"
+msgstr "Tidak dapat membuka file log untuk ditulis"
+
+#: gnome_connection_manager.py:5533
+msgid "Error connecting to server"
+msgstr "Kesalahan menghubungkan ke server"
+
+#: gnome_connection_manager.py:5745
+msgid "Invalid entry in configuration file"
+msgstr "Entri tidak valid dalam file konfigurasi"
+
+#: gnome_connection_manager.py:6239 gnome_connection_manager.py:6426
+msgid "Save as"
+msgstr "Simpan sebagai"
+
+#: gnome_connection_manager.py:6271
+msgid "Can't open file for writting"
+msgstr "Tidak dapat membuka file untuk ditulis"
+
+#: gnome_connection_manager.py:6338
+msgid "There are"
+msgstr "Ada"
+
+#: gnome_connection_manager.py:6340
+msgid "open consoles, exit anyway?"
+msgstr "konsol terbuka, tetap keluar?"
+
+#: gnome_connection_manager.py:6375
+msgid "Import Servers"
+msgstr "Impor Server"
+
+#: gnome_connection_manager.py:6375 gnome_connection_manager.py:6430
+msgid "Enter password"
+msgstr "Masukkan kata sandi"
+
+#: gnome_connection_manager.py:6387
+msgid "Invalid password"
+msgstr "Kata sandi tidak valid"
+
+#: gnome_connection_manager.py:6391
+msgid "Server list will be overwritten, continue?"
+msgstr "Daftar server akan ditimpa, lanjutkan?"
+
+#: gnome_connection_manager.py:6407 gnome_connection_manager.py:6452
+msgid "Invalid file"
+msgstr "File tidak valid"
+
+#: gnome_connection_manager.py:6430
+msgid "Export Servers"
+msgstr "Ekspor Server"
+
+#: gnome_connection_manager.py:6661
+msgid "Do you really want to remove host"
+msgstr "Apakah Anda benar-benar ingin menghapus host"
+
+#: gnome_connection_manager.py:6680
+msgid "Do you really want to remove all hosts in group"
+msgstr "Apakah Anda benar-benar ingin menghapus semua host dalam grup"
+
+#: gnome_connection_manager.py:6839
+msgid "No open consoles"
+msgstr "Tidak ada konsol yang terbuka"
+
+#: gnome_connection_manager.py:7221 gnome-connection-manager.glade:2275
+msgid "Local"
+msgstr "Lokal"
+
+#: gnome_connection_manager.py:7223 gnome_connection_manager.py:8390
+#: gnome-connection-manager.glade:1051
+msgid "Host"
+msgstr "Host"
+
+#: gnome_connection_manager.py:7225
+msgid "Remote"
+msgstr "Remote"
+
+#: gnome_connection_manager.py:7524
+msgid "Fields group, name and host are required"
+msgstr "Kolom grup, nama, dan host wajib diisi"
+
+#: gnome_connection_manager.py:7528
+msgid "Invalid port"
+msgstr "Port tidak valid"
+
+#: gnome_connection_manager.py:7594 gnome_connection_manager.py:7614
+#: gnome_connection_manager.py:7633
+msgid "Host name"
+msgstr "Nama host"
+
+#: gnome_connection_manager.py:7596 gnome_connection_manager.py:7616
+#: gnome_connection_manager.py:7635
+msgid "already exists for group"
+msgstr "sudah ada untuk grup"
+
+#: gnome_connection_manager.py:7652
+msgid "Error saving host. Description"
+msgstr "Kesalahan menyimpan host. Deskripsi"
+
+#: gnome_connection_manager.py:7784
+msgid "Enter remote host"
+msgstr "Masukkan host remote"
+
+#: gnome_connection_manager.py:7789
+msgid "Local port already assigned"
+msgstr "Port lokal sudah digunakan"
+
+#: gnome_connection_manager.py:7953
+msgid "Word separator"
+msgstr "Pemisah kata"
+
+#: gnome_connection_manager.py:7954
+msgid "Buffer size"
+msgstr "Ukuran buffer"
+
+#: gnome_connection_manager.py:7955
+msgid "Transparency"
+msgstr "Transparansi"
+
+#: gnome_connection_manager.py:7956 gnome-connection-manager.glade:1352
+msgid "TERM"
+msgstr "TERM"
+
+#: gnome_connection_manager.py:7957
+msgid "Logs path"
+msgstr "Path log"
+
+#: gnome_connection_manager.py:7958
+msgid "Continuous VTE tab logging mode"
+msgstr "Mode pencatatan tab VTE berkelanjutan"
+
+#: gnome_connection_manager.py:7959
+msgid "Open local console on startup"
+msgstr "Buka konsol lokal saat startup"
+
+#: gnome_connection_manager.py:7960
+msgid "Log local console sessions"
+msgstr "Catat sesi konsol lokal"
+
+#: gnome_connection_manager.py:7961
+msgid "Paste on right click"
+msgstr "Tempel saat klik kanan"
+
+#: gnome_connection_manager.py:7962
+msgid "Copy selection to clipboard"
+msgstr "Salin pilihan ke clipboard"
+
+#: gnome_connection_manager.py:7963
+msgid "Confirm on close console"
+msgstr "Konfirmasi saat menutup konsol"
+
+#: gnome_connection_manager.py:7965
+msgid "Confirm on close console with middle click"
+msgstr "Konfirmasi saat menutup konsol dengan klik tengah"
+
+#: gnome_connection_manager.py:7970
+msgid "Circle around tabs when going to the previous/next tab"
+msgstr "Putar tab saat berpindah ke tab sebelumnya/berikutnya"
+
+#: gnome_connection_manager.py:7978
+msgid "Never"
+msgstr "Tidak pernah"
+
+#: gnome_connection_manager.py:7978
+msgid "Always"
+msgstr "Selalu"
+
+#: gnome_connection_manager.py:7978
+msgid "Only on clean exit"
+msgstr "Hanya saat keluar bersih"
+
+#: gnome_connection_manager.py:7980
+msgid "Confirm on exit"
+msgstr "Konfirmasi saat keluar"
+
+#: gnome_connection_manager.py:7981
+msgid "Check updates"
+msgstr "Periksa pembaruan"
+
+#: gnome_connection_manager.py:7983
+msgid "Disable alternating stripes in hosts window"
+msgstr "Nonaktifkan garis bergantian di jendela host"
+
+#: gnome_connection_manager.py:7987
+msgid "Dynamic title"
+msgstr "Judul dinamis"
+
+#: gnome_connection_manager.py:7988
+msgid "Title"
+msgstr "Judul"
+
+#: gnome_connection_manager.py:8021
+msgid "Action"
+msgstr "Aksi"
+
+#: gnome_connection_manager.py:8030 gnome_connection_manager.py:8048
+msgid "Shortcut"
+msgstr "Pintasan"
+
+#: gnome_connection_manager.py:8040
+msgid "Command"
+msgstr "Perintah"
+
+#: gnome_connection_manager.py:8324
+msgid "Select font"
+msgstr "Pilih font"
+
+#: gnome_connection_manager.py:8388
+msgid "Activate"
+msgstr "Aktifkan"
+
+#: gnome_connection_manager.py:8719 gnome-connection-manager.glade:438
+#: gnome-connection-manager.glade:981
+msgid "OK"
+msgstr "OK"
+
+#: gnome_connection_manager.py:8944
+msgid ""
+"A new version is available: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+msgstr ""
+"Versi baru tersedia: https://github.com/MathildeDec/gnome-connection-"
+"manager/releases"
+
+#: gnome-connection-manager.glade:10
+msgid ""
+"This is gnome-connection-manager, written and maintained by\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chile"
+msgstr ""
+"Ini adalah gnome-connection-manager, ditulis dan dikelola oleh\n"
+"Copyright © 2012 Renzo Bertuzzi L. <kuthulu@gmail.com> - Chili"
+
+#: gnome-connection-manager.glade:12
+msgid "A simple ssh connection manager for gnome"
+msgstr "Pengelola koneksi SSH sederhana untuk Gnome"
+
+#: gnome-connection-manager.glade:14
+msgid "Project's Homepage"
+msgstr "Halaman utama proyek"
+
+#: gnome-connection-manager.glade:47 gnome-connection-manager.glade:2501
+msgid "Cluster"
+msgstr "Cluster"
+
+#: gnome-connection-manager.glade:68
+msgid "Close"
+msgstr "Tutup"
+
+#: gnome-connection-manager.glade:99
+msgid "Select consoles to use:"
+msgstr "Pilih konsol yang akan digunakan:"
+
+#: gnome-connection-manager.glade:238
+msgid "Clear selection"
+msgstr "Hapus pilihan"
+
+#: gnome-connection-manager.glade:298
+msgid "Invert selection"
+msgstr "Balikkan pilihan"
+
+#: gnome-connection-manager.glade:352
+msgid "Enter the text to send to consoles: "
+msgstr "Masukkan teks yang akan dikirim ke konsol: "
+
+#: gnome-connection-manager.glade:387
+msgid "<span size=\"smaller\">CTRL+UP/CTRL+DOWN for history</span>"
+msgstr "<span size=\"smaller\">CTRL+ATAS/CTRL+BAWAH untuk riwayat</span>"
+
+#: gnome-connection-manager.glade:410 gnome-connection-manager.glade:2180
+#: gnome-connection-manager.glade:2418
+msgid "Settings"
+msgstr "Pengaturan"
+
+#: gnome-connection-manager.glade:642
+msgid "General"
+msgstr "Umum"
+
+#: gnome-connection-manager.glade:667 gnome-connection-manager.glade:1816
+msgid "Background color:"
+msgstr "Warna latar belakang:"
+
+#: gnome-connection-manager.glade:684 gnome-connection-manager.glade:1804
+msgid "Foreground color:"
+msgstr "Warna teks:"
+
+#: gnome-connection-manager.glade:700 gnome-connection-manager.glade:1843
+msgid "Select background color"
+msgstr "Pilih warna latar belakang"
+
+#: gnome-connection-manager.glade:716 gnome-connection-manager.glade:1829
+msgid "Select foreground color"
+msgstr "Pilih warna teks"
+
+#: gnome-connection-manager.glade:729 gnome-connection-manager.glade:1780
+msgid "Default colors"
+msgstr "Warna default"
+
+#: gnome-connection-manager.glade:745
+msgid "Use default fixed width font"
+msgstr "Gunakan font lebar tetap default"
+
+#: gnome-connection-manager.glade:768
+msgid "Font:"
+msgstr "Font:"
+
+#: gnome-connection-manager.glade:822
+msgid "Colors"
+msgstr "Warna"
+
+#: gnome-connection-manager.glade:850
+msgid "Standard Commands"
+msgstr "Perintah Standar"
+
+#: gnome-connection-manager.glade:895
+msgid "Custom Commands"
+msgstr "Perintah Khusus"
+
+#: gnome-connection-manager.glade:934
+msgid "Shortcuts"
+msgstr "Pintasan"
+
+#: gnome-connection-manager.glade:953
+msgid "Edit Host"
+msgstr "Edit Host"
+
+#: gnome-connection-manager.glade:1027
+msgid "Name"
+msgstr "Nama"
+
+#: gnome-connection-manager.glade:1039
+msgid "Description"
+msgstr "Deskripsi"
+
+#: gnome-connection-manager.glade:1063
+msgid "Type"
+msgstr "Jenis"
+
+#: gnome-connection-manager.glade:1075
+msgid "Port"
+msgstr "Port"
+
+#: gnome-connection-manager.glade:1087
+msgid "User"
+msgstr "Pengguna"
+
+#: gnome-connection-manager.glade:1099
+msgid "Password"
+msgstr "Kata sandi"
+
+#: gnome-connection-manager.glade:1111
+msgid "Private key"
+msgstr "Kunci privat"
+
+#: gnome-connection-manager.glade:1122
+msgid "To create subgroups use format group1/group2/group3"
+msgstr "Untuk membuat subgrup gunakan format grup1/grup2/grup3"
+
+#: gnome-connection-manager.glade:1176
+msgid "ssh"
+msgstr "ssh"
+
+#: gnome-connection-manager.glade:1177
+msgid "telnet"
+msgstr "telnet"
+
+#: gnome-connection-manager.glade:1178
+msgid "rdp"
+msgstr "rdp"
+
+#: gnome-connection-manager.glade:1179
+msgid "vnc"
+msgstr "vnc"
+
+#: gnome-connection-manager.glade:1180
+msgid "spice"
+msgstr "spice"
+
+#: gnome-connection-manager.glade:1181
+msgid "serial"
+msgstr "serial"
+
+#: gnome-connection-manager.glade:1182
+msgid "local"
+msgstr "lokal"
+
+#: gnome-connection-manager.glade:1217
+msgid "Leave blank for passwordless/public key authentication"
+msgstr "Biarkan kosong untuk autentikasi tanpa kata sandi/kunci publik"
+
+#: gnome-connection-manager.glade:1271
+msgid "Keep-Alive"
+msgstr "Keep-Alive"
+
+#: gnome-connection-manager.glade:1289
+msgid "X11 Forwarding"
+msgstr "Penerusan X11"
+
+#: gnome-connection-manager.glade:1301
+msgid "Agent Forwarding"
+msgstr "Penerusan Agent"
+
+#: gnome-connection-manager.glade:1310
+msgid "Compression"
+msgstr "Kompresi"
+
+#: gnome-connection-manager.glade:1328
+msgid "Extra arguments"
+msgstr "Argumen tambahan"
+
+#: gnome-connection-manager.glade:1340
+msgid "Enable Logging"
+msgstr "Aktifkan Pencatatan"
+
+#: gnome-connection-manager.glade:1363
+msgid "Seconds between keep-alive packets"
+msgstr "Detik antar paket keep-alive"
+
+#: gnome-connection-manager.glade:1403
+msgid ""
+"Compression level: \n"
+"blank: default compression\n"
+"1: min\n"
+"9: max"
+msgstr ""
+"Level kompresi:\n"
+"kosong: kompresi default\n"
+"1: min\n"
+"9: maks"
+
+#: gnome-connection-manager.glade:1418
+msgid "Extra arguments to pass to command line"
+msgstr "Argumen tambahan untuk diteruskan ke baris perintah"
+
+#: gnome-connection-manager.glade:1457
+msgid "Properties"
+msgstr "Properti"
+
+#: gnome-connection-manager.glade:1480
+msgid "Dynamic"
+msgstr "Dinamis"
+
+#: gnome-connection-manager.glade:1484
+msgid "Create dynamic port forwarding"
+msgstr "Buat penerusan port dinamis"
+
+#: gnome-connection-manager.glade:1498
+msgid "Local Port"
+msgstr "Port Lokal"
+
+#: gnome-connection-manager.glade:1510
+msgid "Remote Host"
+msgstr "Host Remote"
+
+#: gnome-connection-manager.glade:1522
+msgid "Remote Port"
+msgstr "Port Remote"
+
+#: gnome-connection-manager.glade:1545
+msgid "localhost"
+msgstr "localhost"
+
+#: gnome-connection-manager.glade:1693
+msgid "Port forwarding"
+msgstr "Penerusan port"
+
+#: gnome-connection-manager.glade:1707
+msgid "Send commands after login"
+msgstr "Kirim perintah setelah login"
+
+#: gnome-connection-manager.glade:1724
+msgid ""
+"<span size='smaller'>Use ##D=milliseconds to add a delay.\n"
+"Ex: ##D=1000</span>"
+msgstr ""
+"<span size='smaller'>Gunakan ##D=milidetik untuk menambahkan delay.\n"
+"Cth: ##D=1000</span>"
+
+#: gnome-connection-manager.glade:1761
+msgid "Commands"
+msgstr "Perintah"
+
+#: gnome-connection-manager.glade:1888
+msgid "Key sequences"
+msgstr "Urutan tombol"
+
+#: gnome-connection-manager.glade:1906
+msgid "Backspace:"
+msgstr "Backspace:"
+
+#: gnome-connection-manager.glade:1918
+msgid "Delete:"
+msgstr "Delete:"
+
+#: gnome-connection-manager.glade:1952
+msgid "Automatic"
+msgstr "Otomatis"
+
+#: gnome-connection-manager.glade:1953
+msgid "ASCII Backspace \t[Ctrl+H 0x08]"
+msgstr "ASCII Backspace \t[Ctrl+H 0x08]"
+
+#: gnome-connection-manager.glade:1954
+msgid "ASCII Delete    \t[Ctrl+? 0x7F]"
+msgstr "ASCII Delete    \t[Ctrl+? 0x7F]"
+
+#: gnome-connection-manager.glade:1955
+msgid "Delete Sequence \t[@7]"
+msgstr "Urutan Delete \t[@7]"
+
+#: gnome-connection-manager.glade:1956
+msgid "TTY Erase"
+msgstr "Hapus TTY"
+
+#: gnome-connection-manager.glade:1987
+msgid "Colors and Keys"
+msgstr "Warna dan Tombol"
+
+#: gnome-connection-manager.glade:2006
+msgid "Gnome Connection Manager"
+msgstr "Gnome Connection Manager"
+
+#: gnome-connection-manager.glade:2024
+msgid "_File"
+msgstr "_File"
+
+#: gnome-connection-manager.glade:2034
+msgid "Save active console buffer to file"
+msgstr "Simpan buffer konsol aktif ke file"
+
+#: gnome-connection-manager.glade:2035
+msgid "Save buffer as"
+msgstr "Simpan buffer sebagai"
+
+#: gnome-connection-manager.glade:2044
+msgid "Import server list from file"
+msgstr "Impor daftar server dari file"
+
+#: gnome-connection-manager.glade:2045
+msgid "_Import servers"
+msgstr "_Impor server"
+
+#: gnome-connection-manager.glade:2054
+msgid "Export server list to file"
+msgstr "Ekspor daftar server ke file"
+
+#: gnome-connection-manager.glade:2055
+msgid "_Export servers"
+msgstr "_Ekspor server"
+
+#: gnome-connection-manager.glade:2072
+msgid "Import from Proxmox"
+msgstr "Impor dari Proxmox"
+
+#: gnome-connection-manager.glade:2086
+msgid "_Quit"
+msgstr "_Keluar"
+
+#: gnome-connection-manager.glade:2099
+msgid "_Edit"
+msgstr "_Edit"
+
+#: gnome-connection-manager.glade:2193
+msgid "_View"
+msgstr "_Tampilan"
+
+#: gnome-connection-manager.glade:2203
+msgid "Show Toolbar"
+msgstr "Tampilkan Toolbar"
+
+#: gnome-connection-manager.glade:2212
+msgid "Show Panel"
+msgstr "Tampilkan Panel"
+
+#: gnome-connection-manager.glade:2225
+msgid "_Servers"
+msgstr "_Server"
+
+#: gnome-connection-manager.glade:2239
+msgid "_Help"
+msgstr "_Bantuan"
+
+#: gnome-connection-manager.glade:2249
+msgid "_About"
+msgstr "_Tentang"
+
+#: gnome-connection-manager.glade:2273
+msgid "Open local console"
+msgstr "Buka konsol lokal"
+
+#: gnome-connection-manager.glade:2289
+msgid "Connect to selected host or all hosts in selected group"
+msgstr ""
+"Hubungkan ke host yang dipilih atau semua host dalam grup yang dipilih"
+
+#: gnome-connection-manager.glade:2305
+msgid "Add new host"
+msgstr "Tambah host baru"
+
+#: gnome-connection-manager.glade:2321
+msgid "Edit hosts properties"
+msgstr "Edit properti host"
+
+#: gnome-connection-manager.glade:2337
+msgid "Remove selected host"
+msgstr "Hapus host yang dipilih"
+
+#: gnome-connection-manager.glade:2363
+msgid "Split console horizontally"
+msgstr "Pisahkan konsol secara horizontal"
+
+#: gnome-connection-manager.glade:2364
+msgid "__glade_unnamed_28"
+msgstr "__glade_unnamed_28"
+
+#: gnome-connection-manager.glade:2378
+msgid "Split console vertically"
+msgstr "Pisahkan konsol secara vertikal"
+
+#: gnome-connection-manager.glade:2379
+msgid "__glade_unnamed_29"
+msgstr "__glade_unnamed_29"
+
+#: gnome-connection-manager.glade:2393
+msgid "Unsplit all consoles"
+msgstr "Gabungkan kembali semua konsol"
+
+#: gnome-connection-manager.glade:2394
+msgid "__glade_unnamed_30"
+msgstr "__glade_unnamed_30"
+
+#: gnome-connection-manager.glade:2419
+msgid "__glade_unnamed_32"
+msgstr "__glade_unnamed_32"
+
+#: gnome-connection-manager.glade:2461
+msgid "__glade_unnamed_36"
+msgstr "__glade_unnamed_36"
+
+#: gnome-connection-manager.glade:2475
+msgid "__glade_unnamed_37"
+msgstr "__glade_unnamed_37"
+
+#: gnome-connection-manager.glade:2499
+msgid "Send commands to several hosts at the same time"
+msgstr "Kirim perintah ke beberapa host sekaligus"
+
+#: gnome-connection-manager.glade:2567
+msgid "label"
+msgstr "label"
+
+#: gnome-connection-manager.glade:2574
+msgid "page 1"
+msgstr "halaman 1"
+
+#: gnome-connection-manager.glade:2593
+msgid "page 2"
+msgstr "halaman 2"

@@ -1,0 +1,37 @@
+[flake8]
+max-line-length = 120
+extend-ignore =
+    # E402: module level import not at top — inévitable avec gi.require_version
+    E402,
+    # W503/W504: line break before/after binary operator — conflit avec black
+    W503,
+    W504,
+    # E203: whitespace before ':' — conflit avec black sur les slices
+    E203,
+    # E722: bare except — style pre-existant dans le code legacy
+    E722,
+    # E266: too many leading '#' — style pre-existant
+    E266,
+    # E711: comparison to None with == — style pre-existant
+    E711,
+    # E712: comparison to True/False — style pre-existant
+    E712,
+    # F401: imported but unused — imports GTK souvent utilisés dynamiquement
+    F401,
+    # F841: local variable assigned but unused — pré-existant
+    F841,
+    # E401: multiple imports on one line (import locale, gettext dans bindtextdomain)
+    E401,
+    # E501: line too long — black gère la longueur, certaines lignes (strings/urls) incompressibles
+    E501,
+    # E721: type comparison with == — style pre-existant, utiliser isinstance() est souhaitable mais non bloquant
+    E721,
+    # E713: not in test — style pre-existant
+    E713,
+    # F824: global declared but never assigned — pre-existant (global wMain, groups en lecture seule)
+    F824,
+per-file-ignores =
+    # _ est installé globalement par gettext.install(), pas un vrai F821
+    gnome_connection_manager.py: F821
+    # W605: séquences d'échappement invalides dans regex complexes pré-existantes
+    urlregex.py: W605

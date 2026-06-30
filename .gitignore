@@ -2,3 +2,13 @@ __pycache__
 *.deb
 *.rpm
 /lang/*/LC_MESSAGES/*
+*.old
+*.log
+*erro*
+SSH-Studio
+SSH-Studio/
+*/*.log
+*/*/*.log
+rdp/data/*
+pre-commit-python.skill
+gnome-connection-manager.gladeref
