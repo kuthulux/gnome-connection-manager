@@ -33,6 +33,9 @@ cd gnome-connection-manager
 * python3
 * python3-gi and gir1.2-vte-2.91 (debian) / python3-gobject (fedora)
 
+### macOS
+GCM runs from source on macOS with GTK 3 and VTE from Homebrew. See [MACOS.md](MACOS.md) for step-by-step instructions.
+
 ---
 
 ## Language

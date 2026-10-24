@@ -12,3 +12,12 @@ notebook tab {
     border-right: 1px solid #bcbebf;
     border-left: 1px solid #bcbebf;
 }
+
+vte-terminal {
+    padding: 4px 6px;
+}
+
+/* Adwaita's dark variant darkens the error border until it is hard to see */
+entry.error, spinbutton.error {
+    border-color: @error_color;
+}

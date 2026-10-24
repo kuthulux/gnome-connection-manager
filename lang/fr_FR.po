@@ -1313,3 +1313,123 @@ msgstr "Édit_er"
 #: ../gnome-connection-manager.glade:308
 msgid "_Servidores"
 msgstr "_Serveurs"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Tema"
+msgstr "Thème"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Sistema"
+msgstr "Système"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Claro"
+msgstr "Clair"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Oscuro"
+msgstr "Sombre"
+
+#: ../gnome-connection-manager.glade:1056 ../gnome_connection_manager.py:1568
+msgid "Etiquetas"
+msgstr "Étiquettes"
+
+#: ../gnome-connection-manager.glade:1180
+msgid "Separar con comas, por ejemplo: nginx, redis"
+msgstr "Séparer par des virgules, par exemple : nginx, redis"
+
+#: ../gnome-connection-manager.glade:2577
+msgid "Filtrar hosts..."
+msgstr "Filtrer les hôtes..."
+
+#: ../gnome_connection_manager.py:1914
+msgid "Ningún host coincide con \"%s\""
+msgstr "Aucun hôte ne correspond à \"%s\""
+
+#: ../gnome_connection_manager.py:1916
+msgid "Presione %(key)s para conectar a %(host)s"
+msgstr "Appuyez sur %(key)s pour vous connecter à %(host)s"
+
+#: ../gnome_connection_manager.py:1918
+msgid "No hay hosts. Haga clic en Agregar para crear uno."
+msgstr "Aucun hôte. Cliquez sur Ajouter pour en créer un."
+
+#: ../gnome_connection_manager.py:1645
+msgid "Conexión cerrada. Presione %s para reconectar."
+msgstr "Connexion fermée. Appuyez sur %s pour vous reconnecter."
+
+#: ../gnome_connection_manager.py:1645
+msgid "Conexión cerrada."
+msgstr "Connexion fermée."
+
+#: ../gnome_connection_manager.py:1647
+msgid "Sesión terminada. Presione %s para reiniciar."
+msgstr "Session terminée. Appuyez sur %s pour redémarrer."
+
+#: ../gnome_connection_manager.py:1647
+msgid "Sesión terminada."
+msgstr "Session terminée."
+
+#: ../gnome_connection_manager.py:1217
+msgid "Color"
+msgstr "Couleur"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Rojo"
+msgstr "Rouge"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Naranja"
+msgstr "Orange"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Amarillo"
+msgstr "Jaune"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Verde"
+msgstr "Vert"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Azul"
+msgstr "Bleu"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Morado"
+msgstr "Violet"
+
+#: ../gnome_connection_manager.py:2571
+msgid "Ninguno"
+msgstr "Aucune"
+
+#: ../gnome_connection_manager.py:2571 ../gnome_connection_manager.py:2578
+msgid "Personalizado..."
+msgstr "Personnalisée..."
+
+#: ../gnome_connection_manager.py:2587
+msgid "Color de carpeta"
+msgstr "Couleur du dossier"
+
+#: ../gnome_connection_manager.py:3054 ../gnome_connection_manager.py:3139
+msgid "Mostrar contraseña"
+msgstr "Afficher le mot de passe"
+
+#: ../gnome_connection_manager.py:3139
+msgid "Ocultar contraseña"
+msgstr "Masquer le mot de passe"
+
+#: ../gnome-connection-manager.glade:1508
+msgid "Avanzado"
+msgstr "Avancé"
+
+#: ../gnome-connection-manager.glade:2565
+msgid "Buscar en terminal..."
+msgstr "Rechercher dans le terminal..."
+
+#: ../gnome-connection-manager.glade:2583
+msgid "Anterior"
+msgstr "Précédent"
+
+#: ../gnome-connection-manager.glade:2597
+msgid "Siguiente"
+msgstr "Suivant"

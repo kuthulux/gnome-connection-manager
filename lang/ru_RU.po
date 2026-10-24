@@ -1329,3 +1329,123 @@ msgstr "Отключить чередование полос в окне хос�
 #: ../gnome_connection_manager.py:2850
 msgid "Título dinámico"
 msgstr "Динамический заголовок"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Tema"
+msgstr "Тема"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Sistema"
+msgstr "Системная"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Claro"
+msgstr "Светлая"
+
+#: ../gnome_connection_manager.py:2992
+msgid "Oscuro"
+msgstr "Тёмная"
+
+#: ../gnome-connection-manager.glade:1056 ../gnome_connection_manager.py:1568
+msgid "Etiquetas"
+msgstr "Теги"
+
+#: ../gnome-connection-manager.glade:1180
+msgid "Separar con comas, por ejemplo: nginx, redis"
+msgstr "Через запятую, например: nginx, redis"
+
+#: ../gnome-connection-manager.glade:2577
+msgid "Filtrar hosts..."
+msgstr "Фильтр хостов..."
+
+#: ../gnome_connection_manager.py:1914
+msgid "Ningún host coincide con \"%s\""
+msgstr "Нет хостов, соответствующих \"%s\""
+
+#: ../gnome_connection_manager.py:1916
+msgid "Presione %(key)s para conectar a %(host)s"
+msgstr "Нажмите %(key)s, чтобы подключиться к %(host)s"
+
+#: ../gnome_connection_manager.py:1918
+msgid "No hay hosts. Haga clic en Agregar para crear uno."
+msgstr "Хостов нет. Нажмите «Добавить», чтобы создать."
+
+#: ../gnome_connection_manager.py:1645
+msgid "Conexión cerrada. Presione %s para reconectar."
+msgstr "Соединение закрыто. Нажмите %s для переподключения."
+
+#: ../gnome_connection_manager.py:1645
+msgid "Conexión cerrada."
+msgstr "Соединение закрыто."
+
+#: ../gnome_connection_manager.py:1647
+msgid "Sesión terminada. Presione %s para reiniciar."
+msgstr "Сеанс завершён. Нажмите %s для перезапуска."
+
+#: ../gnome_connection_manager.py:1647
+msgid "Sesión terminada."
+msgstr "Сеанс завершён."
+
+#: ../gnome_connection_manager.py:1217
+msgid "Color"
+msgstr "Цвет"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Rojo"
+msgstr "Красный"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Naranja"
+msgstr "Оранжевый"
+
+#: ../gnome_connection_manager.py:2568
+msgid "Amarillo"
+msgstr "Жёлтый"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Verde"
+msgstr "Зелёный"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Azul"
+msgstr "Синий"
+
+#: ../gnome_connection_manager.py:2569
+msgid "Morado"
+msgstr "Фиолетовый"
+
+#: ../gnome_connection_manager.py:2571
+msgid "Ninguno"
+msgstr "Нет"
+
+#: ../gnome_connection_manager.py:2571 ../gnome_connection_manager.py:2578
+msgid "Personalizado..."
+msgstr "Другой..."
+
+#: ../gnome_connection_manager.py:2587
+msgid "Color de carpeta"
+msgstr "Цвет папки"
+
+#: ../gnome_connection_manager.py:3054 ../gnome_connection_manager.py:3139
+msgid "Mostrar contraseña"
+msgstr "Показать пароль"
+
+#: ../gnome_connection_manager.py:3139
+msgid "Ocultar contraseña"
+msgstr "Скрыть пароль"
+
+#: ../gnome-connection-manager.glade:1508
+msgid "Avanzado"
+msgstr "Дополнительно"
+
+#: ../gnome-connection-manager.glade:2565
+msgid "Buscar en terminal..."
+msgstr "Поиск в терминале..."
+
+#: ../gnome-connection-manager.glade:2583
+msgid "Anterior"
+msgstr "Предыдущее"
+
+#: ../gnome-connection-manager.glade:2597
+msgid "Siguiente"
+msgstr "Следующее"

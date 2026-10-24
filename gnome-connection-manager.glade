@@ -698,6 +698,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
                     <property name="title" translatable="yes">Seleccione el color de fondo</property>
+                    <signal name="color-set" handler="on_btnBColor_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -714,6 +715,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
                     <property name="title" translatable="yes">Seleccione el color del texto</property>
+                    <signal name="color-set" handler="on_btnFColor_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -733,6 +735,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="use-underline">True</property>
                     <property name="active">True</property>
                     <property name="draw-indicator">True</property>
+                    <signal name="toggled" handler="on_chkDefaultColors_toggled" swapped="no"/>
                   </object>
                   <packing>
                     <property name="right-attach">2</property>
@@ -749,6 +752,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="use-underline">True</property>
                     <property name="active">True</property>
                     <property name="draw-indicator">True</property>
+                    <signal name="toggled" handler="on_chkDefaultFont_toggled" swapped="no"/>
                   </object>
                   <packing>
                     <property name="right-attach">2</property>
@@ -783,6 +787,7 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">False</property>
                     <property name="use-underline">True</property>
+                    <signal name="clicked" handler="on_btnFont_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
@@ -1002,11 +1007,10 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <child>
-              <!-- n-columns=2 n-rows=16 -->
-              <object class="GtkGrid">
+              <!-- n-columns=2 n-rows=10 -->
+              <object class="GtkGrid" id="gridGeneral">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="row-homogeneous">True</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
@@ -1017,102 +1021,6 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <packing>
                     <property name="left-attach">0</property>
                     <property name="top-attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Nombre</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Descripción</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Host</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Tipo</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Puerto</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">5</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Usuario</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">6</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Password</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">7</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Clave Privada</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">8</property>
                   </packing>
                 </child>
                 <child>
@@ -1135,6 +1043,18 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Nombre</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkEntry" id="txtName">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1143,6 +1063,18 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Descripción</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -1157,14 +1089,100 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="txtHost">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Etiquetas</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="txtTags">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Separar con comas, por ejemplo: nginx, redis</property>
                     <property name="margin-start">10</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Host</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="margin-start">10</property>
+                    <property name="spacing">6</property>
+                    <child>
+                      <object class="GtkEntry" id="txtHost">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Puerto</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="txtPort">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="width-chars">5</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left-attach">1</property>
+                    <property name="top-attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Tipo</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">5</property>
                   </packing>
                 </child>
                 <child>
@@ -1181,18 +1199,19 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   </object>
                   <packing>
                     <property name="left-attach">1</property>
-                    <property name="top-attach">4</property>
+                    <property name="top-attach">5</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="txtPort">
+                  <object class="GtkLabel">
                     <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="margin-start">10</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Usuario</property>
                   </object>
                   <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">5</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">6</property>
                   </packing>
                 </child>
                 <child>
@@ -1207,6 +1226,18 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Password</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">7</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkEntry" id="txtPassword">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
@@ -1218,6 +1249,18 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Clave Privada</property>
+                  </object>
+                  <packing>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">8</property>
                   </packing>
                 </child>
                 <child>
@@ -1263,185 +1306,213 @@ Copyright © 2012 Renzo Bertuzzi L. &lt;kuthulu@gmail.com&gt; - Chile</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="chkKeepAlive">
-                    <property name="label" translatable="yes">Keep-Alive</property>
+                  <object class="GtkExpander" id="expAdvanced">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
-                    <signal name="toggled" handler="on_chkKeepAlive_toggled" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">9</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Redirigir X11</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Redirigir Agente</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">11</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="chkCompression">
-                    <property name="label" translatable="yes">Compresión</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="halign">start</property>
-                    <property name="draw-indicator">True</property>
-                    <signal name="toggled" handler="on_chkCompression_toggled" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">12</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Opciones extra</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">13</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Habilitar Log</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">14</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">TERM</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">15</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="txtKeepAlive">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Intervalo en segundos para enviar paquetes keep-alive</property>
-                    <property name="margin-start">10</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">9</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="chkX11">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="margin-start">10</property>
-                    <property name="use-stock">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="chkAgent">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="margin-start">10</property>
-                    <property name="use-stock">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">11</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkSpinButton" id="txtCompressionLevel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Nivel de compresión: 
+                    <property name="margin-top">6</property>
+                    <child>
+                      <!-- n-columns=2 n-rows=7 -->
+                      <object class="GtkGrid" id="gridAdvanced">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-top">4</property>
+                        <property name="row-homogeneous">True</property>
+                        <child>
+                          <object class="GtkCheckButton" id="chkKeepAlive">
+                            <property name="label" translatable="yes">Keep-Alive</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="halign">start</property>
+                            <property name="draw-indicator">True</property>
+                            <signal name="toggled" handler="on_chkKeepAlive_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="txtKeepAlive">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">Intervalo en segundos para enviar paquetes keep-alive</property>
+                            <property name="margin-start">10</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Redirigir X11</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="chkX11">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="use-stock">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Redirigir Agente</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="chkAgent">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="use-stock">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="chkCompression">
+                            <property name="label" translatable="yes">Compresión</property>
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="halign">start</property>
+                            <property name="draw-indicator">True</property>
+                            <signal name="toggled" handler="on_chkCompression_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="txtCompressionLevel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">Nivel de compresión: 
 blanco: por defecto
 1: min
 9: max</property>
-                    <property name="margin-start">10</property>
+                            <property name="margin-start">10</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Opciones extra</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="txtExtraParams">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="tooltip-text" translatable="yes">Parámetros extra a pasar a la línea de comandos</property>
+                            <property name="margin-start">10</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">Habilitar Log</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="chkLogging">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="receives-default">False</property>
+                            <property name="margin-start">10</property>
+                            <property name="use-stock">True</property>
+                            <property name="draw-indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">start</property>
+                            <property name="label" translatable="yes">TERM</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="txtTerm">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="margin-start">10</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">1</property>
+                            <property name="top-attach">6</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">Avanzado</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">12</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="txtExtraParams">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="tooltip-text" translatable="yes">Parámetros extra a pasar a la línea de comandos</property>
-                    <property name="margin-start">10</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">13</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="chkLogging">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">False</property>
-                    <property name="margin-start">10</property>
-                    <property name="use-stock">True</property>
-                    <property name="draw-indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">14</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="txtTerm">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="margin-start">10</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">15</property>
+                    <property name="left-attach">0</property>
+                    <property name="top-attach">9</property>
+                    <property name="width">2</property>
                   </packing>
                 </child>
               </object>
@@ -2417,62 +2488,6 @@ Ej: ##D=1000&lt;/span&gt;</property>
               </packing>
             </child>
             <child>
-              <object class="GtkToolItem">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <child>
-                  <object class="GtkEntry" id="txtSearch">
-                    <property name="name">txtSearch</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <signal name="key-press-event" handler="on_btnSearch_key_press" swapped="no"/>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_36</property>
-                <property name="use-underline">True</property>
-                <property name="stock-id">gtk-media-rewind</property>
-                <signal name="clicked" handler="on_btnSearchBack_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolButton">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">__glade_unnamed_37</property>
-                <property name="use-underline">True</property>
-                <property name="stock-id">gtk-media-forward</property>
-                <signal name="clicked" handler="on_btnSearch_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkSeparatorToolItem">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkToolButton">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -2532,25 +2547,153 @@ Ej: ##D=1000&lt;/span&gt;</property>
           </packing>
         </child>
         <child>
+          <object class="GtkSearchBar" id="findBar">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="show-close-button">True</property>
+            <signal name="notify::search-mode-enabled" handler="on_findBar_search_mode_changed" swapped="no"/>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkSearchEntry" id="txtSearch">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="width-chars">30</property>
+                    <property name="placeholder-text" translatable="yes">Buscar en terminal...</property>
+                    <signal name="key-press-event" handler="on_btnSearch_key_press" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkButton" id="btnSearchBack">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Anterior</property>
+                        <signal name="clicked" handler="on_btnSearchBack_clicked" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="btnSearchNext">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="receives-default">False</property>
+                        <property name="tooltip-text" translatable="yes">Siguiente</property>
+                        <signal name="clicked" handler="on_btnSearch_clicked" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <style>
+                      <class name="linked"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkPaned" id="hpMain">
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <signal name="button-press-event" handler="on_hpMain_button_press_event" swapped="no"/>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkBox">
                 <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="shadow-type">in</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="treeServers">
+                  <object class="GtkSearchEntry" id="txtHostFilter">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <signal name="button-press-event" handler="on_tvServers_button_press_event" swapped="no"/>
-                    <signal name="row-activated" handler="on_tvServers_row_activated" swapped="no"/>
-                    <child internal-child="selection">
-                      <object class="GtkTreeSelection"/>
+                    <property name="placeholder-text" translatable="yes">Filtrar hosts...</property>
+                    <signal name="activate" handler="on_txtHostFilter_activate" swapped="no"/>
+                    <signal name="key-press-event" handler="on_txtHostFilter_key_press" swapped="no"/>
+                    <signal name="search-changed" handler="on_txtHostFilter_search_changed" swapped="no"/>
+                    <signal name="stop-search" handler="on_txtHostFilter_stop_search" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkOverlay">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkScrolledWindow">
+                        <property name="visible">True</property>
+                        <property name="can-focus">True</property>
+                        <property name="shadow-type">in</property>
+                        <child>
+                          <object class="GtkTreeView" id="treeServers">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <signal name="button-press-event" handler="on_tvServers_button_press_event" swapped="no"/>
+                            <signal name="row-activated" handler="on_tvServers_row_activated" swapped="no"/>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection"/>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="overlay">
+                      <object class="GtkLabel" id="lblHostsEmpty">
+                        <property name="can-focus">False</property>
+                        <property name="no-show-all">True</property>
+                        <property name="valign">start</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="margin-top">24</property>
+                        <property name="justify">center</property>
+                        <property name="wrap">True</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="pass-through">True</property>
+                      </packing>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
               <packing>
@@ -2619,7 +2762,7 @@ Ej: ##D=1000&lt;/span&gt;</property>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>

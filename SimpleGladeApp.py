@@ -35,6 +35,21 @@ import builtins
 
 _app_name = ''
 
+def _bind_c_textdomain(app_name, locale_dir):
+    """GtkBuilder translates .glade strings via C gettext; Python's locale module only exposes bindtextdomain on glibc."""
+    import locale
+    if hasattr(locale, 'bindtextdomain'):
+        locale.bindtextdomain(app_name, locale_dir)
+        return
+    import ctypes
+    for path in ('/opt/homebrew/opt/gettext/lib/libintl.8.dylib',
+                 '/usr/local/opt/gettext/lib/libintl.8.dylib'):
+        if os.path.exists(path):
+            libintl = ctypes.CDLL(path)
+            libintl.bindtextdomain(app_name.encode(), locale_dir.encode())
+            libintl.bind_textdomain_codeset(app_name.encode(), b'UTF-8')
+            return
+
 def bindtextdomain(app_name, locale_dir=None):
     """
     Bind the domain represented by app_name to the locale directory locale_dir.
@@ -55,7 +70,7 @@ def bindtextdomain(app_name, locale_dir=None):
         import locale
         import gettext
         locale.setlocale(locale.LC_ALL, "")
-        locale.bindtextdomain(app_name, locale_dir)
+        _bind_c_textdomain(app_name, locale_dir)
         gettext.bindtextdomain(app_name, locale_dir)
         gettext.textdomain(app_name)
         gettext.install(app_name, locale_dir)
@@ -66,7 +81,7 @@ def bindtextdomain(app_name, locale_dir=None):
             os.environ["LANG"] = "en_US.UTF-8"
             os.environ["LANGUAGE"] = "en"
             locale.setlocale(locale.LC_ALL, "")
-            locale.bindtextdomain(app_name, locale_dir)
+            _bind_c_textdomain(app_name, locale_dir)
             gettext.bindtextdomain(app_name, locale_dir)
             gettext.textdomain(app_name)
             gettext.install(app_name, locale_dir)
